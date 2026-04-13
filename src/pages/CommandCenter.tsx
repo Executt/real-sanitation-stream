@@ -1,15 +1,16 @@
 import { StatCard } from "@/components/StatCard";
 import { AlertItem } from "@/components/AlertItem";
+import { DboTrendChart } from "@/components/DboTrendChart";
 import { Badge } from "@/components/ui/badge";
 import { Globe, TrendingDown, TrendingUp } from "lucide-react";
 
 const bacias = [
-  { nome: "Bacia do Tietê", etes: 342, cobertura: 78.3, eficiencia: 89.1, trend: "up" },
-  { nome: "Bacia do São Francisco", etes: 187, cobertura: 52.1, eficiencia: 72.4, trend: "down" },
-  { nome: "Bacia do Paraná", etes: 456, cobertura: 84.7, eficiencia: 91.3, trend: "up" },
-  { nome: "Bacia do Amazonas", etes: 89, cobertura: 23.8, eficiencia: 58.9, trend: "down" },
-  { nome: "Bacia do Paraguai", etes: 124, cobertura: 61.2, eficiencia: 79.6, trend: "up" },
-  { nome: "Bacia Atlântico Sudeste", etes: 298, cobertura: 71.9, eficiencia: 85.2, trend: "up" },
+  { nome: "Bacia do Tietê", etes: 342, cobertura: 78.3, eficiencia: 89.1, trend: "up" as const },
+  { nome: "Bacia do São Francisco", etes: 187, cobertura: 52.1, eficiencia: 72.4, trend: "down" as const },
+  { nome: "Bacia do Paraná", etes: 456, cobertura: 84.7, eficiencia: 91.3, trend: "up" as const },
+  { nome: "Bacia do Amazonas", etes: 89, cobertura: 23.8, eficiencia: 58.9, trend: "down" as const },
+  { nome: "Bacia do Paraguai", etes: 124, cobertura: 61.2, eficiencia: 79.6, trend: "up" as const },
+  { nome: "Bacia Atlântico Sudeste", etes: 298, cobertura: 71.9, eficiencia: 85.2, trend: "up" as const },
 ];
 
 export default function CommandCenter() {
@@ -37,6 +38,11 @@ export default function CommandCenter() {
         <StatCard label="Eficiência DBO Nacional" value="82.1%" subtitle="+1.3% vs trimestre anterior" variant="default" progress={82.1} />
       </div>
 
+      {/* DBO Trend Chart */}
+      <div className="mb-8">
+        <DboTrendChart />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2 bg-card border rounded-sm shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
@@ -52,36 +58,11 @@ export default function CommandCenter() {
 
         <div className="bg-card border rounded-sm shadow-sm p-5">
           <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
-          <AlertItem
-            title="ETE Piracicaba"
-            description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)"
-            severity="critical"
-            time="há 2 min"
-          />
-          <AlertItem
-            title="Bacia Amazonas"
-            description="Cobertura abaixo de 25% — risco sanitário elevado"
-            severity="critical"
-            time="há 15 min"
-          />
-          <AlertItem
-            title="Bacia São Francisco"
-            description="Eficiência DBO em queda: -3.2% no último mês"
-            severity="warning"
-            time="há 1 hora"
-          />
-          <AlertItem
-            title="Hub IoT Região Sul"
-            description="12 sensores desconectados no cluster PR-042"
-            severity="warning"
-            time="há 3 horas"
-          />
-          <AlertItem
-            title="API Gateway"
-            description="Rate limit atingido por 2 concessionárias (429)"
-            severity="info"
-            time="há 6 horas"
-          />
+          <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
+          <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
+          <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
+          <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
+          <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
         </div>
       </div>
 
@@ -116,10 +97,7 @@ export default function CommandCenter() {
                 </div>
               </div>
               <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full"
-                  style={{ width: `${bacia.cobertura}%` }}
-                />
+                <div className="h-full bg-primary rounded-full" style={{ width: `${bacia.cobertura}%` }} />
               </div>
             </div>
           ))}

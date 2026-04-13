@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, BarChart3, Globe, LayoutDashboard, Radio, Settings, Shield } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, ClipboardEdit, Globe, LayoutDashboard, Radio, Settings, Shield, TrendingUp } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -15,12 +15,14 @@ import {
 
 const operadorItems = [
   { title: "Status das ETEs", url: "/operador", icon: Activity },
+  { title: "Cadastro Manual", url: "/operador/cadastro", icon: ClipboardEdit },
   { title: "Monitoramento API", url: "/operador/api", icon: Radio },
   { title: "Log de Integração", url: "/operador/logs", icon: Settings },
 ];
 
 const anaItems = [
   { title: "Command Center", url: "/command-center", icon: LayoutDashboard },
+  { title: "Tendência DBO", url: "/command-center/tendencia", icon: TrendingUp },
   { title: "Mapa Interativo", url: "/command-center/mapa", icon: Globe },
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },

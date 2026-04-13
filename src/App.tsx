@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import Index from "./pages/Index";
 import OperadorDashboard from "./pages/OperadorDashboard";
 import CommandCenter from "./pages/CommandCenter";
+import CadastroManual from "./pages/CadastroManual";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route element={<DashboardLayout />}>
             <Route path="/operador" element={<OperadorDashboard />} />
+            <Route path="/operador/cadastro" element={<CadastroManual />} />
             <Route path="/command-center" element={<CommandCenter />} />
           </Route>
           <Route path="*" element={<NotFound />} />

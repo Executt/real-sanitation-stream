@@ -2,9 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const statusConfig = {
-  ativa: { label: "Ativa", variant: "default" as const, className: "bg-success/10 text-success border-success/30" },
-  construcao: { label: "Em construção", variant: "secondary" as const, className: "bg-warning/10 text-warning border-warning/30" },
-  inativa: { label: "Inativa", variant: "destructive" as const, className: "bg-destructive/10 text-destructive border-destructive/30" },
+  ativa: { label: "Ativa", className: "bg-success/10 text-success border-success/30" },
+  construcao: { label: "Em construção", className: "bg-warning/10 text-warning border-warning/30" },
+  inativa: { label: "Inativa", className: "bg-destructive/10 text-destructive border-destructive/30" },
 };
 
 interface Ete {
@@ -26,7 +26,7 @@ const mockEtes: Ete[] = [
   { codigo: "ETE-BA-0087", nome: "ETE Jaguaribe", municipio: "Salvador - BA", tipologia: "Lagoa Facultativa", status: "inativa", eficienciaDBO: 0, integracaoAPI: "manual", ultimaAtualizacao: "há 90 dias" },
   { codigo: "ETE-PR-0044", nome: "ETE Belém", municipio: "Curitiba - PR", tipologia: "UASB + Lodos Ativados", status: "ativa", eficienciaDBO: 92.1, integracaoAPI: "ok", ultimaAtualizacao: "há 3 min" },
   { codigo: "ETE-RS-0019", nome: "ETE São João", municipio: "Porto Alegre - RS", tipologia: "Lodos Ativados", status: "ativa", eficienciaDBO: 89.5, integracaoAPI: "ok", ultimaAtualizacao: "há 8 min" },
-  { codigo: "ETE-CE-0055", nome: "ETE Coc\u00f3", municipio: "Fortaleza - CE", tipologia: "Lagoa Anaeróbia", status: "ativa", eficienciaDBO: 67.8, integracaoAPI: "falha", ultimaAtualizacao: "há 6h" },
+  { codigo: "ETE-CE-0055", nome: "ETE Cocó", municipio: "Fortaleza - CE", tipologia: "Lagoa Anaeróbia", status: "ativa", eficienciaDBO: 67.8, integracaoAPI: "falha", ultimaAtualizacao: "há 6h" },
 ];
 
 const apiConfig = {

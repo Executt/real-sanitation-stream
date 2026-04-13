@@ -28,30 +28,10 @@ export default function OperadorDashboard() {
         </div>
         <div className="bg-card border rounded-sm shadow-sm p-5">
           <h2 className="font-semibold mb-4">Alertas de Integração</h2>
-          <AlertItem
-            title="ETE Arrudas — API Timeout"
-            description="Requisição ao endpoint /vazao retornou 504 após 30s"
-            severity="critical"
-            time="há 2 horas"
-          />
-          <AlertItem
-            title="ETE Cocó — Certificado SSL"
-            description="Certificado expira em 7 dias. Renovação necessária."
-            severity="warning"
-            time="há 6 horas"
-          />
-          <AlertItem
-            title="Nodo Integrador Sul"
-            description="Latência média subiu para 1.2s (limiar: 500ms)"
-            severity="warning"
-            time="há 12 horas"
-          />
-          <AlertItem
-            title="ETE Jaguaribe — Sem Dados"
-            description="Nenhum registro recebido nos últimos 90 dias"
-            severity="critical"
-            time="há 90 dias"
-          />
+          <AlertItem title="ETE Arrudas — API Timeout" description="Requisição ao endpoint /vazao retornou 504 após 30s" severity="critical" time="há 2 horas" />
+          <AlertItem title="ETE Cocó — Certificado SSL" description="Certificado expira em 7 dias. Renovação necessária." severity="warning" time="há 6 horas" />
+          <AlertItem title="Nodo Integrador Sul" description="Latência média subiu para 1.2s (limiar: 500ms)" severity="warning" time="há 12 horas" />
+          <AlertItem title="ETE Jaguaribe — Sem Dados" description="Nenhum registro recebido nos últimos 90 dias" severity="critical" time="há 90 dias" />
         </div>
       </div>
     </div>
