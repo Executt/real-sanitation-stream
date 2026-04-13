@@ -1,6 +1,7 @@
-import { Activity, AlertTriangle, BarChart3, ClipboardEdit, Globe, LayoutDashboard, Radio, Settings, Shield, TrendingUp } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, ClipboardEdit, Globe, LayoutDashboard, Radio, Settings, Shield, TrendingUp, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -28,10 +29,15 @@ const anaItems = [
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
 ];
 
+const adminItems = [
+  { title: "Usuários & Roles", url: "/admin", icon: Users },
+];
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { isSuperAdmin } = useAuth();
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -83,6 +89,28 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isSuperAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Administração
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                      <NavLink to={item.url} end activeClassName="bg-accent text-primary font-medium">
+                        <item.icon className="size-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
