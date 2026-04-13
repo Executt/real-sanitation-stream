@@ -1,8 +1,9 @@
 import { StatCard } from "@/components/StatCard";
 import { AlertItem } from "@/components/AlertItem";
 import { DboTrendChart } from "@/components/DboTrendChart";
+import { EteMap } from "@/components/EteMap";
 import { Badge } from "@/components/ui/badge";
-import { Globe, TrendingDown, TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 const bacias = [
   { nome: "Bacia do Tietê", etes: 342, cobertura: 78.3, eficiencia: 89.1, trend: "up" as const },
@@ -44,16 +45,8 @@ export default function CommandCenter() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 bg-card border rounded-sm shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold">Monitoramento Geoespacial</h2>
-            <Badge variant="outline" className="font-mono text-xs">SNIRH INTEGRADO</Badge>
-          </div>
-          <div className="bg-muted rounded-sm aspect-video flex flex-col items-center justify-center gap-3">
-            <Globe className="size-12 text-muted-foreground/50" />
-            <p className="text-muted-foreground font-mono text-sm">MAPA INTERATIVO — LEAFLET / MAPBOX</p>
-            <p className="text-xs text-muted-foreground">Integração geoespacial com PostGIS e camadas SNIRH</p>
-          </div>
+        <div className="lg:col-span-2">
+          <EteMap />
         </div>
 
         <div className="bg-card border rounded-sm shadow-sm p-5">
