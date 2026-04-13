@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import OperadorDashboard from "./pages/OperadorDashboard";
 import CommandCenter from "./pages/CommandCenter";
 import CadastroManual from "./pages/CadastroManual";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/operador" element={<OperadorDashboard />} />
               <Route path="/operador/cadastro" element={<CadastroManual />} />
               <Route path="/command-center" element={<CommandCenter />} />
+              <Route path="/admin" element={<AdminPanel />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
