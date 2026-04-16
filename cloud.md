@@ -10,6 +10,7 @@ O HydrosNet utiliza Lovable Cloud como backend, fornecendo autenticação, banco
 - **Método**: E-mail e senha
 - **Auto-confirm**: Habilitado (para desenvolvimento)
 - **Trigger**: Criação automática de perfil no signup via `handle_new_user()`
+- **LDAP**: Módulo de configuração disponível no painel de administração
 
 ### Banco de Dados
 - **Tabelas**: `profiles`, `user_roles`
@@ -48,3 +49,15 @@ O HydrosNet utiliza Lovable Cloud como backend, fornecendo autenticação, banco
 ### user_roles
 - ALL: Superadmins podem gerenciar todas as roles
 - SELECT: Usuários podem ver suas próprias roles
+
+## Integração LDAP
+
+O módulo LDAP é implementado no frontend (`/admin/ldap`) e permite:
+- Configuração de servidor LDAP/Active Directory (host, porta, Base DN, Bind DN)
+- Suporte a SSL/TLS (LDAPS)
+- Mapeamento de atributos LDAP para campos do perfil HydrosNet
+- Visualização e importação de usuários do diretório
+- Sincronização manual do diretório
+- Atribuição automática de role padrão para usuários importados
+
+**Nota**: A integração LDAP completa com backend (edge function para conexão ao servidor LDAP) pode ser implementada conforme necessidade.
