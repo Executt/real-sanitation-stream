@@ -11,6 +11,7 @@ import OperadorDashboard from "./pages/OperadorDashboard";
 import CommandCenter from "./pages/CommandCenter";
 import CadastroManual from "./pages/CadastroManual";
 import AdminPanel from "./pages/AdminPanel";
+import LdapConfig from "./pages/LdapConfig";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/operador/cadastro" element={<CadastroManual />} />
               <Route path="/command-center" element={<CommandCenter />} />
               <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/admin/ldap" element={<LdapConfig />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
