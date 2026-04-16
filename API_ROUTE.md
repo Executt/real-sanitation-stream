@@ -4,7 +4,7 @@
 
 | Rota | Componente | Acesso | Descrição |
 |------|-----------|--------|-----------|
-| `/login` | `Login` | Público | Tela de autenticação (login + cadastro) |
+| `/login` | `Login` | Público | Tela de autenticação split-screen (login + cadastro) |
 | `/` | `OperadorDashboard` | Autenticado | Redirect para dashboard do operador |
 | `/operador` | `OperadorDashboard` | Autenticado | Dashboard principal do operador B2B |
 | `/operador/cadastro` | `CadastroManual` | Autenticado | Formulário de cadastro manual de dados ETE |
@@ -16,6 +16,7 @@
 | `/command-center/alertas` | — | Autenticado | Alertas DBO (placeholder) |
 | `/command-center/conformidade` | — | Autenticado | Conformidade (placeholder) |
 | `/admin` | `AdminPanel` | Superadmin | Painel de administração de usuários e roles |
+| `/admin/ldap` | `LdapConfig` | Superadmin | Configuração de integração LDAP/AD |
 | `*` | `NotFound` | Público | Página 404 |
 
 ## Edge Functions (Backend)
@@ -32,6 +33,14 @@
 | `user_roles` | SELECT, INSERT, DELETE | AuthContext, AdminPanel |
 | `auth.signInWithPassword` | — | Login |
 | `auth.signUp` | — | Login (cadastro) |
-| `auth.signOut` | — | DashboardLayout |
+| `auth.signOut` | — | TopNavbar |
 | `auth.getSession` | — | AuthContext |
 | `auth.onAuthStateChange` | — | AuthContext |
+
+## Navegação (TopNavbar)
+
+| Menu | Itens | Visibilidade |
+|------|-------|-------------|
+| Operador B2B | Status ETEs, Cadastro Manual, Monitoramento API, Log de Integração | Todos autenticados |
+| ANA Center | Command Center, Tendência DBO, Mapa Interativo, Alertas DBO, Conformidade | Todos autenticados |
+| Administração | Usuários & Roles, Configuração LDAP | Apenas superadmin |

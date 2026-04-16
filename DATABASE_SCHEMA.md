@@ -58,3 +58,15 @@ Atualiza o campo `updated_at` automaticamente antes de um `UPDATE`.
 
 ### `seed-admin`
 Cria ou atualiza o usuário superadmin `admin@ana.gov.br` e atribui a role `superadmin`.
+
+## Diagrama de Relacionamento
+
+```
+auth.users (gerenciado pelo Supabase)
+    │
+    ├── 1:1 ── profiles (via user_id)
+    │           Perfil completo do usuário
+    │
+    └── 1:N ── user_roles (via user_id)
+                Roles atribuídas ao usuário
+```
