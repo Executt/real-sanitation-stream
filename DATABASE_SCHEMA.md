@@ -59,17 +59,36 @@ Atualiza `updated_at` antes de UPDATE.
 ### `seed-admin`
 Cria ou atualiza o usuário superadmin `admin@ana.gov.br` e atribui `superadmin`.
 
-## Tabelas Planejadas (Roadmap)
+## Tabelas de Configuração Administrativa
 
-Estas tabelas estão previstas e referenciadas pelos módulos administrativos do frontend; serão criadas via migrations conforme cada módulo for ativado:
+### `ldap_config` (singleton)
+Configuração do servidor LDAP/AD. Campos: `enabled`, `host`, `port`, `use_tls`, `base_dn`, `bind_dn`, `bind_password`, `user_filter`, `attr_email`, `attr_name`, `attr_org`, `default_role` (`app_role`).
+**RLS:** apenas `superadmin` (ALL).
+
+### `smtp_config` (singleton)
+Configuração SMTP. Campos: `enabled`, `host`, `port`, `username`, `password`, `from_email`, `from_name`, `use_tls`.
+**RLS:** apenas `superadmin` (ALL).
+
+### `sei_config` (singleton)
+Integração SEI. Campos: `enabled`, `api_url`, `api_key`, `orgao_id`, `unidade_id`, `tipo_processo`.
+**RLS:** apenas `superadmin` (ALL).
+
+### `system_parameters` (singleton)
+Parâmetros gerais. Campos: `dbo_min`, `dbo_critico`, `api_timeout_seconds`, `sync_interval_minutes`, `retention_days`, `max_upload_mb`.
+**RLS:** apenas `superadmin` (ALL).
+
+### `audit_log` (append-only)
+Trilha de auditoria imutável. Campos: `user_id`, `user_email`, `action`, `target`, `severity`, `metadata` (jsonb), `created_at`.
+**RLS:**
+- SELECT: apenas `superadmin`.
+- INSERT: qualquer usuário autenticado (apenas com seu próprio `user_id` ou nulo).
+- UPDATE/DELETE: bloqueado (sem políticas).
+**Índices:** `created_at DESC`, `user_id`.
+
+## Tabelas Planejadas (Roadmap)
 
 - `etes` — Cadastro de Estações de Tratamento de Esgoto.
 - `medicoes` — Time-series de medições de DBO/DQO/Vazão (TimescaleDB).
-- `ldap_config` — Configuração de servidor LDAP/AD.
-- `smtp_config` — Configuração SMTP.
-- `sei_config` — Configuração da integração SEI.
-- `system_parameters` — Parâmetros globais do sistema.
-- `audit_log` — Trilha de auditoria de ações críticas.
 
 ## Diagrama de Relacionamento
 

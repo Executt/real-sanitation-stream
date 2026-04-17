@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,51 +34,100 @@ const mockLdapUsers: LdapUser[] = [
 ];
 
 export default function LdapConfig() {
-  const { isSuperAdmin, loading: authLoading } = useAuth();
+  const { isSuperAdmin, loading: authLoading, user } = useAuth();
   const { toast } = useToast();
-  const [ldapEnabled, setLdapEnabled] = useState(false);
+  const [configId, setConfigId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [testing, setTesting] = useState(false);
 
-  // LDAP Config state
-  const [ldapHost, setLdapHost] = useState("ldap://ldap.ana.gov.br");
-  const [ldapPort, setLdapPort] = useState("389");
-  const [ldapBaseDn, setLdapBaseDn] = useState("dc=ana,dc=gov,dc=br");
-  const [ldapBindDn, setLdapBindDn] = useState("cn=admin,dc=ana,dc=gov,dc=br");
-  const [ldapBindPassword, setLdapBindPassword] = useState("");
-  const [ldapUserFilter, setLdapUserFilter] = useState("(objectClass=inetOrgPerson)");
-  const [ldapUseSsl, setLdapUseSsl] = useState(false);
-  const [ldapDefaultRole, setLdapDefaultRole] = useState<AppRole>("operador");
+  const [form, setForm] = useState({
+    enabled: false,
+    host: "",
+    port: 389,
+    use_tls: true,
+    base_dn: "",
+    bind_dn: "",
+    bind_password: "",
+    user_filter: "(objectClass=person)",
+    attr_email: "mail",
+    attr_name: "cn",
+    attr_org: "o",
+    default_role: "operador" as AppRole,
+  });
 
-  // Mapping
-  const [mapEmail, setMapEmail] = useState("mail");
-  const [mapName, setMapName] = useState("cn");
-  const [mapOrg, setMapOrg] = useState("o");
-  const [mapDept, setMapDept] = useState("departmentNumber");
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    (async () => {
+      const { data, error } = await supabase.from("ldap_config").select("*").limit(1).maybeSingle();
+      if (error) {
+        toast({ title: "Erro ao carregar", description: error.message, variant: "destructive" });
+      } else if (data) {
+        setConfigId(data.id);
+        setForm({
+          enabled: data.enabled,
+          host: data.host,
+          port: data.port,
+          use_tls: data.use_tls,
+          base_dn: data.base_dn,
+          bind_dn: data.bind_dn,
+          bind_password: data.bind_password,
+          user_filter: data.user_filter,
+          attr_email: data.attr_email,
+          attr_name: data.attr_name,
+          attr_org: data.attr_org,
+          default_role: data.default_role,
+        });
+      }
+      setLoading(false);
+    })();
+  }, [isSuperAdmin, toast]);
 
-  if (authLoading) return null;
+  if (authLoading || loading) return <div className="p-8 text-muted-foreground">Carregando...</div>;
   if (!isSuperAdmin) return <Navigate to="/operador" replace />;
+
+  const logAudit = async (action: string, target?: string) => {
+    await supabase.from("audit_log").insert({
+      user_id: user?.id ?? null,
+      user_email: user?.email ?? null,
+      action,
+      target: target ?? null,
+      severity: "info",
+    });
+  };
+
+  const handleSaveConfig = async () => {
+    if (!configId) return;
+    setSaving(true);
+    const { error } = await supabase.from("ldap_config").update(form).eq("id", configId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Configuração LDAP salva" });
+      logAudit("LDAP_CONFIG_UPDATED");
+    }
+  };
 
   const handleTestConnection = async () => {
     setTesting(true);
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 1500));
     setTesting(false);
-    toast({ title: "Conexão LDAP bem-sucedida", description: `Conectado a ${ldapHost}:${ldapPort}` });
+    toast({ title: "Conexão LDAP simulada", description: `${form.host}:${form.port}` });
   };
 
   const handleSync = async () => {
     setSyncing(true);
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 2000));
     setSyncing(false);
-    toast({ title: "Sincronização concluída", description: "3 novos usuários importados do diretório LDAP." });
+    toast({ title: "Sincronização concluída", description: "3 novos usuários (simulado)." });
+    logAudit("LDAP_SYNC", "3 usuários");
   };
 
-  const handleSaveConfig = () => {
-    toast({ title: "Configuração salva", description: "As configurações LDAP foram salvas com sucesso." });
-  };
-
-  const handleImportUser = (user: LdapUser) => {
-    toast({ title: "Usuário importado", description: `${user.cn} (${user.mail}) foi importado com role ${ldapDefaultRole}.` });
+  const handleImportUser = (u: LdapUser) => {
+    toast({ title: "Usuário importado", description: `${u.cn} com role ${form.default_role}` });
+    logAudit("LDAP_USER_IMPORTED", u.mail);
   };
 
   return (
@@ -85,7 +135,7 @@ export default function LdapConfig() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Configuração LDAP</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Configure a integração com o diretório LDAP/Active Directory para cadastro e sincronização de usuários
+          Integração com diretório LDAP/Active Directory para cadastro e sincronização de usuários
         </p>
       </div>
 
@@ -96,65 +146,37 @@ export default function LdapConfig() {
           <TabsTrigger value="users">Usuários LDAP</TabsTrigger>
         </TabsList>
 
-        {/* Configuração */}
         <TabsContent value="config" className="space-y-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Server className="size-5" />
-                    Servidor LDAP
-                  </CardTitle>
+                  <CardTitle className="flex items-center gap-2"><Server className="size-5" />Servidor LDAP</CardTitle>
                   <CardDescription>Configurações de conexão com o diretório</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Label htmlFor="ldap-enabled" className="text-sm">Ativar LDAP</Label>
-                  <Switch id="ldap-enabled" checked={ldapEnabled} onCheckedChange={setLdapEnabled} />
+                  <Switch id="ldap-enabled" checked={form.enabled} onCheckedChange={(v) => setForm({ ...form, enabled: v })} />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Host do Servidor</Label>
-                  <Input value={ldapHost} onChange={(e) => setLdapHost(e.target.value)} placeholder="ldap://servidor.dominio.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Porta</Label>
-                  <Input value={ldapPort} onChange={(e) => setLdapPort(e.target.value)} placeholder="389" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Base DN</Label>
-                  <Input value={ldapBaseDn} onChange={(e) => setLdapBaseDn(e.target.value)} placeholder="dc=exemplo,dc=com" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bind DN</Label>
-                  <Input value={ldapBindDn} onChange={(e) => setLdapBindDn(e.target.value)} placeholder="cn=admin,dc=exemplo,dc=com" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bind Password</Label>
-                  <Input type="password" value={ldapBindPassword} onChange={(e) => setLdapBindPassword(e.target.value)} placeholder="••••••••" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Filtro de Usuários</Label>
-                  <Input value={ldapUserFilter} onChange={(e) => setLdapUserFilter(e.target.value)} placeholder="(objectClass=inetOrgPerson)" className="font-mono text-sm" />
-                </div>
+                <div className="space-y-2"><Label>Host</Label><Input value={form.host} onChange={(e) => setForm({ ...form, host: e.target.value })} placeholder="ldap.exemplo.gov.br" /></div>
+                <div className="space-y-2"><Label>Porta</Label><Input type="number" value={form.port} onChange={(e) => setForm({ ...form, port: parseInt(e.target.value) || 389 })} /></div>
+                <div className="space-y-2"><Label>Base DN</Label><Input value={form.base_dn} onChange={(e) => setForm({ ...form, base_dn: e.target.value })} placeholder="dc=exemplo,dc=com" /></div>
+                <div className="space-y-2"><Label>Bind DN</Label><Input value={form.bind_dn} onChange={(e) => setForm({ ...form, bind_dn: e.target.value })} placeholder="cn=admin,dc=exemplo,dc=com" /></div>
+                <div className="space-y-2"><Label>Bind Password</Label><Input type="password" value={form.bind_password} onChange={(e) => setForm({ ...form, bind_password: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Filtro de Usuários</Label><Input value={form.user_filter} onChange={(e) => setForm({ ...form, user_filter: e.target.value })} className="font-mono text-sm" /></div>
               </div>
-
-              <div className="flex items-center gap-4 pt-2">
-                <div className="flex items-center gap-2">
-                  <Switch id="use-ssl" checked={ldapUseSsl} onCheckedChange={setLdapUseSsl} />
-                  <Label htmlFor="use-ssl">Usar SSL/TLS (LDAPS)</Label>
-                </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Switch id="use-ssl" checked={form.use_tls} onCheckedChange={(v) => setForm({ ...form, use_tls: v })} />
+                <Label htmlFor="use-ssl">Usar SSL/TLS (LDAPS)</Label>
               </div>
-
               <div className="space-y-2">
-                <Label>Role Padrão para Novos Usuários</Label>
-                <Select value={ldapDefaultRole} onValueChange={(v) => setLdapDefaultRole(v as AppRole)}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Role Padrão</Label>
+                <Select value={form.default_role} onValueChange={(v) => setForm({ ...form, default_role: v as AppRole })}>
+                  <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="operador">Operador</SelectItem>
                     <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
@@ -162,9 +184,8 @@ export default function LdapConfig() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleSaveConfig}>Salvar Configuração</Button>
+                <Button onClick={handleSaveConfig} disabled={saving}>{saving ? "Salvando..." : "Salvar Configuração"}</Button>
                 <Button variant="outline" onClick={handleTestConnection} disabled={testing}>
                   {testing ? <RefreshCw className="size-4 mr-2 animate-spin" /> : <Search className="size-4 mr-2" />}
                   {testing ? "Testando..." : "Testar Conexão"}
@@ -174,63 +195,34 @@ export default function LdapConfig() {
           </Card>
         </TabsContent>
 
-        {/* Mapeamento */}
         <TabsContent value="mapping" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="size-5" />
-                Mapeamento de Atributos
-              </CardTitle>
-              <CardDescription>
-                Configure como os atributos LDAP são mapeados para os campos do perfil do HydrosNet
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2"><Shield className="size-5" />Mapeamento de Atributos</CardTitle>
+              <CardDescription>Atributos LDAP → campos do perfil HydrosNet</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Atributo de E-mail</Label>
-                  <Input value={mapEmail} onChange={(e) => setMapEmail(e.target.value)} className="font-mono text-sm" />
-                  <p className="text-xs text-muted-foreground">Campo LDAP → E-mail de login</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Atributo de Nome Completo</Label>
-                  <Input value={mapName} onChange={(e) => setMapName(e.target.value)} className="font-mono text-sm" />
-                  <p className="text-xs text-muted-foreground">Campo LDAP → Nome no perfil</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Atributo de Organização</Label>
-                  <Input value={mapOrg} onChange={(e) => setMapOrg(e.target.value)} className="font-mono text-sm" />
-                  <p className="text-xs text-muted-foreground">Campo LDAP → Organização no perfil</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Atributo de Departamento</Label>
-                  <Input value={mapDept} onChange={(e) => setMapDept(e.target.value)} className="font-mono text-sm" />
-                  <p className="text-xs text-muted-foreground">Campo LDAP → Cargo/posição no perfil</p>
-                </div>
+                <div className="space-y-2"><Label>Atributo de E-mail</Label><Input value={form.attr_email} onChange={(e) => setForm({ ...form, attr_email: e.target.value })} className="font-mono text-sm" /></div>
+                <div className="space-y-2"><Label>Atributo de Nome Completo</Label><Input value={form.attr_name} onChange={(e) => setForm({ ...form, attr_name: e.target.value })} className="font-mono text-sm" /></div>
+                <div className="space-y-2"><Label>Atributo de Organização</Label><Input value={form.attr_org} onChange={(e) => setForm({ ...form, attr_org: e.target.value })} className="font-mono text-sm" /></div>
               </div>
-              <Button onClick={handleSaveConfig} className="mt-4">Salvar Mapeamento</Button>
+              <Button onClick={handleSaveConfig} className="mt-4" disabled={saving}>Salvar Mapeamento</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Usuários LDAP */}
         <TabsContent value="users" className="space-y-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="size-5" />
-                    Diretório de Usuários LDAP
-                  </CardTitle>
-                  <CardDescription>
-                    Visualize e importe usuários do diretório LDAP para o HydrosNet
-                  </CardDescription>
+                  <CardTitle className="flex items-center gap-2"><Users className="size-5" />Diretório de Usuários LDAP</CardTitle>
+                  <CardDescription>Visualize e importe usuários do diretório</CardDescription>
                 </div>
                 <Button onClick={handleSync} disabled={syncing}>
-                  {syncing ? <RefreshCw className="size-4 mr-2 animate-spin" /> : <RefreshCw className="size-4 mr-2" />}
-                  {syncing ? "Sincronizando..." : "Sincronizar Diretório"}
+                  <RefreshCw className={"size-4 mr-2 " + (syncing ? "animate-spin" : "")} />
+                  {syncing ? "Sincronizando..." : "Sincronizar"}
                 </Button>
               </div>
             </CardHeader>
@@ -255,22 +247,17 @@ export default function LdapConfig() {
                       <TableCell className="font-mono text-xs text-muted-foreground max-w-[200px] truncate">{u.dn}</TableCell>
                       <TableCell>
                         {u.synced ? (
-                          <Badge className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/30" variant="outline">
-                            <CheckCircle2 className="size-3 mr-1" />
-                            Sincronizado
+                          <Badge variant="outline" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/30">
+                            <CheckCircle2 className="size-3 mr-1" />Sincronizado
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-muted-foreground">
-                            <XCircle className="size-3 mr-1" />
-                            Pendente
-                          </Badge>
+                          <Badge variant="outline" className="text-muted-foreground"><XCircle className="size-3 mr-1" />Pendente</Badge>
                         )}
                       </TableCell>
                       <TableCell>
                         {!u.synced && (
                           <Button variant="ghost" size="sm" onClick={() => handleImportUser(u)}>
-                            <UserPlus className="size-3 mr-1" />
-                            Importar
+                            <UserPlus className="size-3 mr-1" />Importar
                           </Button>
                         )}
                       </TableCell>

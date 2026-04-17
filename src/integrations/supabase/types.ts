@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          severity: string
+          target: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+          target?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+          target?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ldap_config: {
+        Row: {
+          attr_email: string
+          attr_name: string
+          attr_org: string
+          base_dn: string
+          bind_dn: string
+          bind_password: string
+          created_at: string
+          default_role: Database["public"]["Enums"]["app_role"]
+          enabled: boolean
+          host: string
+          id: string
+          port: number
+          updated_at: string
+          use_tls: boolean
+          user_filter: string
+        }
+        Insert: {
+          attr_email?: string
+          attr_name?: string
+          attr_org?: string
+          base_dn?: string
+          bind_dn?: string
+          bind_password?: string
+          created_at?: string
+          default_role?: Database["public"]["Enums"]["app_role"]
+          enabled?: boolean
+          host?: string
+          id?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          user_filter?: string
+        }
+        Update: {
+          attr_email?: string
+          attr_name?: string
+          attr_org?: string
+          base_dn?: string
+          bind_dn?: string
+          bind_password?: string
+          created_at?: string
+          default_role?: Database["public"]["Enums"]["app_role"]
+          enabled?: boolean
+          host?: string
+          id?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          user_filter?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -44,6 +131,120 @@ export type Database = {
           position?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      sei_config: {
+        Row: {
+          api_key: string
+          api_url: string
+          created_at: string
+          enabled: boolean
+          id: string
+          orgao_id: string
+          tipo_processo: string
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string
+          api_url?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          orgao_id?: string
+          tipo_processo?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          api_url?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          orgao_id?: string
+          tipo_processo?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      smtp_config: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          from_email: string
+          from_name: string
+          host: string
+          id: string
+          password: string
+          port: number
+          updated_at: string
+          use_tls: boolean
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          from_email?: string
+          from_name?: string
+          host?: string
+          id?: string
+          password?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          username?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          from_email?: string
+          from_name?: string
+          host?: string
+          id?: string
+          password?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          username?: string
+        }
+        Relationships: []
+      }
+      system_parameters: {
+        Row: {
+          api_timeout_seconds: number
+          created_at: string
+          dbo_critico: number
+          dbo_min: number
+          id: string
+          max_upload_mb: number
+          retention_days: number
+          sync_interval_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          api_timeout_seconds?: number
+          created_at?: string
+          dbo_critico?: number
+          dbo_min?: number
+          id?: string
+          max_upload_mb?: number
+          retention_days?: number
+          sync_interval_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          api_timeout_seconds?: number
+          created_at?: string
+          dbo_critico?: number
+          dbo_min?: number
+          id?: string
+          max_upload_mb?: number
+          retention_days?: number
+          sync_interval_minutes?: number
+          updated_at?: string
         }
         Relationships: []
       }
