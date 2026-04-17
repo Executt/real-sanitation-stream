@@ -1,156 +1,102 @@
 # Padronização Visual — HydrosNet
 
-## Design System
+## Filosofia
 
-O HydrosNet adota o padrão visual **"CRM Desktop App"** com foco em clareza, alta densidade de dados e navegação horizontal.
+Estilo **"Precision Industrial / CRM Desktop"**: estética inspirada em CRMs corporativos modernos (Linear, Notion, dashboards executivos), com foco em densidade de dados, hierarquia clara e legibilidade técnica.
 
----
+## Cores (HSL)
 
-## Cores
+Todas as cores são definidas como tokens HSL em `src/index.css` e expostas em `tailwind.config.ts`. **Nunca usar cores literais em componentes.**
 
-### Tokens Semânticos (HSL)
+### Tokens Principais
 
-| Token | HSL | Uso |
-|-------|-----|-----|
-| `--background` | `220 14% 96%` | Fundo geral da aplicação |
-| `--foreground` | `220 20% 14%` | Texto principal |
-| `--card` | `0 0% 100%` | Fundo de cards |
-| `--primary` | `220 72% 50%` | Ações primárias, links, botões |
-| `--primary-foreground` | `0 0% 100%` | Texto sobre elementos primários |
-| `--secondary` | `220 14% 92%` | Elementos secundários |
-| `--muted` | `220 14% 92%` | Backgrounds atenuados |
-| `--muted-foreground` | `220 10% 46%` | Texto secundário, labels |
-| `--destructive` | `0 72% 51%` | Erros, alertas críticos |
-| `--warning` | `38 92% 50%` | Avisos, atenção |
-| `--success` | `152 60% 42%` | Sucesso, ETEs ativas |
-| `--border` | `220 14% 90%` | Bordas gerais |
-| `--nav-bg` | `224 30% 18%` | Background da navbar |
-| `--nav-foreground` | `0 0% 100%` | Texto na navbar |
-| `--nav-muted` | `224 20% 60%` | Texto secundário na navbar |
-| `--nav-active` | `220 72% 50%` | Item ativo na navbar |
+| Token | Light | Uso |
+|-------|-------|-----|
+| `--background` | `0 0% 100%` | Fundo geral |
+| `--foreground` | `224 30% 14%` | Texto principal |
+| `--primary` | `220 72% 50%` | Botões, links, ativos |
+| `--primary-foreground` | `0 0% 100%` | Texto sobre primary |
+| `--card` | `0 0% 100%` | Cards |
+| `--muted` | `220 14% 96%` | Fundos secundários |
+| `--muted-foreground` | `220 10% 45%` | Texto auxiliar |
+| `--border` | `220 13% 91%` | Bordas |
+| `--success` | `142 76% 45%` | Status positivo |
+| `--warning` | `38 92% 55%` | Atenção |
+| `--destructive` | `0 84% 60%` | Erros |
 
-### Uso em Componentes
+### Navbar (escura)
 
-- **Cards**: `bg-card` com `border` e `shadow-sm`
-- **Badges de status**: `bg-success/10 text-success` (ativa), `bg-warning/10 text-warning` (construção), `bg-destructive/10 text-destructive` (inativa)
-- **Alertas**: `bg-destructive` (crítico), `bg-warning` (aviso), `bg-primary` (info)
-
----
+| Token | HSL |
+|-------|-----|
+| `--nav-bg` | `224 30% 18%` |
+| `--nav-active` | `220 72% 50%` |
+| `--nav-muted` | `220 10% 70%` |
 
 ## Tipografia
 
-| Contexto | Fonte | Peso |
-|----------|-------|------|
-| Headings (h1-h3) | Inter | 600-700 |
-| Body text | Inter | 400-500 |
-| Dados técnicos | IBM Plex Mono | 400-600 |
-| Labels | Inter | 500 |
-| Badges | IBM Plex Mono | 600 |
+| Família | Uso |
+|---------|-----|
+| **Inter** | UI geral, headings, parágrafos |
+| **IBM Plex Mono** | Dados técnicos, badges, timestamps |
 
-### Tamanhos
+### Escala
 
-| Elemento | Classe | Tamanho |
-|----------|--------|---------|
-| Título de página | `text-2xl font-semibold` | 24px |
-| Título de seção | `text-lg font-semibold` | 18px |
-| Texto corpo | `text-sm` | 14px |
-| Labels/captions | `text-xs` | 12px |
-| Badges | `text-[10px]` | 10px |
-| Valores numéricos | `text-3xl font-semibold` | 30px |
+| Classe | Px | Uso |
+|--------|----|-----|
+| `text-xs` | 12 | Labels, metadata |
+| `text-sm` | 14 | Texto padrão |
+| `text-base` | 16 | Corpo |
+| `text-lg` | 18 | Títulos de cards |
+| `text-2xl` | 24 | Títulos de página |
+| `text-3xl` | 30 | Indicadores numéricos |
 
----
+### Pesos
+- `font-normal` (400) — corpo
+- `font-medium` (500) — labels
+- `font-semibold` (600) — títulos
 
 ## Espaçamento
 
-| Contexto | Valor |
-|----------|-------|
-| Padding de página | `p-6 lg:p-8` |
-| Gap entre cards | `gap-4` |
-| Padding interno de cards | `p-5` ou `p-6` |
-| Gap entre seções | `mb-8` |
-| Gap entre itens de formulário | `gap-4` |
-| Gap entre label e input | `space-y-2` |
+Escala 4px (Tailwind default). Padrões recorrentes:
 
----
-
-## Ícones
-
-- **Biblioteca**: Lucide React
-- **Tamanho padrão**: `size-4` (16px)
-- **Tamanho em stat cards**: `size-5` (20px)
-- **Tamanho no logo**: `size-4` (navbar), `size-8` (login)
-
-### Mapeamento de Ícones
-
-| Contexto | Ícone |
-|----------|-------|
-| Status ETEs | `Activity` |
-| Cadastro Manual | `ClipboardEdit` |
-| Monitoramento API | `Radio` |
-| Command Center | `LayoutDashboard` |
-| Tendência DBO | `TrendingUp` |
-| Mapa Interativo | `Globe` |
-| Alertas | `AlertTriangle` |
-| Conformidade | `Shield` |
-| Usuários | `Users` |
-| Configurações | `Settings` |
-| Login | `LogIn` |
-| Logout | `LogOut` |
-| Servidor LDAP | `Server` |
-
----
-
-## Componentes UI
-
-### Navegação Superior (TopNavbar)
-
-- Altura: `h-14`
-- Background: `hsl(224, 30%, 18%)` (dark)
-- Logo à esquerda com ícone `BarChart3`
-- Menus dropdown por contexto (Operador, ANA, Admin)
-- Perfil do usuário e badges de role à direita
-- Menu mobile hamburger em telas < `lg`
-
-### Cards (StatCard)
-
-- Background branco com borda e shadow suave
-- Ícone opcional no canto superior direito com fundo colorido suave
-- Valor grande (3xl), label pequeno (xs), subtítulo opcional
-- Barra de progresso opcional na parte inferior
-
-### Tabelas
-
-- Header com `text-xs` uppercase
-- Cells com `text-sm`
-- Badges de status inline
-- Hover state nas rows
-
-### Formulários
-
-- Labels acima dos inputs
-- Grid responsivo `grid-cols-1 md:grid-cols-2`
-- Seções agrupadas em cards com título
-
----
+| Token | Px | Uso |
+|-------|----|-----|
+| `p-3` | 12 | Botões |
+| `p-5` | 20 | Cards padrão |
+| `p-6` | 24 | Seções, formulários |
+| `gap-4` | 16 | Grids de cards |
+| `mb-8` | 32 | Espaçamento entre seções |
 
 ## Border Radius
 
-| Contexto | Valor |
-|----------|-------|
-| Padrão (--radius) | `0.5rem` (8px) |
-| Cards | `rounded-lg` |
-| Botões | `rounded-md` |
-| Badges | `rounded-sm` |
-| Logo icon | `rounded-lg` a `rounded-2xl` |
-| Inputs | Herda do tema |
-| Barras de progresso | `rounded-full` |
+| Token | Uso |
+|-------|-----|
+| `rounded-sm` (0.25rem) | Cards, painéis (estética industrial) |
+| `rounded-md` (0.375rem) | Botões, inputs |
+| `rounded-lg` (0.5rem) | Logos, ícones containers |
+| `rounded-full` | Status dots, avatares |
 
----
+## Ícones
+
+- **Biblioteca exclusiva:** [Lucide React](https://lucide.dev).
+- **Tamanhos padronizados:** `size-3` (badges), `size-3.5` (chevrons), `size-4` (botões), `size-5` (headers), `size-8` (avatares/placeholders).
+- Sempre acompanhar de label de texto para acessibilidade.
+
+## Sombras
+
+| Token | Uso |
+|-------|-----|
+| `shadow-sm` | Cards padrão |
+| `shadow-md` | Hover de cards interativos |
+| `shadow-lg` | Modais, dropdowns |
 
 ## Responsividade
 
-| Breakpoint | Comportamento |
-|-----------|---------------|
-| < 640px (sm) | Layout empilhado, logo text hidden |
-| < 1024px (lg) | Navbar mobile hamburger, grid 1-2 cols |
-| ≥ 1024px (lg) | Navbar completa com dropdowns, grid 3-4 cols |
+Breakpoints Tailwind padrão. Em `<lg`, navbar usa hamburger.
+
+## Acessibilidade
+
+- Contraste mínimo WCAG AA.
+- `aria-label` em ícones sem texto.
+- Focus rings via token `--ring`.
+- Tema dark preparado.
