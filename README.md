@@ -1,20 +1,23 @@
 # HydrosNet — Plataforma Integrada de Saneamento
 
-> Sistema de monitoramento e gestão de Estações de Tratamento de Esgoto (ETEs) com integração ao SNIRH/Atlas Esgotos da ANA.
+> Sistema nacional de monitoramento e gestão de Estações de Tratamento de Esgoto (ETEs) com integração ao SNIRH/Atlas Esgotos da ANA.
 
 ## Visão Geral
 
-O HydrosNet é uma plataforma web que conecta operadores de saneamento (B2B) à Agência Nacional de Águas (ANA) por meio de painéis interativos, integração de dados via API e cadastro manual. O sistema oferece controle de acesso baseado em roles, dashboards operacionais, um centro de comando nacional e integração com diretórios LDAP/Active Directory.
+O HydrosNet conecta operadores de saneamento (B2B) à Agência Nacional de Águas (ANA) por meio de painéis interativos, integração de dados via API, cadastro manual e diretórios corporativos (LDAP/AD). Oferece controle de acesso baseado em roles, dashboards operacionais, centro de comando nacional e administração centralizada de parâmetros.
 
 ## Funcionalidades Principais
 
-- **Painel Operador B2B** — Status das ETEs, cadastro manual de dados, monitoramento de integração API
-- **Centro de Comando ANA** — Visão nacional com indicadores por bacia hidrográfica, gráficos de tendência DBO
-- **Mapa Interativo** — Visualização geoespacial com Leaflet das ETEs em todo o Brasil, com marcadores por status
-- **Autenticação & RBAC** — Login com e-mail/senha, controle de acesso por roles (operador, gestor_ana, superadmin)
-- **Painel de Administração** — Gerenciamento de usuários e atribuição de roles (exclusivo superadmin)
-- **Integração LDAP** — Configuração de diretório LDAP/Active Directory para importação e sincronização de usuários
-- **Gráficos de Tendência** — Evolução da eficiência DBO por bacia com Recharts
+- **Painel Operador B2B** — Status das ETEs, cadastro manual, monitoramento de integração API.
+- **Centro de Comando ANA** — Visão nacional, indicadores por bacia, gráficos de tendência DBO.
+- **Mapa Interativo** — Visualização geoespacial com Leaflet das ETEs no Brasil.
+- **Autenticação & RBAC** — Login com e-mail/senha, controle de acesso por roles.
+- **Hub de Administração** — Central única de parametrização do sistema.
+- **Integração LDAP/AD** — Importação e sincronização de usuários corporativos.
+- **Configuração SMTP** — Servidor de e-mail para notificações automáticas.
+- **Integração SEI** — Abertura automática de processos no Sistema Eletrônico de Informações.
+- **Parâmetros Gerais** — Limites de conformidade, timeouts e retenção configuráveis.
+- **Auditoria & Segurança** — Trilhas de auditoria de ações críticas.
 
 ## Stack Tecnológico
 
@@ -34,26 +37,19 @@ O HydrosNet é uma plataforma web que conecta operadores de saneamento (B2B) à 
 |------|--------|
 | `operador` | Painel Operador, Cadastro Manual |
 | `gestor_ana` | Centro de Comando ANA |
-| `superadmin` | Acesso total + Painel de Administração + Configuração LDAP |
+| `superadmin` | Acesso total + Hub de Administração |
 
 ## Navegação
 
-A aplicação utiliza navegação horizontal superior (top navbar) com menus dropdown organizados por contexto:
-- **Operador B2B**: Status das ETEs, Cadastro Manual, Monitoramento API, Log de Integração
-- **ANA Center**: Command Center, Tendência DBO, Mapa Interativo, Alertas DBO, Conformidade
-- **Administração** (superadmin): Usuários & Roles, Configuração LDAP
+A aplicação utiliza navegação horizontal superior (top navbar) com dropdowns:
+- **Operador B2B**: Status das ETEs, Cadastro Manual, Monitoramento API, Log de Integração.
+- **ANA Center**: Command Center, Tendência DBO, Mapa Interativo, Alertas DBO, Conformidade.
+- **Administração** (superadmin): Hub, Usuários & Roles, LDAP, SMTP, SEI, Parâmetros, Auditoria.
 
 ## Usuário Superadmin Padrão
 
 - **E-mail:** `admin@ana.gov.br`
 - **Senha:** `Admin@ANA2026!`
-
-## Design System
-
-- **Cores primárias:** Azul `HSL(220, 72%, 50%)`, navbar dark `HSL(224, 30%, 18%)`
-- **Tipografia:** Inter (body), IBM Plex Mono (dados técnicos)
-- **Border radius:** 0.5rem (padrão)
-- **Layout:** Top navigation bar com dropdowns, cards com shadow suave
 
 ## Executando o Projeto
 
@@ -64,11 +60,12 @@ npm run dev
 
 ## Documentação Complementar
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Arquitetura do sistema
-- [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) — Esquema do banco de dados
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — Arquitetura da aplicação
+- [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) — Esquema do banco
 - [API_ROUTE.md](./API_ROUTE.md) — Rotas e endpoints
-- [FUNCTION_CONT.md](./FUNCTION_CONT.md) — Contagem e inventário de funções
+- [FUNCTION_CONT.md](./FUNCTION_CONT.md) — Inventário e contagem de funções
 - [VISUAL_STANDARDS.md](./VISUAL_STANDARDS.md) — Padronização visual
-- [SECURITY_POLICIES.md](./SECURITY_POLICIES.md) — Políticas de segurança
+- [SECURITY_POLICIES.md](./SECURITY_POLICIES.md) — Políticas de segurança (RLS)
+- [SECURITY.md](./SECURITY.md) — Segurança geral
 - [BUSINESS_RULES.md](./BUSINESS_RULES.md) — Regras de negócio
 - [cloud.md](./cloud.md) — Configuração Lovable Cloud
