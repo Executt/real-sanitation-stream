@@ -2,62 +2,64 @@
 
 ## Visão Geral
 
-O HydrosNet utiliza Lovable Cloud como backend, fornecendo autenticação, banco de dados PostgreSQL com Row Level Security (RLS) e edge functions.
+O HydrosNet utiliza Lovable Cloud como backend, fornecendo autenticação, banco PostgreSQL com RLS, edge functions e secrets gerenciados.
 
 ## Serviços Ativos
 
 ### Autenticação
-- **Método**: E-mail e senha
-- **Auto-confirm**: Habilitado (para desenvolvimento)
-- **Trigger**: Criação automática de perfil no signup via `handle_new_user()`
-- **LDAP**: Módulo de configuração disponível no painel de administração
+- **Métodos:** e-mail/senha (ativo), LDAP/AD (módulo administrativo).
+- **Trigger:** criação automática de perfil via `handle_new_user()`.
+- **Auto-confirm:** habilitado em desenvolvimento.
 
 ### Banco de Dados
-- **Tabelas**: `profiles`, `user_roles`
-- **Enum**: `app_role` (operador, gestor_ana, superadmin)
-- **RLS**: Ativo em todas as tabelas
-- **Funções**: `has_role()`, `handle_new_user()`, `update_updated_at_column()`
+- **Tabelas:** `profiles`, `user_roles`.
+- **Enum:** `app_role` (`operador`, `gestor_ana`, `superadmin`).
+- **RLS:** habilitada em todas as tabelas.
+- **Funções:** `has_role()`, `handle_new_user()`, `update_updated_at_column()`.
 
 ### Edge Functions
-- **seed-admin**: Criação do usuário superadmin inicial
+| Função | Descrição |
+|--------|-----------|
+| `seed-admin` | Cria/atualiza o superadmin inicial (`admin@ana.gov.br`) |
 
 ## Secrets Configuradas
 
 | Nome | Descrição |
 |------|-----------|
-| `LOVABLE_API_KEY` | Chave da API Lovable |
+| `LOVABLE_API_KEY` | Chave da Lovable AI Gateway |
 | `SUPABASE_URL` | URL do projeto |
-| `SUPABASE_PUBLISHABLE_KEY` | Chave pública (anon) |
+| `SUPABASE_ANON_KEY` | Chave pública (anon) |
+| `SUPABASE_PUBLISHABLE_KEY` | Chave pública (publishable) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Chave de serviço (admin) |
-| `SUPABASE_DB_URL` | URL de conexão ao banco |
+| `SUPABASE_DB_URL` | URL de conexão direta ao banco |
 
 ## Variáveis de Ambiente (Frontend)
 
 | Variável | Uso |
 |----------|-----|
 | `VITE_SUPABASE_URL` | URL do backend |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave anon para o client |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave anon para o cliente |
 | `VITE_SUPABASE_PROJECT_ID` | ID do projeto |
 
-## Políticas de Segurança (RLS)
+## Hub de Administração
 
-### profiles
-- SELECT: Todos os usuários autenticados
-- INSERT: Apenas o próprio usuário
-- UPDATE: Apenas o próprio usuário
+A página `/admin` agrega todas as parametrizações:
 
-### user_roles
-- ALL: Superadmins podem gerenciar todas as roles
-- SELECT: Usuários podem ver suas próprias roles
+| Módulo | Rota | Status |
+|--------|------|--------|
+| Usuários & Roles | `/admin/usuarios` | ✅ Ativo |
+| LDAP/AD | `/admin/ldap` | ✅ UI ativa (backend planejado) |
+| SMTP | `/admin/smtp` | ✅ UI ativa (backend planejado) |
+| SEI | `/admin/sei` | ✅ UI ativa (backend planejado) |
+| Parâmetros Gerais | `/admin/parametros` | ✅ UI ativa (backend planejado) |
+| Auditoria & Segurança | `/admin/auditoria` | ✅ UI ativa (backend planejado) |
 
-## Integração LDAP
+## Roadmap Backend
 
-O módulo LDAP é implementado no frontend (`/admin/ldap`) e permite:
-- Configuração de servidor LDAP/Active Directory (host, porta, Base DN, Bind DN)
-- Suporte a SSL/TLS (LDAPS)
-- Mapeamento de atributos LDAP para campos do perfil HydrosNet
-- Visualização e importação de usuários do diretório
-- Sincronização manual do diretório
-- Atribuição automática de role padrão para usuários importados
+Próximos componentes a serem implementados via edge functions + tabelas:
 
-**Nota**: A integração LDAP completa com backend (edge function para conexão ao servidor LDAP) pode ser implementada conforme necessidade.
+- `ldap-sync` — sincronização periódica de diretório.
+- `smtp-test` — envio real de e-mail de teste.
+- `sei-create-process` — abertura de processo no SEI.
+- Tabela `audit_log` com inserção via triggers.
+- Tabelas `ldap_config`, `smtp_config`, `sei_config`, `system_parameters`.

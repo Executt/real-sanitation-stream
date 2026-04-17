@@ -24,8 +24,8 @@ Armazena informações de perfil dos usuários.
 | `updated_at` | timestamptz | Não | `now()` |
 
 **Políticas RLS:**
-- Usuários autenticados podem visualizar todos os perfis
-- Usuários podem inserir e atualizar apenas o próprio perfil
+- SELECT: Todos os usuários autenticados.
+- INSERT/UPDATE: Apenas o próprio usuário.
 
 ---
 
@@ -40,33 +40,42 @@ Armazena as roles atribuídas a cada usuário.
 | `created_at` | timestamptz | Não | `now()` |
 
 **Políticas RLS:**
-- Superadmins podem gerenciar (CRUD) todas as roles
-- Usuários podem visualizar apenas as próprias roles
+- ALL: Superadmins gerenciam todas as roles.
+- SELECT: Usuários veem suas próprias roles.
 
 ## Funções SQL
 
 ### `has_role(_user_id uuid, _role app_role) → boolean`
-Verifica se um usuário possui determinada role. Usa `SECURITY DEFINER` para evitar recursão RLS.
+Verifica se um usuário possui determinada role. `SECURITY DEFINER` para evitar recursão RLS.
 
 ### `handle_new_user() → trigger`
-Trigger executado após inserção em `auth.users`. Cria automaticamente um registro em `profiles`.
+Trigger após inserção em `auth.users`. Cria registro em `profiles`.
 
 ### `update_updated_at_column() → trigger`
-Atualiza o campo `updated_at` automaticamente antes de um `UPDATE`.
+Atualiza `updated_at` antes de UPDATE.
 
 ## Edge Functions
 
 ### `seed-admin`
-Cria ou atualiza o usuário superadmin `admin@ana.gov.br` e atribui a role `superadmin`.
+Cria ou atualiza o usuário superadmin `admin@ana.gov.br` e atribui `superadmin`.
+
+## Tabelas Planejadas (Roadmap)
+
+Estas tabelas estão previstas e referenciadas pelos módulos administrativos do frontend; serão criadas via migrations conforme cada módulo for ativado:
+
+- `etes` — Cadastro de Estações de Tratamento de Esgoto.
+- `medicoes` — Time-series de medições de DBO/DQO/Vazão (TimescaleDB).
+- `ldap_config` — Configuração de servidor LDAP/AD.
+- `smtp_config` — Configuração SMTP.
+- `sei_config` — Configuração da integração SEI.
+- `system_parameters` — Parâmetros globais do sistema.
+- `audit_log` — Trilha de auditoria de ações críticas.
 
 ## Diagrama de Relacionamento
 
 ```
-auth.users (gerenciado pelo Supabase)
+auth.users (Supabase)
     │
     ├── 1:1 ── profiles (via user_id)
-    │           Perfil completo do usuário
-    │
     └── 1:N ── user_roles (via user_id)
-                Roles atribuídas ao usuário
 ```

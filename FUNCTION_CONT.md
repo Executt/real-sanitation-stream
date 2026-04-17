@@ -1,4 +1,4 @@
-# Inventário e Contagem de Funções — HydrosNet
+# Inventário, Contagem de Funções e Pontos de Função — HydrosNet
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Categoria | Quantidade |
 |-----------|-----------|
-| **Componentes React (páginas)** | 8 |
+| **Componentes React (páginas)** | 14 |
 | **Componentes React (UI/layout)** | 9 |
 | **Componentes shadcn/ui** | 42 |
 | **Context Providers** | 1 |
@@ -16,9 +16,9 @@
 | **Funções Utilitárias** | 1 |
 | **Funções SQL (banco)** | 3 |
 | **Edge Functions** | 1 |
-| **Total de funções/componentes da aplicação** | **67** |
+| **Total de funções/componentes da aplicação** | **73** |
 
-### Detalhamento — Páginas (8)
+### Detalhamento — Páginas (14)
 
 | # | Arquivo | Função | Tipo |
 |---|---------|--------|------|
@@ -26,24 +26,30 @@
 | 2 | `src/pages/OperadorDashboard.tsx` | `OperadorDashboard` | Page Component |
 | 3 | `src/pages/CommandCenter.tsx` | `CommandCenter` | Page Component |
 | 4 | `src/pages/CadastroManual.tsx` | `CadastroManual` | Page Component |
-| 5 | `src/pages/AdminPanel.tsx` | `AdminPanel` | Page Component |
-| 6 | `src/pages/LdapConfig.tsx` | `LdapConfig` | Page Component |
-| 7 | `src/pages/NotFound.tsx` | `NotFound` | Page Component |
-| 8 | `src/pages/Index.tsx` | `Index` | Page Component (redirect) |
+| 5 | `src/pages/AdminHub.tsx` | `AdminHub` | Page Component (★ Hub) |
+| 6 | `src/pages/AdminPanel.tsx` | `AdminPanel` | Page Component |
+| 7 | `src/pages/LdapConfig.tsx` | `LdapConfig` | Page Component |
+| 8 | `src/pages/SmtpConfig.tsx` | `SmtpConfig` | Page Component |
+| 9 | `src/pages/SeiConfig.tsx` | `SeiConfig` | Page Component |
+| 10 | `src/pages/SystemParameters.tsx` | `SystemParameters` | Page Component |
+| 11 | `src/pages/AuditLog.tsx` | `AuditLog` | Page Component |
+| 12 | `src/pages/PlaceholderPage.tsx` | `PlaceholderPage` | Page Component |
+| 13 | `src/pages/NotFound.tsx` | `NotFound` | Page Component |
+| 14 | `src/pages/Index.tsx` | `Index` | Page Component (redirect) |
 
 ### Detalhamento — Componentes de Aplicação (9)
 
 | # | Arquivo | Função | Responsabilidade |
 |---|---------|--------|-----------------|
-| 1 | `src/components/TopNavbar.tsx` | `TopNavbar` | Navegação horizontal superior com dropdowns |
-| 2 | `src/components/TopNavbar.tsx` | `NavDropdown` | Menu dropdown interno da navbar |
-| 3 | `src/components/DashboardLayout.tsx` | `DashboardLayout` | Layout principal com navbar e outlet |
-| 4 | `src/components/ProtectedRoute.tsx` | `ProtectedRoute` | Guarda de rota com verificação de sessão/role |
-| 5 | `src/components/NavLink.tsx` | `NavLink` | Link de navegação com estado ativo |
-| 6 | `src/components/StatCard.tsx` | `StatCard` | Card de indicador numérico com ícone |
-| 7 | `src/components/EteStatusTable.tsx` | `EteStatusTable` | Tabela de status de ETEs |
-| 8 | `src/components/AlertItem.tsx` | `AlertItem` | Item de alerta com severidade |
-| 9 | `src/components/DboTrendChart.tsx` | `DboTrendChart` | Gráfico de tendência DBO por bacia |
+| 1 | `src/components/TopNavbar.tsx` | `TopNavbar` | Navegação horizontal superior |
+| 2 | `src/components/TopNavbar.tsx` | `NavDropdown` | Menu dropdown da navbar |
+| 3 | `src/components/DashboardLayout.tsx` | `DashboardLayout` | Layout principal com outlet |
+| 4 | `src/components/ProtectedRoute.tsx` | `ProtectedRoute` | Guarda de rota |
+| 5 | `src/components/StatCard.tsx` | `StatCard` | Card de indicador numérico |
+| 6 | `src/components/EteStatusTable.tsx` | `EteStatusTable` | Tabela de status de ETEs |
+| 7 | `src/components/AlertItem.tsx` | `AlertItem` | Item de alerta com severidade |
+| 8 | `src/components/DboTrendChart.tsx` | `DboTrendChart` | Gráfico de tendência DBO |
+| 9 | `src/components/EteMap.tsx` | `EteMap` | Mapa Leaflet com marcadores |
 
 ### Detalhamento — Contextos e Hooks (3)
 
@@ -53,13 +59,7 @@
 | 2 | `src/contexts/AuthContext.tsx` | `useAuth` | Custom Hook |
 | 3 | `src/hooks/use-mobile.tsx` | `useIsMobile` | Custom Hook |
 
-### Detalhamento — Utilitários (1)
-
-| # | Arquivo | Função | Tipo |
-|---|---------|--------|------|
-| 1 | `src/lib/utils.ts` | `cn` | Utility (class merge) |
-
-### Detalhamento — Funções Internas de Componentes (8)
+### Detalhamento — Funções Internas de Componentes (16)
 
 | # | Componente | Função | Tipo |
 |---|-----------|--------|------|
@@ -68,15 +68,23 @@
 | 3 | `AdminPanel` | `handleRemoveRole` | Event handler |
 | 4 | `CadastroManual` | `handleSubmit` | Form handler |
 | 5 | `DboTrendChart` | `generateData` | Data generator |
-| 6 | `LdapConfig` | `handleTestConnection` | LDAP connection test |
-| 7 | `LdapConfig` | `handleSync` | LDAP directory sync |
-| 8 | `LdapConfig` | `handleImportUser` | User import handler |
+| 6 | `LdapConfig` | `handleTestConnection` | LDAP test |
+| 7 | `LdapConfig` | `handleSync` | LDAP sync |
+| 8 | `LdapConfig` | `handleImportUser` | User import |
+| 9 | `SmtpConfig` | `handleSave` | Form handler |
+| 10 | `SmtpConfig` | `handleTest` | E-mail teste |
+| 11 | `SeiConfig` | `handleSave` | Form handler |
+| 12 | `SeiConfig` | `handleTest` | Conexão SEI teste |
+| 13 | `SystemParameters` | `setParams` | State updater |
+| 14 | `EteMap` | `FitBounds` | Map helper |
+| 15 | `EteMap` | `createIcon` | SVG marker factory |
+| 16 | `Login` | `handleAuth` | Auth handler |
 
-### Detalhamento — Funções SQL no Banco de Dados (3)
+### Detalhamento — Funções SQL (3)
 
 | # | Nome | Tipo | Descrição |
 |---|------|------|-----------|
-| 1 | `has_role(_user_id, _role)` | SQL Function | Verifica se usuário possui role |
+| 1 | `has_role(_user_id, _role)` | SQL Function | Verifica role do usuário |
 | 2 | `handle_new_user()` | Trigger Function | Cria perfil no signup |
 | 3 | `update_updated_at_column()` | Trigger Function | Atualiza timestamp |
 
@@ -99,34 +107,42 @@ Accordion, AlertDialog, Alert, AspectRatio, Avatar, Badge, Breadcrumb, Calendar,
 O HydrosNet é uma plataforma que ajuda o Brasil a monitorar o tratamento de esgoto em todo o país. Veja o que cada parte faz:
 
 #### Acesso e Segurança
-- **Tela de Login** — Permite que operadores e gestores entrem no sistema com e-mail e senha. A tela apresenta um visual moderno com painel informativo à esquerda e formulário à direita. Novos usuários podem se cadastrar informando nome, organização e e-mail.
-- **Controle de Acesso** — O sistema verifica quem é cada usuário e mostra apenas as funcionalidades adequadas ao seu perfil. Existem três perfis: Operador, Gestor da ANA e Administrador do Sistema.
-- **Proteção de Páginas** — Nenhuma página sensível é acessível sem autenticação. Se alguém tentar acessar sem estar logado, é redirecionado para a tela de login.
+- **Tela de Login** — Permite entrar no sistema com e-mail e senha; novos usuários podem se cadastrar.
+- **Controle de Acesso** — Cada perfil (Operador, Gestor ANA, Superadmin) vê apenas o que lhe é permitido.
+- **Proteção de Páginas** — Páginas sensíveis exigem login; tentativas anônimas são redirecionadas.
 
 #### Para Operadores de Saneamento
-- **Painel do Operador** — Mostra um resumo da situação: quantas ETEs estão conectadas, falhas de API nas últimas 24 horas, eficiência média de tratamento e cadastros manuais pendentes.
-- **Tabela de Status** — Lista todas as ETEs com código, nome, município, tipologia, status operacional, eficiência DBO e tipo de integração (automática, manual ou com falha).
-- **Alertas de Integração** — Mostra problemas como timeouts de API, certificados SSL prestes a vencer e sensores desconectados.
-- **Cadastro Manual** — Formulário completo para operadores que não possuem integração automática. Permite registrar dados da ETE como vazão, DBO de entrada/saída, localização e dados do responsável técnico.
+- **Painel do Operador** — Resumo de ETEs conectadas, falhas de API, eficiência média e cadastros pendentes.
+- **Tabela de Status** — Lista de ETEs com código, município, eficiência DBO e tipo de integração.
+- **Alertas de Integração** — Notificações sobre timeouts, certificados vencendo e sensores offline.
+- **Cadastro Manual** — Formulário para registrar dados quando não há integração automática.
 
 #### Para Gestores da ANA
-- **Centro de Comando** — Visão nacional mostrando o total de ETEs ativas, em construção e inativas, além da eficiência DBO média do país.
-- **Gráfico de Tendência DBO** — Mostra a evolução mensal da eficiência de remoção de DBO por bacia hidrográfica ao longo de 12 meses.
-- **Mapa Interativo** — Exibe todas as ETEs georreferenciadas no mapa do Brasil, com marcadores coloridos por status (verde = ativa, amarelo = em construção, vermelho = inativa). Ao clicar em um marcador, o sistema mostra detalhes da ETE.
-- **Indicadores por Bacia** — Apresenta dados de cada grande bacia hidrográfica brasileira com número de ETEs, cobertura e eficiência.
-- **Alertas Nacionais** — Notificações sobre problemas críticos como excesso de carga orgânica, bacias com cobertura abaixo do mínimo e problemas de infraestrutura.
+- **Centro de Comando** — Visão nacional com totais de ETEs e eficiência média do país.
+- **Gráfico de Tendência DBO** — Evolução mensal por bacia hidrográfica.
+- **Mapa Interativo** — Brasil georreferenciado com marcadores coloridos por status.
+- **Indicadores por Bacia** — Cobertura, número de ETEs e eficiência por região.
+- **Alertas Nacionais** — Excesso de carga, baixa cobertura, problemas críticos.
 
-#### Administração do Sistema
-- **Painel de Administração** — Exclusivo para administradores. Permite ver todos os usuários cadastrados, atribuir ou remover perfis de acesso, e visualizar estatísticas como total de usuários, administradores e gestores.
-- **Configuração LDAP** — Permite conectar o sistema a diretórios corporativos (LDAP/Active Directory) para importar usuários automaticamente. O administrador configura servidor, porta, filtros e mapeamentos de atributos, podendo sincronizar e importar usuários com um clique.
-- **Criação Automática do Admin** — O sistema vem com um administrador pré-configurado (`admin@ana.gov.br`) que pode gerenciar todos os usuários.
+#### Hub de Administração (★ NOVO)
+A área de administração agora tem uma **página principal (hub)** que reúne todas as funções de parametrização do sistema em um só lugar:
+
+- **Usuários & Roles** — Gerenciar usuários e atribuir perfis de acesso.
+- **Configuração LDAP** — Conectar ao Active Directory da organização para importar usuários corporativos automaticamente, com suporte a TLS/SSL.
+- **Configuração SMTP** — Definir o servidor de e-mail que enviará notificações e alertas (com teste de envio).
+- **Integração SEI** — Configurar o Sistema Eletrônico de Informações para abrir processos automaticamente quando ocorrerem alertas críticos.
+- **Parâmetros Gerais** — Ajustar limites de conformidade DBO, timeouts de API, intervalo de sincronização e retenção de logs.
+- **Auditoria & Segurança** — Visualizar a trilha de quem fez o quê e quando, para fins de compliance.
 
 #### Navegação
-- **Barra Superior** — Menu horizontal no topo da tela com menus dropdown organizados por contexto (Operador B2B, ANA Center, Administração). Mostra status do sistema, perfis de acesso do usuário logado e menu de usuário com opção de sair.
-- **Responsividade** — Em telas menores, a navegação se transforma em menu hamburger com todos os itens acessíveis.
+- **Barra Superior** — Menu horizontal com dropdowns por contexto (Operador B2B, ANA Center, Administração).
+- **Responsividade** — Em telas menores vira menu hamburger.
+
+#### Páginas em Desenvolvimento
+Algumas rotas (Monitoramento API, Logs, Tendência DBO, Mapa, Alertas, Conformidade) hoje exibem uma **página informativa padronizada** indicando que estão em desenvolvimento — eliminando os antigos erros 404.
 
 #### Infraestrutura
-- **Criação Automática de Perfil** — Ao se cadastrar, o perfil do usuário é criado automaticamente no banco de dados.
-- **Verificação de Permissões** — Uma função segura no banco verifica se o usuário tem a permissão necessária, sem risco de falhas de segurança.
-- **Atualização de Timestamps** — O sistema registra automaticamente quando cada dado foi atualizado pela última vez.
-- **Integração LDAP** — O módulo LDAP permite cadastrar usuários em massa a partir de diretórios corporativos, facilitando a adesão de novas organizações ao sistema.
+- **Criação Automática de Perfil** — Ao se cadastrar, o perfil é criado automaticamente.
+- **Verificação de Permissões** — Função segura no banco evita falhas de segurança.
+- **Atualização de Timestamps** — Sistema registra automaticamente cada alteração.
+- **Superadmin Padrão** — Conta `admin@ana.gov.br` criada automaticamente para o primeiro acesso.

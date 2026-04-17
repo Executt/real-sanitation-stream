@@ -1,110 +1,83 @@
-# Políticas de Segurança — HydrosNet
+# Políticas de Segurança — Row Level Security (RLS)
 
-## Visão Geral
+Toda tabela em `public` tem RLS **habilitada**. Para a visão geral de segurança, ver [SECURITY.md](./SECURITY.md).
 
-O HydrosNet implementa segurança em múltiplas camadas, desde a autenticação de usuários até o controle de acesso a dados no nível de banco de dados (Row Level Security).
+## Princípios
 
----
+1. RLS sempre ativo em tabelas com dados sensíveis.
+2. Roles em tabela separada (`user_roles`) — nunca em `profiles`.
+3. Verificação via `has_role()` com `SECURITY DEFINER` (evita recursão).
+4. Validação client-side é UX; a verdade está no RLS.
+5. Chaves privadas só em secrets do backend.
 
-## 1. Autenticação
+## Tabela `profiles`
 
-### Método Principal
-- **E-mail/Senha** via Supabase Auth
-- Senhas com mínimo de 6 caracteres
-- Auto-confirm habilitado (ambiente de desenvolvimento)
+```sql
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+```
 
-### LDAP/Active Directory
-- Integração configurável com diretórios LDAP
-- Importação de usuários com atribuição automática de role
-- SSL/TLS opcional (LDAPS)
+| Política | Comando | Roles | Expressão |
+|----------|---------|-------|-----------|
+| Profiles are viewable by authenticated users | SELECT | `authenticated` | `true` |
+| Users can insert own profile | INSERT | `authenticated` | with check `auth.uid() = user_id` |
+| Users can update own profile | UPDATE | `authenticated` | `auth.uid() = user_id` |
 
-### Sessão
-- Tokens JWT gerenciados pelo Supabase
-- Listener `onAuthStateChange` para estado reativo
-- `getSession()` para verificação inicial
+DELETE não é permitido.
 
----
+## Tabela `user_roles`
 
-## 2. Autorização (RBAC)
+```sql
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+```
 
-### Roles
+| Política | Comando | Roles | Expressão |
+|----------|---------|-------|-----------|
+| Superadmins can manage roles | ALL | `authenticated` | `has_role(auth.uid(), 'superadmin')` |
+| Superadmins can view all roles | SELECT | `authenticated` | `has_role(auth.uid(), 'superadmin')` |
+| Users can view own roles | SELECT | `authenticated` | `auth.uid() = user_id` |
 
-| Role | Descrição | Nível de Acesso |
-|------|-----------|----------------|
-| `operador` | Operador de concessionária B2B | Painel Operador, Cadastro Manual |
-| `gestor_ana` | Gestor da Agência Nacional de Águas | Centro de Comando ANA |
-| `superadmin` | Administrador do sistema | Acesso total + Administração + LDAP |
+## Função `has_role()`
 
-### Armazenamento de Roles
-- Tabela separada `user_roles` (não no perfil do usuário)
-- Previne ataques de escalação de privilégios
-- Constraint `UNIQUE(user_id, role)` evita duplicatas
+```sql
+CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = _user_id AND role = _role
+  )
+$$;
+```
 
-### Verificação de Roles
-- Função SQL `has_role()` com `SECURITY DEFINER`
-- Evita recursão em políticas RLS
-- `search_path` fixo em `public` para segurança
+`SECURITY DEFINER` evita recursão de RLS quando usada dentro de outra política.
 
----
+## Padrão para Novas Tabelas
 
-## 3. Row Level Security (RLS)
+```sql
+CREATE TABLE public.minha_tabela (...);
+ALTER TABLE public.minha_tabela ENABLE ROW LEVEL SECURITY;
 
-### Tabela `profiles`
+CREATE POLICY "Read by authenticated" ON public.minha_tabela
+  FOR SELECT TO authenticated USING (true);
 
-| Operação | Regra |
-|----------|-------|
-| SELECT | Todos os usuários autenticados podem visualizar todos os perfis |
-| INSERT | Apenas o próprio usuário (`auth.uid() = user_id`) |
-| UPDATE | Apenas o próprio usuário (`auth.uid() = user_id`) |
-| DELETE | **Não permitido** |
+CREATE POLICY "Superadmins manage all" ON public.minha_tabela
+  FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'superadmin'))
+  WITH CHECK (public.has_role(auth.uid(), 'superadmin'));
+```
 
-### Tabela `user_roles`
+## Tabelas de Configuração Administrativa (Roadmap)
 
-| Operação | Regra |
-|----------|-------|
-| ALL (SELECT, INSERT, UPDATE, DELETE) | Superadmins (`has_role(auth.uid(), 'superadmin')`) |
-| SELECT | Usuários podem ver suas próprias roles (`auth.uid() = user_id`) |
+Tabelas planejadas — todas devem nascer com RLS restrita a `superadmin`:
 
----
+- `ldap_config`, `smtp_config`, `sei_config`, `system_parameters`, `audit_log`.
 
-## 4. Proteção de Rotas (Frontend)
+## Erros Comuns a Evitar
 
-### Componente `ProtectedRoute`
-- Verifica `session` (autenticação)
-- Verifica `requiredRole` (autorização)
-- Superadmin tem bypass automático para qualquer role
-- Redireciona para `/login` se não autenticado
-- Redireciona para `/operador` se role insuficiente
-
-### Navegação Condicional
-- Menu "Administração" visível apenas para `superadmin` (`isSuperAdmin`)
-- Páginas `/admin/*` protegidas no nível de componente
-
----
-
-## 5. Edge Functions
-
-### `seed-admin`
-- Usa `SUPABASE_SERVICE_ROLE_KEY` (chave de administração)
-- Cria usuário e atribui role de superadmin
-- Não exposta no frontend (execução manual/deploy)
-
-### Boas Práticas
-- Validação CORS em todas as funções
-- Validação de input com Zod
-- Headers de segurança em todas as respostas
-- Nunca executa SQL raw fornecido pelo cliente
-
----
-
-## 6. Segurança no Banco de Dados
-
-### Funções com SECURITY DEFINER
-- `has_role()`: Executa com privilégios do owner, evitando recursão RLS
-- `handle_new_user()`: Cria perfil automaticamente com segurança
-
-### Proteções Adicionais
-- Nenhuma tabela sem RLS habilitado
-- Foreign keys não referenciam `auth.users` diretamente
-- Timestamps automáticos via triggers
-- `search_path` fixo nas funções para evitar injection
+❌ Armazenar `role` em `profiles` — risco de escalação.
+❌ Verificar admin via `localStorage`.
+❌ Desabilitar RLS para "facilitar dev".
+❌ `WITH CHECK` mais permissivo que `USING`.
+❌ Usar `SUPABASE_SERVICE_ROLE_KEY` no frontend.
