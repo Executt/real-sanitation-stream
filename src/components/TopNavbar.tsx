@@ -17,13 +17,19 @@ import {
   BarChart3,
   ChevronDown,
   ClipboardEdit,
+  FileCog,
   Globe,
   LayoutDashboard,
+  LayoutGrid,
   LogOut,
+  Mail,
   Menu,
+  Network,
   Radio,
   Settings,
+  Settings2,
   Shield,
+  ShieldCheck,
   TrendingUp,
   User,
   Users,
@@ -47,8 +53,13 @@ const anaItems = [
 ];
 
 const adminItems = [
-  { title: "Usuários & Roles", url: "/admin", icon: Users },
-  { title: "Configuração LDAP", url: "/admin/ldap", icon: Settings },
+  { title: "Hub de Administração", url: "/admin", icon: LayoutGrid },
+  { title: "Usuários & Roles", url: "/admin/usuarios", icon: Users },
+  { title: "Configuração LDAP", url: "/admin/ldap", icon: Network },
+  { title: "Configuração SMTP", url: "/admin/smtp", icon: Mail },
+  { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
+  { title: "Parâmetros Gerais", url: "/admin/parametros", icon: Settings2 },
+  { title: "Auditoria & Segurança", url: "/admin/auditoria", icon: ShieldCheck },
 ];
 
 interface NavDropdownProps {
