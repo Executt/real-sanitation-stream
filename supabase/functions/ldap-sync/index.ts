@@ -67,14 +67,7 @@ Deno.serve(async (req) => {
       return json({ error: "LDAP host or base_dn not configured" }, 400);
     }
 
-    // Optional dry-run mode
-    let dryRun = false;
-    if (req.method === "POST") {
-      try {
-        const body = await req.json();
-        dryRun = !!body?.dryRun;
-      } catch (_) { /* no body is fine */ }
-    }
+    const dryRun = !!bodyJson?.dryRun;
 
     const result: SyncResult = {
       total: 0, created: 0, updated: 0, skipped: 0, errors: [], users: [],
