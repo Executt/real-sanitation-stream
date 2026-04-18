@@ -56,8 +56,26 @@ export default function SeiConfig() {
     else toast({ title: "Integração SEI salva" });
   };
 
-  const handleTest = () => {
-    toast({ title: "Conexão SEI testada (simulado)", description: "OK" });
+  const [testing, setTesting] = useState(false);
+  const handleTest = async () => {
+    setTesting(true);
+    const { data, error } = await supabase.functions.invoke("sei-create-process", {
+      body: {
+        interessado: user?.email ?? "Teste HydrosNet",
+        especificacao: `Teste de integração SEI — ${new Date().toLocaleString("pt-BR")}`,
+        observacao: "Processo de teste criado via HydrosNet",
+      },
+    });
+    setTesting(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Falha ao abrir processo SEI",
+        description: (data as any)?.error ?? error?.message ?? "Erro desconhecido",
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "Processo SEI aberto", description: "Veja detalhes no audit log." });
+    }
   };
 
   return (
@@ -91,7 +109,7 @@ export default function SeiConfig() {
 
         <div className="flex gap-2 mt-6">
           <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar Configurações"}</Button>
-          <Button onClick={handleTest} variant="outline"><Plug className="size-4 mr-2" />Testar Conexão</Button>
+          <Button onClick={handleTest} variant="outline" disabled={testing}><Plug className="size-4 mr-2" />{testing ? "Abrindo..." : "Abrir processo de teste"}</Button>
         </div>
       </div>
     </div>
