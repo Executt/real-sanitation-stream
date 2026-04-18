@@ -15,6 +15,7 @@ export default function SeiConfig() {
   const [configId, setConfigId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [form, setForm] = useState({
     enabled: false,
     api_url: "",
@@ -56,7 +57,6 @@ export default function SeiConfig() {
     else toast({ title: "Integração SEI salva" });
   };
 
-  const [testing, setTesting] = useState(false);
   const handleTest = async () => {
     setTesting(true);
     const { data, error } = await supabase.functions.invoke("sei-create-process", {
