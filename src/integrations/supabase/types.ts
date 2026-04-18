@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_config: {
+        Row: {
+          id: string
+          ldap_sync_anon_key: string
+          ldap_sync_url: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          ldap_sync_anon_key: string
+          ldap_sync_url: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          ldap_sync_anon_key?: string
+          ldap_sync_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ldap_config: {
         Row: {
           attr_email: string
