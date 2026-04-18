@@ -281,6 +281,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      schedule_ldap_sync: {
+        Args: { _anon_key: string; _function_url: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "operador" | "gestor_ana" | "superadmin"
