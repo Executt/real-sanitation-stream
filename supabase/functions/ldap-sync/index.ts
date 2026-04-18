@@ -72,27 +72,31 @@ Deno.serve(async (req) => {
     // Connect to LDAP
     const client = new Client({
       url: `${cfg.use_tls ? "ldaps" : "ldap"}://${cfg.host}:${cfg.port}`,
+      timeout: 10000,
+      connectTimeout: 10000,
     });
 
     try {
       await client.bind(cfg.bind_dn, cfg.bind_password);
 
-      const entries = await client.search(cfg.base_dn, {
+      const { searchEntries } = await client.search(cfg.base_dn, {
         scope: "sub",
         filter: cfg.user_filter || "(objectClass=person)",
         attributes: [cfg.attr_email, cfg.attr_name, cfg.attr_org],
       });
 
-      result.total = entries.length;
+      result.total = searchEntries.length;
 
-      for (const entry of entries) {
-        const attrs: Record<string, string> = {};
-        for (const a of entry.attributes ?? []) {
-          attrs[a.type.toLowerCase()] = Array.isArray(a.values) ? a.values[0] : a.values;
-        }
-        const email = attrs[cfg.attr_email.toLowerCase()];
-        const fullName = attrs[cfg.attr_name.toLowerCase()] ?? email;
-        const organization = attrs[cfg.attr_org.toLowerCase()] ?? null;
+      for (const entry of searchEntries) {
+        const lower: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(entry)) lower[k.toLowerCase()] = v;
+        const pick = (k: string) => {
+          const v = lower[k.toLowerCase()];
+          return Array.isArray(v) ? String(v[0]) : v != null ? String(v) : "";
+        };
+        const email = pick(cfg.attr_email);
+        const fullName = pick(cfg.attr_name) || email;
+        const organization = pick(cfg.attr_org) || null;
 
         if (!email) {
           result.skipped++;
