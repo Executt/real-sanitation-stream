@@ -175,9 +175,9 @@ Deno.serve(async (req) => {
 
     // Audit
     await admin.from("audit_log").insert({
-      user_id: userData.user.id,
-      user_email: userData.user.email,
-      action: dryRun ? "LDAP_SYNC_DRYRUN" : "LDAP_SYNC",
+      user_id: callerId,
+      user_email: callerEmail,
+      action: isCron ? "LDAP_SYNC_CRON" : (dryRun ? "LDAP_SYNC_DRYRUN" : "LDAP_SYNC"),
       target: `${cfg.host}:${cfg.port}`,
       severity: "info",
       metadata: {
