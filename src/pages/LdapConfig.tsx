@@ -118,10 +118,21 @@ export default function LdapConfig() {
 
   const handleSync = async () => {
     setSyncing(true);
-    await new Promise((r) => setTimeout(r, 2000));
+    const { data, error } = await supabase.functions.invoke("ldap-sync", { body: {} });
     setSyncing(false);
-    toast({ title: "Sincronização concluída", description: "3 novos usuários (simulado)." });
-    logAudit("LDAP_SYNC", "3 usuários");
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Falha na sincronização",
+        description: error?.message ?? (data as any)?.error,
+        variant: "destructive",
+      });
+    } else {
+      const r = data as { total: number; created: number; updated: number; errors: unknown[] };
+      toast({
+        title: "Sincronização concluída",
+        description: `${r.total} encontrados • ${r.created} criados • ${r.updated} atualizados${r.errors.length ? ` • ${r.errors.length} erros` : ""}`,
+      });
+    }
   };
 
   const handleImportUser = (u: LdapUser) => {
