@@ -29,18 +29,29 @@ Deno.serve(async (req) => {
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Validate caller and superadmin role
-    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData.user) return json({ error: "Invalid token" }, 401);
+    // Detect cron invocation: body contains {"source":"cron"} and uses anon key
+    let isCron = false;
+    let bodyJson: any = {};
+    try { bodyJson = await req.clone().json(); } catch (_) { /* no body */ }
+    if (bodyJson?.source === "cron") isCron = true;
 
-    const { data: isAdmin } = await userClient.rpc("has_role", {
-      _user_id: userData.user.id,
-      _role: "superadmin",
-    });
-    if (!isAdmin) return json({ error: "Forbidden: superadmin only" }, 403);
+    let callerId: string | null = null;
+    let callerEmail: string | null = null;
+
+    if (!isCron) {
+      const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData.user) return json({ error: "Invalid token" }, 401);
+      const { data: isAdmin } = await userClient.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "superadmin",
+      });
+      if (!isAdmin) return json({ error: "Forbidden: superadmin only" }, 403);
+      callerId = userData.user.id;
+      callerEmail = userData.user.email ?? null;
+    }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
