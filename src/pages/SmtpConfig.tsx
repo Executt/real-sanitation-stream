@@ -61,9 +61,21 @@ export default function SmtpConfig() {
     else toast({ title: "Configuração SMTP salva" });
   };
 
-  const handleTest = () => {
+  const handleTest = async () => {
     if (!testEmail) return toast({ title: "Informe um e-mail", variant: "destructive" });
-    toast({ title: "E-mail de teste enviado (simulado)", description: `Para: ${testEmail}` });
+    const { data, error } = await supabase.functions.invoke("smtp-send", {
+      body: {
+        to: testEmail,
+        subject: "Teste SMTP — HydrosNet",
+        html: `<p>Este é um e-mail de teste enviado pelo HydrosNet via <b>${form.host}:${form.port}</b>.</p>`,
+        text: `Teste SMTP HydrosNet via ${form.host}:${form.port}`,
+      },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: "Falha no envio", description: error?.message ?? (data as any)?.error, variant: "destructive" });
+    } else {
+      toast({ title: "E-mail de teste enviado", description: `Para: ${testEmail}` });
+    }
   };
 
   return (
