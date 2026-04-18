@@ -106,7 +106,6 @@ export default function LdapConfig() {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Configuração LDAP salva" });
-      logAudit("LDAP_CONFIG_UPDATED");
     }
   };
 
