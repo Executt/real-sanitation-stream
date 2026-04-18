@@ -52,13 +52,7 @@ export default function SystemParameters() {
     const { error } = await supabase.from("system_parameters").update(form).eq("id", configId);
     setSaving(false);
     if (error) toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: "Parâmetros salvos" });
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null, user_email: user?.email ?? null,
-        action: "SYSTEM_PARAMETERS_UPDATED", severity: "info",
-      });
-    }
+    else toast({ title: "Parâmetros salvos" });
   };
 
   const num = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>

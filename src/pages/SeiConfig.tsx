@@ -53,13 +53,7 @@ export default function SeiConfig() {
     const { error } = await supabase.from("sei_config").update(form).eq("id", configId);
     setSaving(false);
     if (error) toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: "Integração SEI salva" });
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null, user_email: user?.email ?? null,
-        action: "SEI_CONFIG_UPDATED", severity: "info",
-      });
-    }
+    else toast({ title: "Integração SEI salva" });
   };
 
   const handleTest = () => {

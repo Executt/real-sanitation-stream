@@ -58,13 +58,7 @@ export default function SmtpConfig() {
     const { error } = await supabase.from("smtp_config").update(form).eq("id", configId);
     setSaving(false);
     if (error) toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: "Configuração SMTP salva" });
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null, user_email: user?.email ?? null,
-        action: "SMTP_CONFIG_UPDATED", severity: "info",
-      });
-    }
+    else toast({ title: "Configuração SMTP salva" });
   };
 
   const handleTest = () => {
