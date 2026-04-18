@@ -1,7 +1,7 @@
 // LDAP sync — connects to a real LDAP/AD server using persisted ldap_config,
 // searches users by filter, and provisions them into auth.users + user_roles.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Client } from "https://deno.land/x/ldap@v0.5.0/mod.ts";
+import { Client } from "npm:ldapts@7.2.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
