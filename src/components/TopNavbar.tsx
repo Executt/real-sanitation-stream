@@ -15,6 +15,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Building2,
   ChevronDown,
   ClipboardEdit,
   FileCog,
@@ -45,7 +46,7 @@ const operadorItems = [
 ];
 
 const anaItems = [
-  { title: "Command Center", url: "/command-center", icon: LayoutDashboard },
+  { title: "Centro de Comando", url: "/command-center", icon: LayoutDashboard },
   { title: "Tendência DBO", url: "/command-center/tendencia", icon: TrendingUp },
   { title: "Mapa Interativo", url: "/command-center/mapa", icon: Globe },
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
@@ -55,6 +56,7 @@ const anaItems = [
 const adminItems = [
   { title: "Hub de Administração", url: "/admin", icon: LayoutGrid },
   { title: "Usuários & Roles", url: "/admin/usuarios", icon: Users },
+  { title: "Concessionárias & Agências", url: "/admin/concessionarias", icon: Building2 },
   { title: "Configuração LDAP", url: "/admin/ldap", icon: Network },
   { title: "Configuração SMTP", url: "/admin/smtp", icon: Mail },
   { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
@@ -130,9 +132,9 @@ export function TopNavbar() {
       </Link>
 
       {/* Desktop nav */}
-      <div className="hidden lg:flex items-center gap-1">
+      <div className="hidden md:flex items-center gap-1">
         <NavDropdown label="Operador B2B" items={operadorItems} currentPath={location.pathname} />
-        <NavDropdown label="ANA Center" items={anaItems} currentPath={location.pathname} />
+        <NavDropdown label="Centro de Comando ANA" items={anaItems} currentPath={location.pathname} />
         {isSuperAdmin && (
           <NavDropdown label="Administração" items={adminItems} currentPath={location.pathname} />
         )}
@@ -185,7 +187,7 @@ export function TopNavbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-white hover:bg-white/10 lg:hidden"
+          className="size-8 text-white hover:bg-white/10 md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
@@ -194,7 +196,7 @@ export function TopNavbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 lg:hidden z-50">
+        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 md:hidden z-50">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2">Operador B2B</p>
             {operadorItems.map((item) => (
@@ -213,7 +215,7 @@ export function TopNavbar() {
                 {item.title}
               </Link>
             ))}
-            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">ANA Center</p>
+            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">Centro de Comando ANA</p>
             {anaItems.map((item) => (
               <Link
                 key={item.url}
