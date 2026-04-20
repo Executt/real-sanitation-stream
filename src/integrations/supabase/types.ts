@@ -131,6 +131,74 @@ export type Database = {
         }
         Relationships: []
       }
+      etes: {
+        Row: {
+          codigo: string | null
+          concessionaria_id: string | null
+          created_at: string
+          data_inicio_operacao: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          municipio: string
+          nome: string
+          observacoes: string | null
+          populacao_atendida: number | null
+          status: string
+          tipo_tratamento: string | null
+          uf: string
+          updated_at: string
+          vazao_atual_lps: number | null
+          vazao_projeto_lps: number | null
+        }
+        Insert: {
+          codigo?: string | null
+          concessionaria_id?: string | null
+          created_at?: string
+          data_inicio_operacao?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          municipio: string
+          nome: string
+          observacoes?: string | null
+          populacao_atendida?: number | null
+          status?: string
+          tipo_tratamento?: string | null
+          uf: string
+          updated_at?: string
+          vazao_atual_lps?: number | null
+          vazao_projeto_lps?: number | null
+        }
+        Update: {
+          codigo?: string | null
+          concessionaria_id?: string | null
+          created_at?: string
+          data_inicio_operacao?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          municipio?: string
+          nome?: string
+          observacoes?: string | null
+          populacao_atendida?: number | null
+          status?: string
+          tipo_tratamento?: string | null
+          uf?: string
+          updated_at?: string
+          vazao_atual_lps?: number | null
+          vazao_projeto_lps?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etes_concessionaria_id_fkey"
+            columns: ["concessionaria_id"]
+            isOneToOne: false
+            referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ldap_config: {
         Row: {
           attr_email: string
