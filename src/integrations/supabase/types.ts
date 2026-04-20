@@ -47,6 +47,69 @@ export type Database = {
         }
         Relationships: []
       }
+      concessionarias: {
+        Row: {
+          abrangencia: string | null
+          ativa: boolean
+          cnpj: string | null
+          created_at: string
+          email_contato: string | null
+          endereco: string | null
+          id: string
+          municipios_atendidos: number | null
+          natureza: string | null
+          nome: string
+          observacoes: string | null
+          populacao_atendida: number | null
+          sigla: string | null
+          site: string | null
+          telefone: string | null
+          tipo: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          abrangencia?: string | null
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email_contato?: string | null
+          endereco?: string | null
+          id?: string
+          municipios_atendidos?: number | null
+          natureza?: string | null
+          nome: string
+          observacoes?: string | null
+          populacao_atendida?: number | null
+          sigla?: string | null
+          site?: string | null
+          telefone?: string | null
+          tipo: string
+          uf: string
+          updated_at?: string
+        }
+        Update: {
+          abrangencia?: string | null
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email_contato?: string | null
+          endereco?: string | null
+          id?: string
+          municipios_atendidos?: number | null
+          natureza?: string | null
+          nome?: string
+          observacoes?: string | null
+          populacao_atendida?: number | null
+          sigla?: string | null
+          site?: string | null
+          telefone?: string | null
+          tipo?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cron_config: {
         Row: {
           id: string
