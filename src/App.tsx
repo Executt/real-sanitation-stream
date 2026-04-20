@@ -12,6 +12,7 @@ import CommandCenter from "./pages/CommandCenter";
 import CadastroManual from "./pages/CadastroManual";
 import AdminHub from "./pages/AdminHub";
 import AdminPanel from "./pages/AdminPanel";
+import Concessionarias from "./pages/Concessionarias";
 import LdapConfig from "./pages/LdapConfig";
 import SmtpConfig from "./pages/SmtpConfig";
 import SeiConfig from "./pages/SeiConfig";
@@ -69,6 +70,7 @@ const App = () => (
               {/* Administração — Hub e módulos */}
               <Route path="/admin" element={<AdminHub />} />
               <Route path="/admin/usuarios" element={<AdminPanel />} />
+              <Route path="/admin/concessionarias" element={<Concessionarias />} />
               <Route path="/admin/ldap" element={<LdapConfig />} />
               <Route path="/admin/smtp" element={<SmtpConfig />} />
               <Route path="/admin/sei" element={<SeiConfig />} />
