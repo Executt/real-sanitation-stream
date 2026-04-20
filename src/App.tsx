@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import OperadorDashboard from "./pages/OperadorDashboard";
 import CommandCenter from "./pages/CommandCenter";
 import CadastroManual from "./pages/CadastroManual";
+import Etes from "./pages/Etes";
 import AdminHub from "./pages/AdminHub";
 import AdminPanel from "./pages/AdminPanel";
 import Concessionarias from "./pages/Concessionarias";
@@ -41,6 +42,7 @@ const App = () => (
             >
               <Route path="/" element={<OperadorDashboard />} />
               <Route path="/operador" element={<OperadorDashboard />} />
+              <Route path="/operador/etes" element={<Etes />} />
               <Route path="/operador/cadastro" element={<CadastroManual />} />
               <Route
                 path="/operador/api"

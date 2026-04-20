@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 
 const operadorItems = [
   { title: "Status das ETEs", url: "/operador", icon: Activity },
+  { title: "Cadastro de ETEs", url: "/operador/etes", icon: Building2 },
   { title: "Cadastro Manual", url: "/operador/cadastro", icon: ClipboardEdit },
   { title: "Monitoramento API", url: "/operador/api", icon: Radio },
   { title: "Log de Integração", url: "/operador/logs", icon: Settings },
