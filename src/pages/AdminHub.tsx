@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2 } from "lucide-react";
 
 const modules = [
   {
@@ -8,6 +8,12 @@ const modules = [
     description: "Gerencie usuários cadastrados e atribua perfis de acesso.",
     url: "/admin/usuarios",
     icon: Users,
+  },
+  {
+    title: "Concessionárias & Agências",
+    description: "Cadastro nacional de operadores de saneamento e órgãos reguladores.",
+    url: "/admin/concessionarias",
+    icon: Building2,
   },
   {
     title: "Configuração LDAP",
