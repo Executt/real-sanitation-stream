@@ -6,6 +6,8 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Fix default marker icons
@@ -209,6 +211,18 @@ export function EteMap() {
         </div>
       )}
       <div className="h-[480px] relative">
+        {loading && (
+          <div className="absolute inset-0 z-[1000] bg-background/95 flex flex-col items-center justify-center text-center p-6">
+            <Loader2 className="size-8 text-primary animate-spin mb-3" />
+            <p className="text-sm font-medium">Carregando ETEs georreferenciadas…</p>
+            <p className="text-xs text-muted-foreground font-mono mt-1">Consultando base nacional</p>
+            <div className="mt-6 w-full max-w-md space-y-2">
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-5/6" />
+              <Skeleton className="h-3 w-4/6" />
+            </div>
+          </div>
+        )}
         {!loading && markers.length === 0 && (
           <div className="absolute inset-0 z-[1000] bg-background/80 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
             <p className="text-sm font-medium">Nenhuma ETE georreferenciada cadastrada</p>

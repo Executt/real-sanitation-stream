@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import { StatCard } from "@/components/StatCard";
+import { StatCardSkeleton } from "@/components/StatCardSkeleton";
 import { AlertItem } from "@/components/AlertItem";
 import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
-import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const bacias = [
   { nome: "Bacia do Tietê", etes: 342, cobertura: 78.3, eficiencia: 89.1, trend: "up" as const },
@@ -14,14 +17,40 @@ const bacias = [
   { nome: "Bacia Atlântico Sudeste", etes: 298, cobertura: 71.9, eficiencia: 85.2, trend: "up" as const },
 ];
 
+interface Stats {
+  total: number;
+  ativas: number;
+  construcao: number;
+  inativas: number;
+}
+
 export default function CommandCenter() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase.from("etes").select("status");
+      if (!error && data) {
+        const ativas = data.filter((e) => e.status === "ativa").length;
+        const construcao = data.filter((e) => e.status === "em_construcao").length;
+        const inativas = data.filter((e) => e.status === "inativa").length;
+        setStats({ total: data.length, ativas, construcao, inativas });
+      }
+      setLoadingStats(false);
+    };
+    load();
+  }, []);
+
+  const pct = (n: number) => (stats && stats.total > 0 ? (n / stats.total) * 100 : 0);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Centro de Comando ANA</h1>
           <p className="text-muted-foreground font-mono text-sm mt-1">
-            VISÃO NACIONAL | 3.668 ETEs MONITORADAS
+            VISÃO NACIONAL | {loadingStats ? "…" : stats?.total ?? 0} ETEs MONITORADAS
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -33,13 +62,34 @@ export default function CommandCenter() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="ETEs Ativas" value="3.241" subtitle="88.3% do total cadastrado" variant="success" progress={88.3} />
-        <StatCard label="ETEs em Construção" value="198" variant="warning" />
-        <StatCard label="ETEs Inativas" value="229" subtitle="Requer atenção regulatória" variant="destructive" />
-        <StatCard label="Eficiência DBO Nacional" value="82.1%" subtitle="+1.3% vs trimestre anterior" variant="default" progress={82.1} />
+        {loadingStats ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="ETEs Ativas"
+              value={stats?.ativas ?? 0}
+              subtitle={`${pct(stats?.ativas ?? 0).toFixed(1)}% do total cadastrado`}
+              variant="success"
+              progress={pct(stats?.ativas ?? 0)}
+            />
+            <StatCard label="ETEs em Construção" value={stats?.construcao ?? 0} variant="warning" />
+            <StatCard
+              label="ETEs Inativas"
+              value={stats?.inativas ?? 0}
+              subtitle="Requer atenção regulatória"
+              variant="destructive"
+            />
+            <StatCard label="Eficiência DBO Nacional" value="82.1%" subtitle="+1.3% vs trimestre anterior" variant="default" progress={82.1} />
+          </>
+        )}
       </div>
 
-      {/* DBO Trend Chart */}
       <div className="mb-8">
         <DboTrendChart />
       </div>
