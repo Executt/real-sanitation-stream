@@ -4,6 +4,7 @@ import { StatCardSkeleton } from "@/components/StatCardSkeleton";
 import { AlertItem } from "@/components/AlertItem";
 import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
+import { EndpointFailuresPanel, type EndpointStatus } from "@/components/EndpointFailuresPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
