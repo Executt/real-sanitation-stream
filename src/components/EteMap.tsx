@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -167,45 +170,61 @@ export function EteMap() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <FitBounds markers={markers} />
-          {markers.map((ete) => (
-            <Marker key={ete.id} position={[ete.lat, ete.lng]} icon={createIcon(ete.status)}>
-              <Popup>
-                <div className="min-w-[220px] font-sans">
-                  <p className="font-semibold text-sm">{ete.nome}</p>
-                  {ete.codigo && (
-                    <p className="text-xs text-muted-foreground font-mono">{ete.codigo}</p>
-                  )}
-                  <div className="mt-2 space-y-1 text-xs">
-                    <p>
-                      <span className="text-muted-foreground">Município:</span> {ete.municipio}/{ete.uf}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Concessionária:</span>{" "}
-                      <strong>
-                        {ete.concessionariaSigla ?? ete.concessionariaNome ?? "Sem vínculo"}
-                      </strong>
-                    </p>
-                    {ete.tipo_tratamento && (
-                      <p><span className="text-muted-foreground">Tipologia:</span> {ete.tipo_tratamento}</p>
+          <MarkerClusterGroup
+            chunkedLoading
+            showCoverageOnHover={false}
+            spiderfyOnMaxZoom
+            maxClusterRadius={55}
+            iconCreateFunction={(cluster: any) => {
+              const count = cluster.getChildCount();
+              const size = count < 10 ? 36 : count < 100 ? 44 : 52;
+              return L.divIcon({
+                html: `<div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;background:hsl(var(--primary));color:hsl(var(--primary-foreground));border:2px solid #fff;border-radius:9999px;box-shadow:0 2px 6px rgba(0,0,0,0.25);font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;">${count}</div>`,
+                className: "ete-cluster-icon",
+                iconSize: L.point(size, size, true),
+              });
+            }}
+          >
+            {markers.map((ete) => (
+              <Marker key={ete.id} position={[ete.lat, ete.lng]} icon={createIcon(ete.status)}>
+                <Popup>
+                  <div className="min-w-[220px] font-sans">
+                    <p className="font-semibold text-sm">{ete.nome}</p>
+                    {ete.codigo && (
+                      <p className="text-xs text-muted-foreground font-mono">{ete.codigo}</p>
                     )}
-                    <p>
-                      <span className="text-muted-foreground">Vazão atual:</span>{" "}
-                      <strong>{ete.vazao_atual_lps ?? "—"} L/s</strong>
-                      {ete.vazao_projeto_lps && (
-                        <span className="text-muted-foreground"> / {ete.vazao_projeto_lps} L/s</span>
+                    <div className="mt-2 space-y-1 text-xs">
+                      <p>
+                        <span className="text-muted-foreground">Município:</span> {ete.municipio}/{ete.uf}
+                      </p>
+                      <p>
+                        <span className="text-muted-foreground">Concessionária:</span>{" "}
+                        <strong>
+                          {ete.concessionariaSigla ?? ete.concessionariaNome ?? "Sem vínculo"}
+                        </strong>
+                      </p>
+                      {ete.tipo_tratamento && (
+                        <p><span className="text-muted-foreground">Tipologia:</span> {ete.tipo_tratamento}</p>
                       )}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Status:</span>{" "}
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] ${statusBadgeClass[ete.status]}`}>
-                        {statusLabels[ete.status]}
-                      </span>
-                    </p>
+                      <p>
+                        <span className="text-muted-foreground">Vazão atual:</span>{" "}
+                        <strong>{ete.vazao_atual_lps ?? "—"} L/s</strong>
+                        {ete.vazao_projeto_lps && (
+                          <span className="text-muted-foreground"> / {ete.vazao_projeto_lps} L/s</span>
+                        )}
+                      </p>
+                      <p>
+                        <span className="text-muted-foreground">Status:</span>{" "}
+                        <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] ${statusBadgeClass[ete.status]}`}>
+                          {statusLabels[ete.status]}
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
         </MapContainer>
       </div>
     </div>
