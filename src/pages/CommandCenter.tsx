@@ -34,64 +34,97 @@ export default function CommandCenter() {
     { endpoint: "GET /metadados/ana/bacias", source: "ANA", state: "loading" },
   ]);
 
-  useEffect(() => {
-    const load = async () => {
-      const startedAt = performance.now();
-      const { data, error, status } = await supabase.from("etes").select("status");
-      const durationMs = performance.now() - startedAt;
+  const checkEtesStats = async () => {
+    setEndpoints((prev) =>
+      prev.map((ep) =>
+        ep.endpoint === "etes?select=status (stats)" ? { ...ep, state: "loading" } : ep,
+      ),
+    );
+    const startedAt = performance.now();
+    const { data, error, status } = await supabase.from("etes").select("status");
+    const durationMs = performance.now() - startedAt;
 
-      setEndpoints((prev) =>
-        prev.map((ep) =>
-          ep.endpoint === "etes?select=status (stats)"
-            ? {
-                ...ep,
-                state: error ? "error" : "success",
-                httpStatus: status ?? (error ? 500 : 200),
-                errorMessage: error?.message ?? null,
-                durationMs,
-                lastChecked: new Date(),
-              }
-            : ep,
-        ),
-      );
+    setEndpoints((prev) =>
+      prev.map((ep) =>
+        ep.endpoint === "etes?select=status (stats)"
+          ? {
+              ...ep,
+              state: error ? "error" : "success",
+              httpStatus: status ?? (error ? 500 : 200),
+              errorMessage: error?.message ?? null,
+              durationMs,
+              lastChecked: new Date(),
+            }
+          : ep,
+      ),
+    );
 
-      if (!error && data) {
-        const ativas = data.filter((e) => e.status === "ativa").length;
-        const construcao = data.filter((e) => e.status === "em_construcao").length;
-        const inativas = data.filter((e) => e.status === "inativa").length;
-        setStats({ total: data.length, ativas, construcao, inativas });
-      }
-      setLoadingStats(false);
+    if (!error && data) {
+      const ativas = data.filter((e) => e.status === "ativa").length;
+      const construcao = data.filter((e) => e.status === "em_construcao").length;
+      const inativas = data.filter((e) => e.status === "inativa").length;
+      setStats({ total: data.length, ativas, construcao, inativas });
+    }
+    setLoadingStats(false);
+  };
 
-      // Endpoints externos (SNIRH/ANA) — ainda sem integração real, marcamos como indisponíveis
-      // para que falhas fiquem visíveis no painel até a conexão ser configurada.
-      setEndpoints((prev) =>
-        prev.map((ep) => {
-          if (ep.source === "SNIRH") {
-            return {
+  const checkSnirh = async () => {
+    setEndpoints((prev) =>
+      prev.map((ep) => (ep.source === "SNIRH" ? { ...ep, state: "loading" } : ep)),
+    );
+    await new Promise((r) => setTimeout(r, 600));
+    setEndpoints((prev) =>
+      prev.map((ep) =>
+        ep.source === "SNIRH"
+          ? {
               ...ep,
               state: "error",
               httpStatus: 503,
               errorMessage: "Integração SNIRH não configurada (Service Unavailable)",
               durationMs: null,
               lastChecked: new Date(),
-            };
-          }
-          if (ep.source === "ANA") {
-            return {
+            }
+          : ep,
+      ),
+    );
+  };
+
+  const checkAna = async () => {
+    setEndpoints((prev) =>
+      prev.map((ep) => (ep.source === "ANA" ? { ...ep, state: "loading" } : ep)),
+    );
+    await new Promise((r) => setTimeout(r, 600));
+    setEndpoints((prev) =>
+      prev.map((ep) =>
+        ep.source === "ANA"
+          ? {
               ...ep,
               state: "error",
               httpStatus: 401,
               errorMessage: "Token de acesso aos metadados ANA ausente (Unauthorized)",
               durationMs: null,
               lastChecked: new Date(),
-            };
-          }
-          return ep;
-        }),
-      );
-    };
-    load();
+            }
+          : ep,
+      ),
+    );
+  };
+
+  const retryEndpoint = (ep: EndpointStatus) => {
+    if (ep.source === "SNIRH") return checkSnirh();
+    if (ep.source === "ANA") return checkAna();
+    if (ep.endpoint === "etes?select=status (stats)") return checkEtesStats();
+  };
+
+  const retryAllFailures = () => {
+    endpoints.filter((e) => e.state === "error").forEach(retryEndpoint);
+  };
+
+  useEffect(() => {
+    checkEtesStats();
+    checkSnirh();
+    checkAna();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pct = (n: number) => (stats && stats.total > 0 ? (n / stats.total) * 100 : 0);
