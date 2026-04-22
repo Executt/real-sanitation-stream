@@ -161,6 +161,10 @@ export default function CommandCenter() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <EndpointFailuresPanel endpoints={endpoints} />
+      </div>
+
       <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
         <div className="p-5 border-b">
           <h2 className="font-semibold">Indicadores por Bacia Hidrográfica</h2>
