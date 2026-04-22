@@ -195,7 +195,11 @@ export default function CommandCenter() {
       </div>
 
       <div className="mb-8">
-        <EndpointFailuresPanel endpoints={endpoints} />
+        <EndpointFailuresPanel
+          endpoints={endpoints}
+          onRetry={retryEndpoint}
+          onRetryAll={retryAllFailures}
+        />
       </div>
 
       <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
