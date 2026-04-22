@@ -1,5 +1,6 @@
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export interface EndpointStatus {
   /** Identificador curto do endpoint, ex.: "SNIRH /estacoes" */
@@ -20,6 +21,8 @@ export interface EndpointStatus {
 
 interface EndpointFailuresPanelProps {
   endpoints: EndpointStatus[];
+  onRetry?: (endpoint: EndpointStatus) => void;
+  onRetryAll?: () => void;
 }
 
 function statusBadge(state: EndpointStatus["state"], httpStatus?: number | null) {
@@ -44,29 +47,43 @@ function statusBadge(state: EndpointStatus["state"], httpStatus?: number | null)
   );
 }
 
-export function EndpointFailuresPanel({ endpoints }: EndpointFailuresPanelProps) {
+export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: EndpointFailuresPanelProps) {
   const failures = endpoints.filter((e) => e.state === "error");
   const total = endpoints.length;
+  const hasFailures = failures.length > 0;
 
   return (
     <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between p-5 border-b">
+      <div className="flex items-center justify-between p-5 border-b gap-3 flex-wrap">
         <div>
           <h2 className="font-semibold">Falhas de Consulta por Endpoint</h2>
           <p className="text-xs text-muted-foreground mt-1 font-mono">
             {failures.length} falha(s) de {total} endpoint(s) monitorado(s)
           </p>
         </div>
-        <Badge
-          variant="outline"
-          className={
-            failures.length === 0
-              ? "border-success/30 text-success"
-              : "border-destructive/30 text-destructive"
-          }
-        >
-          {failures.length === 0 ? "Saudável" : "Atenção requerida"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {hasFailures && onRetryAll && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRetryAll}
+              className="gap-1.5 h-8"
+            >
+              <RefreshCw className="size-3.5" />
+              Re-tentar falhas
+            </Button>
+          )}
+          <Badge
+            variant="outline"
+            className={
+              !hasFailures
+                ? "border-success/30 text-success"
+                : "border-destructive/30 text-destructive"
+            }
+          >
+            {!hasFailures ? "Saudável" : "Atenção requerida"}
+          </Badge>
+        </div>
       </div>
 
       <div className="divide-y">
@@ -94,7 +111,21 @@ export function EndpointFailuresPanel({ endpoints }: EndpointFailuresPanelProps)
                 <p className="mt-1.5 text-xs text-muted-foreground font-mono">Aguardando resposta…</p>
               )}
             </div>
-            <div className="shrink-0">{statusBadge(ep.state, ep.httpStatus)}</div>
+            <div className="shrink-0 flex items-center gap-2">
+              {statusBadge(ep.state, ep.httpStatus)}
+              {ep.state === "error" && onRetry && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRetry(ep)}
+                  className="gap-1.5 h-8 text-xs"
+                  aria-label={`Re-tentar ${ep.endpoint}`}
+                >
+                  <RefreshCw className="size-3.5" />
+                  Re-tentar
+                </Button>
+              )}
+            </div>
           </div>
         ))}
       </div>
