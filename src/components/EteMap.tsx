@@ -69,6 +69,13 @@ interface EteMarker {
   concessionariaSigla: string | null;
 }
 
+interface QueryStatus {
+  state: "loading" | "success" | "error";
+  count: number;
+  durationMs: number | null;
+  errorMessage: string | null;
+}
+
 function FitBounds({ markers }: { markers: EteMarker[] }) {
   const map = useMap();
   useEffect(() => {
@@ -82,9 +89,17 @@ function FitBounds({ markers }: { markers: EteMarker[] }) {
 export function EteMap() {
   const [markers, setMarkers] = useState<EteMarker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [queryStatus, setQueryStatus] = useState<QueryStatus>({
+    state: "loading",
+    count: 0,
+    durationMs: null,
+    errorMessage: null,
+  });
 
   useEffect(() => {
     const load = async () => {
+      const startedAt = performance.now();
+
       const { data, error } = await supabase
         .from("etes")
         .select(`
@@ -96,7 +111,14 @@ export function EteMap() {
         .not("longitude", "is", null);
 
       if (error) {
+        const durationMs = performance.now() - startedAt;
         console.error("Erro ao carregar ETEs:", error);
+        setQueryStatus({
+          state: "error",
+          count: 0,
+          durationMs,
+          errorMessage: error.message,
+        });
         setLoading(false);
         return;
       }
@@ -118,6 +140,12 @@ export function EteMap() {
       }));
 
       setMarkers(mapped);
+      setQueryStatus({
+        state: "success",
+        count: mapped.length,
+        durationMs: performance.now() - startedAt,
+        errorMessage: null,
+      });
       setLoading(false);
     };
     load();
@@ -139,6 +167,30 @@ export function EteMap() {
           </p>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap rounded-sm border bg-background px-3 py-2">
+            <Badge
+              variant="outline"
+              className={
+                queryStatus.state === "error"
+                  ? "border-destructive/30 text-destructive"
+                  : queryStatus.state === "success"
+                    ? "border-success/30 text-success"
+                    : "border-warning/30 text-warning"
+              }
+            >
+              {queryStatus.state === "error"
+                ? "Consulta com erro"
+                : queryStatus.state === "success"
+                  ? "Consulta OK"
+                  : "Consultando"}
+            </Badge>
+            <span className="text-xs text-muted-foreground font-mono">
+              ETEs retornadas: <strong className="text-foreground">{queryStatus.count}</strong>
+            </span>
+            <span className="text-xs text-muted-foreground font-mono">
+              Tempo: <strong className="text-foreground">{queryStatus.durationMs ? `${Math.round(queryStatus.durationMs)} ms` : "—"}</strong>
+            </span>
+          </div>
           {(["ativa", "em_construcao", "inativa", "manutencao"] as const).map((s) => (
             <div key={s} className="flex items-center gap-1.5">
               <div className="size-3 rounded-full" style={{ backgroundColor: statusColors[s] }} />
@@ -150,6 +202,12 @@ export function EteMap() {
           <Badge variant="outline" className="font-mono text-xs">DADOS REAIS</Badge>
         </div>
       </div>
+      {queryStatus.errorMessage && (
+        <div className="border-b bg-destructive/5 px-5 py-3">
+          <p className="text-xs font-medium text-destructive">Falha ao consultar dados das ETEs</p>
+          <p className="mt-1 text-xs text-muted-foreground font-mono">{queryStatus.errorMessage}</p>
+        </div>
+      )}
       <div className="h-[480px] relative">
         {!loading && markers.length === 0 && (
           <div className="absolute inset-0 z-[1000] bg-background/80 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
