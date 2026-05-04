@@ -119,11 +119,17 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
             </div>
             <div className="shrink-0 flex items-center gap-2">
               {statusBadge(ep.state, ep.httpStatus)}
-              {ep.state === "error" && onRetry && (
+              {ep.state === "loading" && (
+                <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="size-3 animate-spin" /> checando…
+                </span>
+              )}
+              {(ep.state === "error" || ep.state === "loading") && onRetry && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onRetry(ep)}
+                  disabled={ep.state === "loading"}
                   className="gap-1.5 h-8 text-xs"
                   aria-label={`Re-tentar ${ep.endpoint}`}
                 >
