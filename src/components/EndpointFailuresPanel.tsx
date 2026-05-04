@@ -51,6 +51,7 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
   const failures = endpoints.filter((e) => e.state === "error");
   const total = endpoints.length;
   const hasFailures = failures.length > 0;
+  const anyLoading = endpoints.some((e) => e.state === "loading");
 
   return (
     <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
