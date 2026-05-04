@@ -68,10 +68,15 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
               variant="outline"
               size="sm"
               onClick={onRetryAll}
+              disabled={anyLoading}
               className="gap-1.5 h-8"
             >
-              <RefreshCw className="size-3.5" />
-              Re-tentar falhas
+              {anyLoading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+              {anyLoading ? "Checando…" : "Re-tentar falhas"}
             </Button>
           )}
           <Badge
