@@ -51,6 +51,7 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
   const failures = endpoints.filter((e) => e.state === "error");
   const total = endpoints.length;
   const hasFailures = failures.length > 0;
+  const anyLoading = endpoints.some((e) => e.state === "loading");
 
   return (
     <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
@@ -67,10 +68,15 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
               variant="outline"
               size="sm"
               onClick={onRetryAll}
+              disabled={anyLoading}
               className="gap-1.5 h-8"
             >
-              <RefreshCw className="size-3.5" />
-              Re-tentar falhas
+              {anyLoading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+              {anyLoading ? "Checando…" : "Re-tentar falhas"}
             </Button>
           )}
           <Badge
@@ -113,11 +119,17 @@ export function EndpointFailuresPanel({ endpoints, onRetry, onRetryAll }: Endpoi
             </div>
             <div className="shrink-0 flex items-center gap-2">
               {statusBadge(ep.state, ep.httpStatus)}
-              {ep.state === "error" && onRetry && (
+              {ep.state === "loading" && (
+                <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="size-3 animate-spin" /> checando…
+                </span>
+              )}
+              {(ep.state === "error" || ep.state === "loading") && onRetry && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onRetry(ep)}
+                  disabled={ep.state === "loading"}
                   className="gap-1.5 h-8 text-xs"
                   aria-label={`Re-tentar ${ep.endpoint}`}
                 >
