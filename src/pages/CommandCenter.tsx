@@ -4,6 +4,7 @@ import { StatCardSkeleton } from "@/components/StatCardSkeleton";
 import { AlertItem } from "@/components/AlertItem";
 import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EndpointFailuresPanel, type EndpointStatus } from "@/components/EndpointFailuresPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingDown, TrendingUp } from "lucide-react";
@@ -181,7 +182,12 @@ export default function CommandCenter() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
-          <EteMap />
+          <ErrorBoundary
+            title="Mapa indisponível no momento"
+            description="Não foi possível renderizar o mapa geoespacial das ETEs. Tente novamente ou recarregue a página."
+          >
+            <EteMap />
+          </ErrorBoundary>
         </div>
 
         <div className="bg-card border rounded-sm shadow-sm p-5">
