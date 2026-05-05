@@ -177,7 +177,12 @@ export default function CommandCenter() {
       </div>
 
       <div className="mb-8">
-        <DboTrendChart />
+        <ErrorBoundary
+          title="Gráfico indisponível"
+          description="Não foi possível renderizar a evolução de DBO por bacia. As demais seções continuam disponíveis."
+        >
+          <DboTrendChart />
+        </ErrorBoundary>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -201,11 +206,16 @@ export default function CommandCenter() {
       </div>
 
       <div className="mb-8">
-        <EndpointFailuresPanel
-          endpoints={endpoints}
-          onRetry={retryEndpoint}
-          onRetryAll={retryAllFailures}
-        />
+        <ErrorBoundary
+          title="Painel de falhas indisponível"
+          description="Não foi possível renderizar o painel de falhas de endpoints. As demais seções continuam disponíveis."
+        >
+          <EndpointFailuresPanel
+            endpoints={endpoints}
+            onRetry={retryEndpoint}
+            onRetryAll={retryAllFailures}
+          />
+        </ErrorBoundary>
       </div>
 
       <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
