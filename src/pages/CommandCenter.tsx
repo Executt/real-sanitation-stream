@@ -178,8 +178,9 @@ export default function CommandCenter() {
 
       <div className="mb-8">
         <ErrorBoundary
+          section="Tendência DBO"
           title="Gráfico indisponível"
-          description="Não foi possível renderizar a evolução de DBO por bacia. As demais seções continuam disponíveis."
+          description="Não foi possível renderizar a evolução de DBO por bacia."
         >
           <DboTrendChart />
         </ErrorBoundary>
@@ -188,8 +189,9 @@ export default function CommandCenter() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
           <ErrorBoundary
+            section="Mapa Geoespacial"
             title="Mapa indisponível no momento"
-            description="Não foi possível renderizar o mapa geoespacial das ETEs. Tente novamente ou recarregue a página."
+            description="Não foi possível renderizar o mapa geoespacial das ETEs."
           >
             <EteMap />
           </ErrorBoundary>
@@ -207,8 +209,9 @@ export default function CommandCenter() {
 
       <div className="mb-8">
         <ErrorBoundary
+          section="Falhas de Endpoint"
           title="Painel de falhas indisponível"
-          description="Não foi possível renderizar o painel de falhas de endpoints. As demais seções continuam disponíveis."
+          description="Não foi possível renderizar o painel de falhas de endpoints."
         >
           <EndpointFailuresPanel
             endpoints={endpoints}
