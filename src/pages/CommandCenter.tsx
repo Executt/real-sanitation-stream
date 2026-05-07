@@ -233,43 +233,49 @@ export default function CommandCenter() {
         </ErrorBoundary>
       </div>
 
-      <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
-        <div className="p-5 border-b">
-          <h2 className="font-semibold">Indicadores por Bacia Hidrográfica</h2>
-          <p className="text-xs text-muted-foreground mt-1">Cobertura de esgotamento e eficiência de tratamento</p>
+      <ErrorBoundary
+        section="Indicadores por Bacia"
+        title="Indicadores por bacia indisponíveis"
+        description="Não foi possível renderizar os indicadores por bacia hidrográfica."
+      >
+        <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
+          <div className="p-5 border-b">
+            <h2 className="font-semibold">Indicadores por Bacia Hidrográfica</h2>
+            <p className="text-xs text-muted-foreground mt-1">Cobertura de esgotamento e eficiência de tratamento</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {bacias.map((bacia) => (
+              <div key={bacia.nome} className="p-5 border-b border-r last:border-r-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-sm">{bacia.nome}</h3>
+                  {bacia.trend === "up" ? (
+                    <TrendingUp className="size-4 text-success" />
+                  ) : (
+                    <TrendingDown className="size-4 text-destructive" />
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.etes}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">ETEs</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.cobertura}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Cobertura</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.eficiencia}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Efic. DBO</p>
+                  </div>
+                </div>
+                <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${bacia.cobertura}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {bacias.map((bacia) => (
-            <div key={bacia.nome} className="p-5 border-b border-r last:border-r-0">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-sm">{bacia.nome}</h3>
-                {bacia.trend === "up" ? (
-                  <TrendingUp className="size-4 text-success" />
-                ) : (
-                  <TrendingDown className="size-4 text-destructive" />
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                  <p className="text-xl font-semibold">{bacia.etes}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">ETEs</p>
-                </div>
-                <div>
-                  <p className="text-xl font-semibold">{bacia.cobertura}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Cobertura</p>
-                </div>
-                <div>
-                  <p className="text-xl font-semibold">{bacia.eficiencia}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Efic. DBO</p>
-                </div>
-              </div>
-              <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${bacia.cobertura}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </ErrorBoundary>
     </div>
   );
 }
