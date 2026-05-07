@@ -203,14 +203,20 @@ export default function CommandCenter() {
           </ErrorBoundary>
         </div>
 
-        <div className="bg-card border rounded-sm shadow-sm p-5">
-          <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
-          <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
-          <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
-          <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
-          <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
-          <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
-        </div>
+        <ErrorBoundary
+          section="Alertas Nacionais"
+          title="Alertas indisponíveis"
+          description="Não foi possível renderizar o painel de alertas nacionais."
+        >
+          <div className="bg-card border rounded-sm shadow-sm p-5">
+            <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
+            <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
+            <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
+            <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
+            <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
+            <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
+          </div>
+        </ErrorBoundary>
       </div>
 
       <div className="mb-8">
