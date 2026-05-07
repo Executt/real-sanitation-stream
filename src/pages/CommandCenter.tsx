@@ -147,6 +147,11 @@ export default function CommandCenter() {
         </div>
       </div>
 
+      <ErrorBoundary
+        section="KPIs Nacionais"
+        title="Indicadores indisponíveis"
+        description="Não foi possível renderizar os cartões de KPIs. As demais seções continuam disponíveis."
+      >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {loadingStats ? (
           <>
@@ -175,6 +180,7 @@ export default function CommandCenter() {
           </>
         )}
       </div>
+      </ErrorBoundary>
 
       <div className="mb-8">
         <ErrorBoundary
@@ -197,14 +203,20 @@ export default function CommandCenter() {
           </ErrorBoundary>
         </div>
 
-        <div className="bg-card border rounded-sm shadow-sm p-5">
-          <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
-          <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
-          <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
-          <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
-          <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
-          <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
-        </div>
+        <ErrorBoundary
+          section="Alertas Nacionais"
+          title="Alertas indisponíveis"
+          description="Não foi possível renderizar o painel de alertas nacionais."
+        >
+          <div className="bg-card border rounded-sm shadow-sm p-5">
+            <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
+            <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
+            <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
+            <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
+            <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
+            <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
+          </div>
+        </ErrorBoundary>
       </div>
 
       <div className="mb-8">
@@ -221,43 +233,49 @@ export default function CommandCenter() {
         </ErrorBoundary>
       </div>
 
-      <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
-        <div className="p-5 border-b">
-          <h2 className="font-semibold">Indicadores por Bacia Hidrográfica</h2>
-          <p className="text-xs text-muted-foreground mt-1">Cobertura de esgotamento e eficiência de tratamento</p>
+      <ErrorBoundary
+        section="Indicadores por Bacia"
+        title="Indicadores por bacia indisponíveis"
+        description="Não foi possível renderizar os indicadores por bacia hidrográfica."
+      >
+        <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
+          <div className="p-5 border-b">
+            <h2 className="font-semibold">Indicadores por Bacia Hidrográfica</h2>
+            <p className="text-xs text-muted-foreground mt-1">Cobertura de esgotamento e eficiência de tratamento</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {bacias.map((bacia) => (
+              <div key={bacia.nome} className="p-5 border-b border-r last:border-r-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-sm">{bacia.nome}</h3>
+                  {bacia.trend === "up" ? (
+                    <TrendingUp className="size-4 text-success" />
+                  ) : (
+                    <TrendingDown className="size-4 text-destructive" />
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.etes}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">ETEs</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.cobertura}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Cobertura</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-semibold">{bacia.eficiencia}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Efic. DBO</p>
+                  </div>
+                </div>
+                <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${bacia.cobertura}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {bacias.map((bacia) => (
-            <div key={bacia.nome} className="p-5 border-b border-r last:border-r-0">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-sm">{bacia.nome}</h3>
-                {bacia.trend === "up" ? (
-                  <TrendingUp className="size-4 text-success" />
-                ) : (
-                  <TrendingDown className="size-4 text-destructive" />
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                  <p className="text-xl font-semibold">{bacia.etes}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">ETEs</p>
-                </div>
-                <div>
-                  <p className="text-xl font-semibold">{bacia.cobertura}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Cobertura</p>
-                </div>
-                <div>
-                  <p className="text-xl font-semibold">{bacia.eficiencia}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Efic. DBO</p>
-                </div>
-              </div>
-              <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${bacia.cobertura}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </ErrorBoundary>
     </div>
   );
 }
