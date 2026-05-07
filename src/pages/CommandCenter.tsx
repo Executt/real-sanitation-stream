@@ -180,6 +180,7 @@ export default function CommandCenter() {
           </>
         )}
       </div>
+      </ErrorBoundary>
 
       <div className="mb-8">
         <ErrorBoundary
