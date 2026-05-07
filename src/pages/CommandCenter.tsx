@@ -147,6 +147,11 @@ export default function CommandCenter() {
         </div>
       </div>
 
+      <ErrorBoundary
+        section="KPIs Nacionais"
+        title="Indicadores indisponíveis"
+        description="Não foi possível renderizar os cartões de KPIs. As demais seções continuam disponíveis."
+      >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {loadingStats ? (
           <>
