@@ -76,9 +76,9 @@ export function AppSidebar() {
         <SidebarSeparator />
 
         <ErrorBoundary
-          section="Filtros"
-          title="Filtros indisponíveis"
-          description="Não foi possível carregar as opções de bacia, status e período. O restante da navegação continua disponível."
+          section="Filtros da Sidebar"
+          title="Não foi possível carregar os filtros"
+          description="Falha ao carregar as opções de bacia, status e período. Tente novamente — o restante da navegação continua disponível."
         >
           <SidebarFilters />
         </ErrorBoundary>
