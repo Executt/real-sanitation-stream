@@ -73,6 +73,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarSeparator />
+
+        <ErrorBoundary
+          section="Filtros"
+          title="Filtros indisponíveis"
+          description="Não foi possível carregar as opções de bacia, status e período. O restante da navegação continua disponível."
+        >
+          <SidebarFilters />
+        </ErrorBoundary>
+
+        <SidebarSeparator />
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             ANA Center
