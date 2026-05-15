@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { StatCard } from "@/components/StatCard";
 import { StatCardSkeleton } from "@/components/StatCardSkeleton";
-import { AlertItem } from "@/components/AlertItem";
+import { AlertasDboPanel } from "@/components/AlertasDboPanel";
+import { ConformidadeCard } from "@/components/ConformidadeCard";
 import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -184,6 +185,16 @@ export default function CommandCenter() {
 
       <div className="mb-8">
         <ErrorBoundary
+          section="Conformidade DBO"
+          title="Conformidade indisponível"
+          description="Não foi possível calcular o percentual de conformidade DBO. As demais seções continuam disponíveis."
+        >
+          <ConformidadeCard />
+        </ErrorBoundary>
+      </div>
+
+      <div className="mb-8">
+        <ErrorBoundary
           section="Tendência DBO"
           title="Gráfico indisponível"
           description="Não foi possível renderizar a evolução de DBO por bacia."
@@ -204,18 +215,11 @@ export default function CommandCenter() {
         </div>
 
         <ErrorBoundary
-          section="Alertas Nacionais"
+          section="Alertas DBO"
           title="Alertas indisponíveis"
-          description="Não foi possível renderizar o painel de alertas nacionais."
+          description="Não foi possível carregar os alertas de medições DBO fora de conformidade."
         >
-          <div className="bg-card border rounded-sm shadow-sm p-5">
-            <h2 className="font-semibold mb-4">Alertas Nacionais</h2>
-            <AlertItem title="ETE Piracicaba" description="Excesso de carga orgânica — DBO 120mg/L (limiar: 60mg/L)" severity="critical" time="há 2 min" />
-            <AlertItem title="Bacia Amazonas" description="Cobertura abaixo de 25% — risco sanitário elevado" severity="critical" time="há 15 min" />
-            <AlertItem title="Bacia São Francisco" description="Eficiência DBO em queda: -3.2% no último mês" severity="warning" time="há 1 hora" />
-            <AlertItem title="Hub IoT Região Sul" description="12 sensores desconectados no cluster PR-042" severity="warning" time="há 3 horas" />
-            <AlertItem title="API Gateway" description="Rate limit atingido por 2 concessionárias (429)" severity="info" time="há 6 horas" />
-          </div>
+          <AlertasDboPanel />
         </ErrorBoundary>
       </div>
 

@@ -8,7 +8,14 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+
+interface UltimaMedicao {
+  eficiencia_pct: number | null;
+  conforme: boolean | null;
+  medido_em: string;
+}
 
 // Fix default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -69,6 +76,7 @@ interface EteMarker {
   vazao_projeto_lps: number | null;
   concessionariaNome: string | null;
   concessionariaSigla: string | null;
+  ultimaMedicao: UltimaMedicao | null;
 }
 
 interface QueryStatus {
@@ -88,9 +96,12 @@ function FitBounds({ markers }: { markers: EteMarker[] }) {
   return null;
 }
 
+const ALL_STATUSES: Status[] = ["ativa", "em_construcao", "inativa", "manutencao"];
+
 export function EteMap() {
   const [markers, setMarkers] = useState<EteMarker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<Set<Status>>(new Set(ALL_STATUSES));
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({
     state: "loading",
     count: 0,
@@ -102,30 +113,49 @@ export function EteMap() {
     const load = async () => {
       const startedAt = performance.now();
 
-      const { data, error } = await supabase
-        .from("etes")
-        .select(`
-          id, codigo, nome, municipio, uf, latitude, longitude, status,
-          tipo_tratamento, vazao_atual_lps, vazao_projeto_lps,
-          concessionarias ( nome, sigla )
-        `)
-        .not("latitude", "is", null)
-        .not("longitude", "is", null);
+      const [etesRes, medRes] = await Promise.all([
+        supabase
+          .from("etes")
+          .select(`
+            id, codigo, nome, municipio, uf, latitude, longitude, status,
+            tipo_tratamento, vazao_atual_lps, vazao_projeto_lps,
+            concessionarias ( nome, sigla )
+          `)
+          .not("latitude", "is", null)
+          .not("longitude", "is", null),
+        supabase
+          .from("dbo_medicoes")
+          .select("ete_id, eficiencia_pct, conforme, medido_em")
+          .order("medido_em", { ascending: false }),
+      ]);
 
-      if (error) {
+      if (etesRes.error) {
         const durationMs = performance.now() - startedAt;
-        console.error("Erro ao carregar ETEs:", error);
+        console.error("Erro ao carregar ETEs:", etesRes.error);
         setQueryStatus({
           state: "error",
           count: 0,
           durationMs,
-          errorMessage: error.message,
+          errorMessage: etesRes.error.message,
         });
         setLoading(false);
         return;
       }
 
-      const mapped: EteMarker[] = (data ?? []).map((e: any) => ({
+      // Última medição por ETE
+      const ultima = new Map<string, UltimaMedicao>();
+      for (const row of medRes.data ?? []) {
+        const id = (row as any).ete_id as string;
+        if (!ultima.has(id)) {
+          ultima.set(id, {
+            eficiencia_pct: (row as any).eficiencia_pct == null ? null : Number((row as any).eficiencia_pct),
+            conforme: (row as any).conforme,
+            medido_em: (row as any).medido_em,
+          });
+        }
+      }
+
+      const mapped: EteMarker[] = (etesRes.data ?? []).map((e: any) => ({
         id: e.id,
         codigo: e.codigo,
         nome: e.nome,
@@ -139,6 +169,7 @@ export function EteMap() {
         vazao_projeto_lps: e.vazao_projeto_lps,
         concessionariaNome: e.concessionarias?.nome ?? null,
         concessionariaSigla: e.concessionarias?.sigla ?? null,
+        ultimaMedicao: ultima.get(e.id) ?? null,
       }));
 
       setMarkers(mapped);
@@ -153,6 +184,22 @@ export function EteMap() {
     load();
   }, []);
 
+  const toggleStatus = (s: Status) => {
+    setActive((prev) => {
+      const next = new Set(prev);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
+      // Garantir que ao menos um status esteja ativo
+      if (next.size === 0) return new Set(ALL_STATUSES);
+      return next;
+    });
+  };
+
+  const visibleMarkers = useMemo(
+    () => markers.filter((m) => active.has(m.status)),
+    [markers, active],
+  );
+
   const counts = useMemo(() => {
     const c: Record<Status, number> = { ativa: 0, em_construcao: 0, inativa: 0, manutencao: 0 };
     markers.forEach((m) => { c[m.status]++; });
@@ -165,7 +212,9 @@ export function EteMap() {
         <div>
           <h2 className="font-semibold">Monitoramento Geoespacial</h2>
           <p className="text-xs text-muted-foreground mt-1">
-            {loading ? "Carregando…" : `${markers.length} ETEs georreferenciadas`}
+            {loading
+              ? "Carregando…"
+              : `${visibleMarkers.length} de ${markers.length} ETEs visíveis — clique nas legendas para filtrar`}
           </p>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
@@ -193,14 +242,28 @@ export function EteMap() {
               Tempo: <strong className="text-foreground">{queryStatus.durationMs ? `${Math.round(queryStatus.durationMs)} ms` : "—"}</strong>
             </span>
           </div>
-          {(["ativa", "em_construcao", "inativa", "manutencao"] as const).map((s) => (
-            <div key={s} className="flex items-center gap-1.5">
-              <div className="size-3 rounded-full" style={{ backgroundColor: statusColors[s] }} />
-              <span className="text-xs text-muted-foreground">
-                {statusLabels[s]} <span className="font-mono">({counts[s]})</span>
-              </span>
-            </div>
-          ))}
+          {(["ativa", "em_construcao", "inativa", "manutencao"] as const).map((s) => {
+            const isActive = active.has(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => toggleStatus(s)}
+                aria-pressed={isActive}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-sm border px-2 py-1 transition-colors",
+                  isActive
+                    ? "border-foreground/30 bg-background"
+                    : "border-transparent bg-muted/40 opacity-50 hover:opacity-80",
+                )}
+              >
+                <div className="size-3 rounded-full" style={{ backgroundColor: statusColors[s] }} />
+                <span className="text-xs">
+                  {statusLabels[s]} <span className="font-mono text-muted-foreground">({counts[s]})</span>
+                </span>
+              </button>
+            );
+          })}
           <Badge variant="outline" className="font-mono text-xs">DADOS REAIS</Badge>
         </div>
       </div>
@@ -241,8 +304,9 @@ export function EteMap() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <FitBounds markers={markers} />
+          <FitBounds markers={visibleMarkers} />
           <MarkerClusterGroup
+            key={Array.from(active).sort().join(",")}
             chunkedLoading
             showCoverageOnHover={false}
             spiderfyOnMaxZoom
@@ -257,7 +321,7 @@ export function EteMap() {
               });
             }}
           >
-            {markers.map((ete) => (
+            {visibleMarkers.map((ete) => (
               <Marker key={ete.id} position={[ete.lat, ete.lng]} icon={createIcon(ete.status)}>
                 <Popup>
                   <div className="min-w-[220px] font-sans">
@@ -291,6 +355,31 @@ export function EteMap() {
                           {statusLabels[ete.status]}
                         </span>
                       </p>
+                      {ete.ultimaMedicao && (
+                        <>
+                          <p>
+                            <span className="text-muted-foreground">Eficiência DBO:</span>{" "}
+                            <strong>
+                              {ete.ultimaMedicao.eficiencia_pct != null
+                                ? `${ete.ultimaMedicao.eficiencia_pct.toFixed(1)}%`
+                                : "—"}
+                            </strong>
+                          </p>
+                          <p>
+                            <span className="text-muted-foreground">Conformidade:</span>{" "}
+                            <span
+                              className={cn(
+                                "inline-block px-1.5 py-0.5 rounded text-[10px] border",
+                                ete.ultimaMedicao.conforme
+                                  ? "bg-success/10 text-success border-success/30"
+                                  : "bg-destructive/10 text-destructive border-destructive/30",
+                              )}
+                            >
+                              {ete.ultimaMedicao.conforme ? "Conforme" : "Não conforme"}
+                            </span>
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Popup>

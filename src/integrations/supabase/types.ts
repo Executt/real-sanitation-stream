@@ -131,6 +131,39 @@ export type Database = {
         }
         Relationships: []
       }
+      dbo_medicoes: {
+        Row: {
+          conforme: boolean | null
+          created_at: string
+          dbo_entrada_mg_l: number
+          dbo_saida_mg_l: number
+          eficiencia_pct: number | null
+          ete_id: string
+          id: string
+          medido_em: string
+        }
+        Insert: {
+          conforme?: boolean | null
+          created_at?: string
+          dbo_entrada_mg_l: number
+          dbo_saida_mg_l: number
+          eficiencia_pct?: number | null
+          ete_id: string
+          id?: string
+          medido_em?: string
+        }
+        Update: {
+          conforme?: boolean | null
+          created_at?: string
+          dbo_entrada_mg_l?: number
+          dbo_saida_mg_l?: number
+          eficiencia_pct?: number | null
+          ete_id?: string
+          id?: string
+          medido_em?: string
+        }
+        Relationships: []
+      }
       etes: {
         Row: {
           codigo: string | null
