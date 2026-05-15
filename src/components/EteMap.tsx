@@ -212,7 +212,9 @@ export function EteMap() {
         <div>
           <h2 className="font-semibold">Monitoramento Geoespacial</h2>
           <p className="text-xs text-muted-foreground mt-1">
-            {loading ? "Carregando…" : `${markers.length} ETEs georreferenciadas`}
+            {loading
+              ? "Carregando…"
+              : `${visibleMarkers.length} de ${markers.length} ETEs visíveis — clique nas legendas para filtrar`}
           </p>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
@@ -240,14 +242,28 @@ export function EteMap() {
               Tempo: <strong className="text-foreground">{queryStatus.durationMs ? `${Math.round(queryStatus.durationMs)} ms` : "—"}</strong>
             </span>
           </div>
-          {(["ativa", "em_construcao", "inativa", "manutencao"] as const).map((s) => (
-            <div key={s} className="flex items-center gap-1.5">
-              <div className="size-3 rounded-full" style={{ backgroundColor: statusColors[s] }} />
-              <span className="text-xs text-muted-foreground">
-                {statusLabels[s]} <span className="font-mono">({counts[s]})</span>
-              </span>
-            </div>
-          ))}
+          {(["ativa", "em_construcao", "inativa", "manutencao"] as const).map((s) => {
+            const isActive = active.has(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => toggleStatus(s)}
+                aria-pressed={isActive}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-sm border px-2 py-1 transition-colors",
+                  isActive
+                    ? "border-foreground/30 bg-background"
+                    : "border-transparent bg-muted/40 opacity-50 hover:opacity-80",
+                )}
+              >
+                <div className="size-3 rounded-full" style={{ backgroundColor: statusColors[s] }} />
+                <span className="text-xs">
+                  {statusLabels[s]} <span className="font-mono text-muted-foreground">({counts[s]})</span>
+                </span>
+              </button>
+            );
+          })}
           <Badge variant="outline" className="font-mono text-xs">DADOS REAIS</Badge>
         </div>
       </div>
@@ -288,8 +304,9 @@ export function EteMap() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <FitBounds markers={markers} />
+          <FitBounds markers={visibleMarkers} />
           <MarkerClusterGroup
+            key={Array.from(active).sort().join(",")}
             chunkedLoading
             showCoverageOnHover={false}
             spiderfyOnMaxZoom
@@ -304,7 +321,7 @@ export function EteMap() {
               });
             }}
           >
-            {markers.map((ete) => (
+            {visibleMarkers.map((ete) => (
               <Marker key={ete.id} position={[ete.lat, ete.lng]} icon={createIcon(ete.status)}>
                 <Popup>
                   <div className="min-w-[220px] font-sans">
@@ -338,6 +355,31 @@ export function EteMap() {
                           {statusLabels[ete.status]}
                         </span>
                       </p>
+                      {ete.ultimaMedicao && (
+                        <>
+                          <p>
+                            <span className="text-muted-foreground">Eficiência DBO:</span>{" "}
+                            <strong>
+                              {ete.ultimaMedicao.eficiencia_pct != null
+                                ? `${ete.ultimaMedicao.eficiencia_pct.toFixed(1)}%`
+                                : "—"}
+                            </strong>
+                          </p>
+                          <p>
+                            <span className="text-muted-foreground">Conformidade:</span>{" "}
+                            <span
+                              className={cn(
+                                "inline-block px-1.5 py-0.5 rounded text-[10px] border",
+                                ete.ultimaMedicao.conforme
+                                  ? "bg-success/10 text-success border-success/30"
+                                  : "bg-destructive/10 text-destructive border-destructive/30",
+                              )}
+                            >
+                              {ete.ultimaMedicao.conforme ? "Conforme" : "Não conforme"}
+                            </span>
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Popup>
