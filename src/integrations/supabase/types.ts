@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_probe_log: {
+        Row: {
+          checked_at: string
+          duration_ms: number | null
+          endpoint: string
+          error_message: string | null
+          http_status: number | null
+          id: string
+          source: string
+          state: string
+        }
+        Insert: {
+          checked_at?: string
+          duration_ms?: number | null
+          endpoint: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          source: string
+          state: string
+        }
+        Update: {
+          checked_at?: string
+          duration_ms?: number | null
+          endpoint?: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          source?: string
+          state?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
