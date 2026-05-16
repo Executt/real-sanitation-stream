@@ -19,6 +19,8 @@ import SeiConfig from "./pages/SeiConfig";
 import SystemParameters from "./pages/SystemParameters";
 import AuditLog from "./pages/AuditLog";
 import PlaceholderPage from "./pages/PlaceholderPage";
+import ApiMonitoring from "./pages/ApiMonitoring";
+import IntegrationLog from "./pages/IntegrationLog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,14 +44,8 @@ const App = () => (
               <Route path="/operador" element={<OperadorDashboard />} />
               <Route path="/operador/etes" element={<Etes />} />
               <Route path="/operador/cadastro" element={<CadastroManual />} />
-              <Route
-                path="/operador/api"
-                element={<PlaceholderPage title="Monitoramento API" description="Painel de monitoramento das integrações de API com sistemas dos operadores." />}
-              />
-              <Route
-                path="/operador/logs"
-                element={<PlaceholderPage title="Log de Integração" description="Histórico detalhado de eventos das integrações automáticas." />}
-              />
+              <Route path="/operador/api" element={<ApiMonitoring />} />
+              <Route path="/operador/logs" element={<IntegrationLog />} />
               <Route path="/command-center" element={<CommandCenter />} />
               <Route
                 path="/command-center/tendencia"
