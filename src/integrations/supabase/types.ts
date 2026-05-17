@@ -195,7 +195,15 @@ export type Database = {
           id?: string
           medido_em?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dbo_medicoes_ete_id_fkey"
+            columns: ["ete_id"]
+            isOneToOne: false
+            referencedRelation: "etes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       etes: {
         Row: {
