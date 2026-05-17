@@ -183,16 +183,6 @@ export default function CommandCenter() {
 
       <div className="mb-8">
         <ErrorBoundary
-          section="Conformidade DBO"
-          title="Conformidade indisponível"
-          description="Não foi possível calcular o percentual de conformidade DBO. As demais seções continuam disponíveis."
-        >
-          <ConformidadeCard />
-        </ErrorBoundary>
-      </div>
-
-      <div className="mb-8">
-        <ErrorBoundary
           section="Tendência DBO"
           title="Gráfico indisponível"
           description="Não foi possível renderizar a evolução de DBO por bacia."
@@ -201,23 +191,13 @@ export default function CommandCenter() {
         </ErrorBoundary>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          <ErrorBoundary
-            section="Mapa Geoespacial"
-            title="Mapa indisponível no momento"
-            description="Não foi possível renderizar o mapa geoespacial das ETEs."
-          >
-            <EteMap />
-          </ErrorBoundary>
-        </div>
-
+      <div className="mb-8">
         <ErrorBoundary
-          section="Alertas DBO"
-          title="Alertas indisponíveis"
-          description="Não foi possível carregar os alertas de medições DBO fora de conformidade."
+          section="Mapa Geoespacial"
+          title="Mapa indisponível no momento"
+          description="Não foi possível renderizar o mapa geoespacial das ETEs."
         >
-          <AlertasDboPanel />
+          <EteMap />
         </ErrorBoundary>
       </div>
 
