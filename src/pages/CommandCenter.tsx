@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/StatCard";
 import { StatCardSkeleton } from "@/components/StatCardSkeleton";
 import { DboTrendChart } from "@/components/DboTrendChart";
-import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EndpointFailuresPanel, type EndpointStatus } from "@/components/EndpointFailuresPanel";
