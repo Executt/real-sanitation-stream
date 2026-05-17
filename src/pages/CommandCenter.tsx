@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { StatCard } from "@/components/StatCard";
 import { StatCardSkeleton } from "@/components/StatCardSkeleton";
-import { AlertasDboPanel } from "@/components/AlertasDboPanel";
-import { ConformidadeCard } from "@/components/ConformidadeCard";
+import { DboTrendChart } from "@/components/DboTrendChart";
 import { DboTrendChart } from "@/components/DboTrendChart";
 import { EteMap } from "@/components/EteMap";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
