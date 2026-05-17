@@ -21,6 +21,8 @@ import AuditLog from "./pages/AuditLog";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import ApiMonitoring from "./pages/ApiMonitoring";
 import IntegrationLog from "./pages/IntegrationLog";
+import AlertasDboPage from "./pages/AlertasDboPage";
+import ConformidadePage from "./pages/ConformidadePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,14 +57,8 @@ const App = () => (
                 path="/command-center/mapa"
                 element={<PlaceholderPage title="Mapa Interativo" description="Visualização geoespacial detalhada de todas as ETEs cadastradas no Brasil." />}
               />
-              <Route
-                path="/command-center/alertas"
-                element={<PlaceholderPage title="Alertas DBO" description="Centro de alertas críticos de não-conformidade de DBO por região." />}
-              />
-              <Route
-                path="/command-center/conformidade"
-                element={<PlaceholderPage title="Conformidade" description="Relatórios de conformidade regulatória junto à ANA." />}
-              />
+              <Route path="/command-center/alertas" element={<AlertasDboPage />} />
+              <Route path="/command-center/conformidade" element={<ConformidadePage />} />
               {/* Administração — Hub e módulos */}
               <Route path="/admin" element={<AdminHub />} />
               <Route path="/admin/usuarios" element={<AdminPanel />} />
