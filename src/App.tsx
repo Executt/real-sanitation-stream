@@ -18,11 +18,12 @@ import SmtpConfig from "./pages/SmtpConfig";
 import SeiConfig from "./pages/SeiConfig";
 import SystemParameters from "./pages/SystemParameters";
 import AuditLog from "./pages/AuditLog";
-import PlaceholderPage from "./pages/PlaceholderPage";
 import ApiMonitoring from "./pages/ApiMonitoring";
 import IntegrationLog from "./pages/IntegrationLog";
 import AlertasDboPage from "./pages/AlertasDboPage";
 import ConformidadePage from "./pages/ConformidadePage";
+import TendenciaPage from "./pages/TendenciaPage";
+import MapaPage from "./pages/MapaPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,14 +50,8 @@ const App = () => (
               <Route path="/operador/api" element={<ApiMonitoring />} />
               <Route path="/operador/logs" element={<IntegrationLog />} />
               <Route path="/command-center" element={<CommandCenter />} />
-              <Route
-                path="/command-center/tendencia"
-                element={<PlaceholderPage title="Tendência DBO" description="Análise temporal da eficiência de remoção de DBO por bacia hidrográfica." />}
-              />
-              <Route
-                path="/command-center/mapa"
-                element={<PlaceholderPage title="Mapa Interativo" description="Visualização geoespacial detalhada de todas as ETEs cadastradas no Brasil." />}
-              />
+              <Route path="/command-center/tendencia" element={<TendenciaPage />} />
+              <Route path="/command-center/mapa" element={<MapaPage />} />
               <Route path="/command-center/alertas" element={<AlertasDboPage />} />
               <Route path="/command-center/conformidade" element={<ConformidadePage />} />
               {/* Administração — Hub e módulos */}
