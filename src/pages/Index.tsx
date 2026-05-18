@@ -1,10 +1,5 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 export default function Index() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    navigate("/operador", { replace: true });
-  }, [navigate]);
-  return null;
+  return <Navigate to="/operador" replace />;
 }
