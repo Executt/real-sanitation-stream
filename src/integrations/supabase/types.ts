@@ -330,6 +330,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          concessionaria_id: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -340,6 +341,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          concessionaria_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -350,6 +352,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          concessionaria_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -358,7 +361,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_concessionaria_id_fkey"
+            columns: ["concessionaria_id"]
+            isOneToOne: false
+            referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sei_config: {
         Row: {
@@ -500,6 +511,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_concessionaria: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
