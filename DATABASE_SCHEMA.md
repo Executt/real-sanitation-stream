@@ -2,99 +2,139 @@
 
 ## Enums
 
-### `app_role`
 ```sql
 CREATE TYPE public.app_role AS ENUM ('operador', 'gestor_ana', 'superadmin');
 ```
 
-## Tabelas
+## Tabelas (estado atual)
 
 ### `profiles`
-Armazena informações de perfil dos usuários.
+Perfis de usuário, vinculados a `auth.users` via `user_id`.
 
-| Coluna | Tipo | Nullable | Default |
-|--------|------|----------|---------|
-| `id` | uuid | Não | `gen_random_uuid()` |
-| `user_id` | uuid | Não | — |
-| `full_name` | text | Sim | — |
-| `organization` | text | Sim | — |
-| `position` | text | Sim | — |
-| `avatar_url` | text | Sim | — |
-| `created_at` | timestamptz | Não | `now()` |
-| `updated_at` | timestamptz | Não | `now()` |
+| Coluna | Tipo | Notas |
+|--------|------|-------|
+| `id` | uuid PK | `gen_random_uuid()` |
+| `user_id` | uuid | referência lógica a `auth.users` |
+| `full_name` | text | |
+| `organization` | text | |
+| `position` | text | |
+| `avatar_url` | text | |
+| `concessionaria_id` | uuid → `concessionarias.id` | **novo** — escopo do operador |
+| `created_at` / `updated_at` | timestamptz | |
 
-**Políticas RLS:**
-- SELECT: Todos os usuários autenticados.
-- INSERT/UPDATE: Apenas o próprio usuário.
-
----
+**RLS:** usuário vê/edita o próprio; superadmin vê todos.
 
 ### `user_roles`
-Armazena as roles atribuídas a cada usuário.
+Atribuição de roles por usuário. **Auditada por trigger.**
 
-| Coluna | Tipo | Nullable | Default |
-|--------|------|----------|---------|
-| `id` | uuid | Não | `gen_random_uuid()` |
-| `user_id` | uuid | Não | — |
-| `role` | `app_role` | Não | — |
-| `created_at` | timestamptz | Não | `now()` |
+| Coluna | Tipo |
+|--------|------|
+| `user_id` | uuid |
+| `role` | `app_role` |
+| `created_at` | timestamptz |
 
-**Políticas RLS:**
-- ALL: Superadmins gerenciam todas as roles.
-- SELECT: Usuários veem suas próprias roles.
+**RLS:** usuário vê suas próprias roles; superadmin gerencia todas.
 
-## Funções SQL
+### `concessionarias`
+Prestadoras de saneamento (SABESP, COPASA, CAESB…). **Auditada por trigger.**
 
-### `has_role(_user_id uuid, _role app_role) → boolean`
-Verifica se um usuário possui determinada role. `SECURITY DEFINER` para evitar recursão RLS.
+Campos: `nome`, `sigla`, `tipo`, `natureza`, `uf`, `cnpj`, `site`, `abrangencia`, `municipios_atendidos`, `populacao_atendida`, `email_contato`, `telefone`, `endereco`, `ativa`, `observacoes`.
 
-### `handle_new_user() → trigger`
-Trigger após inserção em `auth.users`. Cria registro em `profiles`.
+**RLS:** autenticado lê; superadmin gerencia.
 
-### `update_updated_at_column() → trigger`
-Atualiza `updated_at` antes de UPDATE.
+### `etes`
+Estações de Tratamento de Esgoto. **Auditada por trigger.**
+
+Campos: `concessionaria_id` (FK → `concessionarias.id`), `nome`, `codigo`, `municipio`, `uf`, `latitude`, `longitude`, `status` (`ativa`/`em_construcao`/`inativa`/`manutencao`), `tipo_tratamento`, `vazao_projeto_lps`, `vazao_atual_lps`, `populacao_atendida`, `data_inicio_operacao`, `observacoes`.
+
+**RLS (atualizada):**
+- SELECT: superadmin e gestor_ana veem tudo; **operador vê apenas ETEs da sua concessionária** (`profiles.concessionaria_id`).
+- INSERT/UPDATE: operador e superadmin.
+- DELETE: apenas superadmin.
+
+### `dbo_medicoes`
+Medições DBO entrada/saída por ETE. Conformidade calculada por trigger (`set_conforme_dbo`). **Realtime habilitado.**
+
+Campos: `ete_id`, `dbo_entrada_mg_l`, `dbo_saida_mg_l`, `eficiencia_pct`, `conforme`, `medido_em`.
+
+**RLS:** autenticado lê; operador/superadmin escreve; superadmin apaga.
+
+### `api_probe_log`
+Histórico de probes de endpoints externos (SNIRH, ANA, etc). **Realtime habilitado.**
+
+Campos: `source`, `endpoint`, `state` (`up`/`down`/`degraded`), `http_status`, `duration_ms`, `error_message`, `checked_at`.
+
+**RLS:** autenticado lê/insere; superadmin apaga.
+
+### `audit_log`
+Trilha imutável de auditoria. **Populada automaticamente** por triggers em `user_roles`, `etes`, `concessionarias`, `ldap_config`, `smtp_config`, `sei_config`, `system_parameters`.
+
+Campos: `user_id`, `user_email`, `action` (`<TABLE>_<OP>`), `target` (nome da tabela), `severity` (`info`/`warning`), `metadata` (jsonb com `old`/`new`, com senhas/API keys mascaradas), `created_at`.
+
+**RLS:** SELECT só superadmin; INSERT aceita registros de usuário ou de sistema (user_id NULL); UPDATE/DELETE bloqueados.
+
+### Configurações administrativas (singleton, RLS = superadmin)
+
+- `ldap_config` — servidor LDAP/AD. **Auditada.**
+- `smtp_config` — servidor SMTP. **Auditada.**
+- `sei_config` — integração SEI. **Auditada.**
+- `system_parameters` — limites DBO, timeouts, retenção, intervalo de sync. **Auditada.**
+- `cron_config` — URLs do `ldap-sync` para agendamento via `pg_cron`.
+
+## Funções
+
+| Função | Propósito |
+|--------|-----------|
+| `has_role(user_id, role)` | RBAC sem recursão RLS. |
+| `current_user_concessionaria()` | **Novo** — retorna `concessionaria_id` do usuário logado (usada pela RLS de `etes`). |
+| `handle_new_user()` | Cria `profiles` após cadastro em `auth.users`. |
+| `update_updated_at_column()` | Trigger genérico de timestamp. |
+| `set_conforme_dbo()` | Marca `conforme` em `dbo_medicoes` conforme `system_parameters.dbo_min`. |
+| `log_audit_event()` | Trigger genérico de auditoria; mascara senhas/API keys. |
+| `schedule_ldap_sync(url, key)` | Agenda o `ldap-sync` via `pg_cron` + `pg_net`. |
+| `reschedule_ldap_sync_on_change()` | Reagenda quando `sync_interval_minutes` muda. |
+
+## Triggers (estado atual)
+
+| Tabela | Trigger | Quando | Ação |
+|--------|---------|--------|------|
+| `user_roles` | `audit_user_roles` | AFTER I/U/D | `log_audit_event` |
+| `etes` | `audit_etes` | AFTER I/U/D | `log_audit_event` |
+| `concessionarias` | `audit_concessionarias` | AFTER I/U/D | `log_audit_event` |
+| `ldap_config` | `audit_ldap_config` | AFTER I/U/D | `log_audit_event` |
+| `smtp_config` | `audit_smtp_config` | AFTER I/U/D | `log_audit_event` |
+| `sei_config` | `audit_sei_config` | AFTER I/U/D | `log_audit_event` |
+| `system_parameters` | `audit_system_parameters` | AFTER I/U/D | `log_audit_event` |
+| `dbo_medicoes` | (pré-existente) | BEFORE I/U | `set_conforme_dbo` |
+
+## Realtime
+
+Publicação `supabase_realtime` inclui:
+- `dbo_medicoes` — para `AlertasDboPanel` e `ConformidadeCard`.
+- `api_probe_log` — para `ApiMonitoring` e KPIs do dashboard.
 
 ## Edge Functions
 
-### `seed-admin`
-Cria ou atualiza o usuário superadmin `admin@ana.gov.br` e atribui `superadmin`.
-
-## Tabelas de Configuração Administrativa
-
-### `ldap_config` (singleton)
-Configuração do servidor LDAP/AD. Campos: `enabled`, `host`, `port`, `use_tls`, `base_dn`, `bind_dn`, `bind_password`, `user_filter`, `attr_email`, `attr_name`, `attr_org`, `default_role` (`app_role`).
-**RLS:** apenas `superadmin` (ALL).
-
-### `smtp_config` (singleton)
-Configuração SMTP. Campos: `enabled`, `host`, `port`, `username`, `password`, `from_email`, `from_name`, `use_tls`.
-**RLS:** apenas `superadmin` (ALL).
-
-### `sei_config` (singleton)
-Integração SEI. Campos: `enabled`, `api_url`, `api_key`, `orgao_id`, `unidade_id`, `tipo_processo`.
-**RLS:** apenas `superadmin` (ALL).
-
-### `system_parameters` (singleton)
-Parâmetros gerais. Campos: `dbo_min`, `dbo_critico`, `api_timeout_seconds`, `sync_interval_minutes`, `retention_days`, `max_upload_mb`.
-**RLS:** apenas `superadmin` (ALL).
-
-### `audit_log` (append-only)
-Trilha de auditoria imutável. Campos: `user_id`, `user_email`, `action`, `target`, `severity`, `metadata` (jsonb), `created_at`.
-**RLS:**
-- SELECT: apenas `superadmin`.
-- INSERT: qualquer usuário autenticado (apenas com seu próprio `user_id` ou nulo).
-- UPDATE/DELETE: bloqueado (sem políticas).
-**Índices:** `created_at DESC`, `user_id`.
-
-## Tabelas Planejadas (Roadmap)
-
-- `etes` — Cadastro de Estações de Tratamento de Esgoto.
-- `medicoes` — Time-series de medições de DBO/DQO/Vazão (TimescaleDB).
+- `seed-admin` — bootstrap do superadmin `admin@ana.gov.br`.
+- `ldap-sync` — disparada por `pg_cron` no intervalo definido em `system_parameters`.
+- `smtp-send` — envio transacional.
+- `sei-create-process` — abre processo SEI a partir de alertas críticos.
 
 ## Diagrama de Relacionamento
 
 ```
-auth.users (Supabase)
-    │
-    ├── 1:1 ── profiles (via user_id)
-    └── 1:N ── user_roles (via user_id)
+auth.users
+   ├── 1:1 ── profiles ── N:1 ── concessionarias ── 1:N ── etes
+   └── 1:N ── user_roles                                    └── 1:N ── dbo_medicoes
+
+audit_log ← (triggers em user_roles, etes, concessionarias, *_config, system_parameters)
+api_probe_log (independente)
 ```
+
+## Observações sobre a arquitetura de alertas
+
+Decisão deliberada (princípio spec-driven): **não foi criada uma tabela `alertas` separada**.
+O componente `AlertasDboPanel` deriva alertas dinamicamente de `dbo_medicoes` filtrando `conforme = false` e aplicando os limites de `system_parameters`. Manter uma tabela espelho geraria divergência sem benefício, dado que:
+1. As consultas são rápidas (índice em `medido_em DESC`).
+2. Realtime em `dbo_medicoes` já entrega novos alertas ao painel.
+3. Evita sincronização e regras de invalidação extras.
