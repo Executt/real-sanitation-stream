@@ -72,6 +72,80 @@ const roleLabels: Record<AppRole, string> = {
 const roleBadgeVariant = (role: AppRole) =>
   role === "superadmin" ? "default" : role === "gestor_ana" ? "secondary" : "outline";
 
+function ConcessionariaCell({
+  userId,
+  currentConcId,
+  concessionarias,
+  onChange,
+}: {
+  userId: string;
+  currentConcId: string | null;
+  concessionarias: ConcessionariaOpt[];
+  onChange: (userId: string, value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const current = concessionarias.find((c) => c.id === currentConcId);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="h-8 justify-between text-xs w-full font-normal"
+        >
+          <span className="truncate">
+            {current ? `${current.nome} (${current.id.slice(0, 8)}…)` : "— Sem vínculo —"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0">
+        <Command>
+          <CommandInput placeholder="Buscar por nome ou ID…" />
+          <CommandList>
+            <CommandEmpty>Nenhuma concessionária encontrada.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="__none__"
+                onSelect={() => {
+                  onChange(userId, "__none__");
+                  setOpen(false);
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !currentConcId ? "opacity-100" : "opacity-0")} />
+                — Sem vínculo —
+              </CommandItem>
+              {concessionarias.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={`${c.nome} ${c.id}`}
+                  onSelect={() => {
+                    onChange(userId, c.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      currentConcId === c.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className="flex flex-col">
+                    <span className="text-xs">{c.nome}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function AdminPanel() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
