@@ -67,6 +67,9 @@ export default function AdminPanel() {
   const [addRoleUserId, setAddRoleUserId] = useState("");
   const [addRoleValue, setAddRoleValue] = useState<AppRole | "">("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filterConc, setFilterConc] = useState<string>("__all__");
+  const [filterRole, setFilterRole] = useState<string>("__all__");
 
   const fetchUsers = async () => {
     setLoading(true);
