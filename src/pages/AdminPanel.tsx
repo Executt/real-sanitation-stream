@@ -39,8 +39,14 @@ interface UserWithRoles {
   full_name: string | null;
   organization: string | null;
   position: string | null;
+  concessionaria_id: string | null;
   created_at: string;
   roles: AppRole[];
+}
+
+interface ConcessionariaOpt {
+  id: string;
+  nome: string;
 }
 
 const roleLabels: Record<AppRole, string> = {
