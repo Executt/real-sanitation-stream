@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Table,
   TableBody,
@@ -29,7 +43,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, UserPlus, Trash2, Users, Search } from "lucide-react";
+import { Shield, UserPlus, Trash2, Users, Search, Check, ChevronsUpDown } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -57,6 +71,80 @@ const roleLabels: Record<AppRole, string> = {
 
 const roleBadgeVariant = (role: AppRole) =>
   role === "superadmin" ? "default" : role === "gestor_ana" ? "secondary" : "outline";
+
+function ConcessionariaCell({
+  userId,
+  currentConcId,
+  concessionarias,
+  onChange,
+}: {
+  userId: string;
+  currentConcId: string | null;
+  concessionarias: ConcessionariaOpt[];
+  onChange: (userId: string, value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const current = concessionarias.find((c) => c.id === currentConcId);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="h-8 justify-between text-xs w-full font-normal"
+        >
+          <span className="truncate">
+            {current ? `${current.nome} (${current.id.slice(0, 8)}…)` : "— Sem vínculo —"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0">
+        <Command>
+          <CommandInput placeholder="Buscar por nome ou ID…" />
+          <CommandList>
+            <CommandEmpty>Nenhuma concessionária encontrada.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="__none__"
+                onSelect={() => {
+                  onChange(userId, "__none__");
+                  setOpen(false);
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !currentConcId ? "opacity-100" : "opacity-0")} />
+                — Sem vínculo —
+              </CommandItem>
+              {concessionarias.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={`${c.nome} ${c.id}`}
+                  onSelect={() => {
+                    onChange(userId, c.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      currentConcId === c.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className="flex flex-col">
+                    <span className="text-xs">{c.nome}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function AdminPanel() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
@@ -335,23 +423,13 @@ export default function AdminPanel() {
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
-                  <TableCell className="text-sm min-w-[220px]">
-                    <Select
-                      value={u.concessionaria_id ?? "__none__"}
-                      onValueChange={(v) => handleSetConcessionaria(u.user_id, v)}
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Vincular..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">— Sem vínculo —</SelectItem>
-                        {concessionarias.map((c) => (
-                          <SelectItem key={c.id} value={c.id} className="text-xs">
-                            {c.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <TableCell className="text-sm min-w-[260px]">
+                    <ConcessionariaCell
+                      userId={u.user_id}
+                      currentConcId={u.concessionaria_id}
+                      concessionarias={concessionarias}
+                      onChange={handleSetConcessionaria}
+                    />
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
