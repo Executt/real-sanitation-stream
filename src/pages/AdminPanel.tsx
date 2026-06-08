@@ -246,11 +246,48 @@ export default function AdminPanel() {
       </div>
 
       <div className="bg-card border rounded-sm shadow-sm overflow-hidden">
-        <div className="p-5 border-b">
-          <h2 className="font-semibold">Usuários Cadastrados</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Lista de todos os usuários com suas respectivas roles
-          </p>
+        <div className="p-5 border-b space-y-3">
+          <div>
+            <h2 className="font-semibold">Usuários Cadastrados</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Lista de todos os usuários com suas respectivas roles
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nome, organização, cargo ou ID do operador..."
+                className="h-9 pl-8 text-sm"
+              />
+            </div>
+            <Select value={filterConc} onValueChange={setFilterConc}>
+              <SelectTrigger className="h-9 text-xs md:w-[260px]">
+                <SelectValue placeholder="Concessionária" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas as concessionárias</SelectItem>
+                <SelectItem value="__none__">— Sem vínculo —</SelectItem>
+                {concessionarias.map((c) => (
+                  <SelectItem key={c.id} value={c.id} className="text-xs">{c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterRole} onValueChange={setFilterRole}>
+              <SelectTrigger className="h-9 text-xs md:w-[160px]">
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas as roles</SelectItem>
+                <SelectItem value="__norole__">Sem role</SelectItem>
+                <SelectItem value="operador">Operador</SelectItem>
+                <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
+                <SelectItem value="superadmin">Super Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         {loading ? (
           <div className="p-8 text-center text-muted-foreground">Carregando...</div>
@@ -265,14 +302,21 @@ export default function AdminPanel() {
                 <TableHead className="text-xs">Roles</TableHead>
                 <TableHead className="text-xs">Cadastro</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
-
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((u) => (
+              {filteredUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-xs text-muted-foreground py-6">
+                    Nenhum usuário corresponde aos filtros aplicados.
+                  </TableCell>
+                </TableRow>
+              )}
+              {filteredUsers.map((u) => (
                 <TableRow key={u.user_id}>
                   <TableCell className="font-medium text-sm">
-                    {u.full_name || "—"}
+                    <div>{u.full_name || "—"}</div>
+                    <div className="font-mono text-[10px] text-muted-foreground">{u.user_id.slice(0, 8)}</div>
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
