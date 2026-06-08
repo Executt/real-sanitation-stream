@@ -273,6 +273,24 @@ export default function AdminPanel() {
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
+                  <TableCell className="text-sm min-w-[220px]">
+                    <Select
+                      value={u.concessionaria_id ?? "__none__"}
+                      onValueChange={(v) => handleSetConcessionaria(u.user_id, v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Vincular..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">— Sem vínculo —</SelectItem>
+                        {concessionarias.map((c) => (
+                          <SelectItem key={c.id} value={c.id} className="text-xs">
+                            {c.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {u.roles.length === 0 && (
