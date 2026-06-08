@@ -160,6 +160,21 @@ export default function AdminPanel() {
   };
 
 
+  const q = search.trim().toLowerCase();
+  const filteredUsers = users.filter((u) => {
+    if (filterConc === "__none__" && u.concessionaria_id) return false;
+    if (filterConc !== "__all__" && filterConc !== "__none__" && u.concessionaria_id !== filterConc) return false;
+    if (filterRole === "__norole__" && u.roles.length > 0) return false;
+    if (filterRole !== "__all__" && filterRole !== "__norole__" && !u.roles.includes(filterRole as AppRole)) return false;
+    if (!q) return true;
+    return (
+      (u.full_name ?? "").toLowerCase().includes(q) ||
+      (u.organization ?? "").toLowerCase().includes(q) ||
+      (u.position ?? "").toLowerCase().includes(q) ||
+      u.user_id.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
