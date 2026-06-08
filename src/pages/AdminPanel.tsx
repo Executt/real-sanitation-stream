@@ -258,9 +258,11 @@ export default function AdminPanel() {
                 <TableHead className="text-xs">Nome</TableHead>
                 <TableHead className="text-xs">Organização</TableHead>
                 <TableHead className="text-xs">Cargo</TableHead>
+                <TableHead className="text-xs">Concessionária</TableHead>
                 <TableHead className="text-xs">Roles</TableHead>
                 <TableHead className="text-xs">Cadastro</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
+
               </TableRow>
             </TableHeader>
             <TableBody>
