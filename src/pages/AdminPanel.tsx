@@ -39,8 +39,14 @@ interface UserWithRoles {
   full_name: string | null;
   organization: string | null;
   position: string | null;
+  concessionaria_id: string | null;
   created_at: string;
   roles: AppRole[];
+}
+
+interface ConcessionariaOpt {
+  id: string;
+  nome: string;
 }
 
 const roleLabels: Record<AppRole, string> = {
@@ -56,6 +62,7 @@ export default function AdminPanel() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
+  const [concessionarias, setConcessionarias] = useState<ConcessionariaOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [addRoleUserId, setAddRoleUserId] = useState("");
   const [addRoleValue, setAddRoleValue] = useState<AppRole | "">("");
@@ -63,9 +70,10 @@ export default function AdminPanel() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, organization, position, created_at"),
+    const [profilesRes, rolesRes, concRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, created_at"),
       supabase.from("user_roles").select("user_id, role"),
+      supabase.from("concessionarias").select("id, nome").order("nome"),
     ]);
 
     const profiles = profilesRes.data ?? [];
@@ -78,6 +86,7 @@ export default function AdminPanel() {
         full_name: p.full_name,
         organization: p.organization,
         position: p.position,
+        concessionaria_id: p.concessionaria_id,
         created_at: p.created_at,
         roles: [],
       };
@@ -89,6 +98,7 @@ export default function AdminPanel() {
     });
 
     setUsers(Object.values(userMap));
+    setConcessionarias(concRes.data ?? []);
     setLoading(false);
   };
 
@@ -130,6 +140,22 @@ export default function AdminPanel() {
       fetchUsers();
     }
   };
+
+  const handleSetConcessionaria = async (userId: string, conc: string) => {
+
+    const value = conc === "__none__" ? null : conc;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ concessionaria_id: value })
+      .eq("user_id", userId);
+    if (error) {
+      toast({ title: "Erro ao vincular concessionária", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Concessionária vinculada" : "Vínculo removido" });
+      fetchUsers();
+    }
+  };
+
 
   return (
     <div>
@@ -232,9 +258,11 @@ export default function AdminPanel() {
                 <TableHead className="text-xs">Nome</TableHead>
                 <TableHead className="text-xs">Organização</TableHead>
                 <TableHead className="text-xs">Cargo</TableHead>
+                <TableHead className="text-xs">Concessionária</TableHead>
                 <TableHead className="text-xs">Roles</TableHead>
                 <TableHead className="text-xs">Cadastro</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
+
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,6 +273,24 @@ export default function AdminPanel() {
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
+                  <TableCell className="text-sm min-w-[220px]">
+                    <Select
+                      value={u.concessionaria_id ?? "__none__"}
+                      onValueChange={(v) => handleSetConcessionaria(u.user_id, v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Vincular..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">— Sem vínculo —</SelectItem>
+                        {concessionarias.map((c) => (
+                          <SelectItem key={c.id} value={c.id} className="text-xs">
+                            {c.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {u.roles.length === 0 && (
