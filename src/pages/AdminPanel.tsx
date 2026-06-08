@@ -139,7 +139,21 @@ export default function AdminPanel() {
       toast({ title: "Role removida" });
       fetchUsers();
     }
+
+  const handleSetConcessionaria = async (userId: string, conc: string) => {
+    const value = conc === "__none__" ? null : conc;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ concessionaria_id: value })
+      .eq("user_id", userId);
+    if (error) {
+      toast({ title: "Erro ao vincular concessionária", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Concessionária vinculada" : "Vínculo removido" });
+      fetchUsers();
+    }
   };
+
 
   return (
     <div>
