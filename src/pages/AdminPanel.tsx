@@ -62,6 +62,7 @@ export default function AdminPanel() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
+  const [concessionarias, setConcessionarias] = useState<ConcessionariaOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [addRoleUserId, setAddRoleUserId] = useState("");
   const [addRoleValue, setAddRoleValue] = useState<AppRole | "">("");
@@ -69,9 +70,10 @@ export default function AdminPanel() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, organization, position, created_at"),
+    const [profilesRes, rolesRes, concRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, created_at"),
       supabase.from("user_roles").select("user_id, role"),
+      supabase.from("concessionarias").select("id, nome").order("nome"),
     ]);
 
     const profiles = profilesRes.data ?? [];
@@ -84,6 +86,7 @@ export default function AdminPanel() {
         full_name: p.full_name,
         organization: p.organization,
         position: p.position,
+        concessionaria_id: p.concessionaria_id,
         created_at: p.created_at,
         roles: [],
       };
@@ -95,6 +98,7 @@ export default function AdminPanel() {
     });
 
     setUsers(Object.values(userMap));
+    setConcessionarias(concRes.data ?? []);
     setLoading(false);
   };
 
