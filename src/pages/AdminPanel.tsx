@@ -563,12 +563,24 @@ export default function AdminPanel() {
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
-                  <TableCell className="text-sm min-w-[260px]">
-                    <ConcessionariaCell
+                  <TableCell className="text-sm min-w-[240px]">
+                    <RelationCell
+                      table="concessionarias"
+                      entityLabel="concessionária"
                       userId={u.user_id}
-                      currentConcId={u.concessionaria_id}
-                      currentConcNome={u.concessionaria_nome}
+                      currentId={u.concessionaria_id}
+                      currentNome={u.concessionaria_nome}
                       onChange={handleSetConcessionaria}
+                    />
+                  </TableCell>
+                  <TableCell className="text-sm min-w-[240px]">
+                    <RelationCell
+                      table="agencias_reguladoras"
+                      entityLabel="agência"
+                      userId={u.user_id}
+                      currentId={u.agencia_reguladora_id}
+                      currentNome={u.agencia_reguladora_nome}
+                      onChange={handleSetAgencia}
                     />
                   </TableCell>
                   <TableCell>
