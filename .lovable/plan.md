@@ -1,72 +1,75 @@
+# Gestão de ETEs por Concessionárias & Agências Reguladoras
+
 ## Contexto
 
-Hoje a página `CommandCenter` já tem: `EteMap` (dados reais), `DboTrendChart` (dados sintéticos), painel "Alertas Nacionais" (hardcoded) e nenhum bloco de "Conformidade". Não existe tabela de medições DBO no banco — sem ela, "Alertas DBO" e "Tendência DBO" continuariam fictícios.
+Hoje a hierarquia é: **ANA (nacional) → Concessionárias → ETEs**. Faltam as **Agências Reguladoras** (ARs estaduais/municipais como ARSESP, AGEPAR, ADASA, AGENERSA etc.), que fiscalizam concessionárias dentro do seu território. Esta evolução introduz a AR como nível intermediário e dá a ela um painel de gestão equivalente ao da ANA, porém escopado.
 
-## O que será feito
-
-### 1. Backend (migration)
-Criar tabela `dbo_medicoes` para suportar tendência, conformidade e alertas reais:
-
-- `dbo_medicoes`: `ete_id` (fk lógica para `etes`), `medido_em` (timestamptz), `dbo_entrada_mg_l`, `dbo_saida_mg_l`, `eficiencia_pct` (gerada), `conforme` (gerada por trigger usando `system_parameters.dbo_min`).
-- RLS: SELECT autenticado; INSERT/UPDATE para `operador`/`superadmin`; DELETE só `superadmin`.
-- Índices em `(ete_id, medido_em desc)` e `(medido_em desc)`.
-- Seed: gerar ~12 meses de medições para as ETEs já cadastradas, com variação por bacia/UF para o gráfico ter forma realista.
-
-### 2. Tendência DBO (`DboTrendChart`)
-- Trocar `generateData()` por consulta agregada das últimas 12 médias mensais de `eficiencia_pct`, agrupando por bacia (derivada da UF da ETE — mapa estático UF→bacia).
-- Skeleton enquanto carrega; estado de erro propagado para o `ErrorBoundary` já existente.
-
-### 3. Alertas DBO (`AlertasDboPanel`, novo)
-Substitui o painel "Alertas Nacionais" hardcoded.
-- Lê últimas medições por ETE (top 20 mais recentes) e gera alertas:
-  - `critical` quando `dbo_saida > dbo_critico`
-  - `warning` quando `dbo_saida > dbo_min` e ≤ `dbo_critico`
-- Tempo relativo ("há X min") calculado do `medido_em`.
-- Skeleton + erro via `ErrorBoundary`.
-
-### 4. Conformidade (`ConformidadeCard`, novo)
-Novo bloco no topo da grade de KPIs ou abaixo dela:
-- KPI nacional: `% conformes` nos últimos 30 dias (count(conforme)/count(*)).
-- Quebra por bacia (mesma derivação UF→bacia) com mini barras.
-- Loading skeleton; erro via `ErrorBoundary`.
-
-### 5. Mapa Interativo (`EteMap`)
-- Adicionar filtro por status (chips clicáveis na legenda já existente) que esconde marcadores não selecionados sem reconsultar.
-- Pop-up: incluir última `eficiencia_pct` e badge de conformidade quando houver medição.
-
-### 6. Integração no `CommandCenter`
-- Inserir `ConformidadeCard` após os KPIs.
-- Trocar painel "Alertas Nacionais" hardcoded por `AlertasDboPanel`.
-- Manter `ErrorBoundary` em torno de cada novo bloco.
-
-## Detalhes técnicos
+## Hierarquia final
 
 ```text
-dbo_medicoes
-├─ ete_id uuid                       -- referência lógica
-├─ medido_em timestamptz default now()
-├─ dbo_entrada_mg_l numeric not null
-├─ dbo_saida_mg_l numeric not null
-├─ eficiencia_pct numeric generated  -- (entrada-saida)/entrada*100
-└─ conforme boolean                  -- preenchido por trigger
+ANA (gestor_ana / superadmin)
+ └── Agência Reguladora (gestor_ar)         ← NOVO nível
+      └── Concessionária (operador)
+           └── ETE
 ```
 
-Trigger `set_conforme_dbo()` lê `system_parameters.dbo_min` (default 60) e marca `conforme = dbo_saida_mg_l <= dbo_min`.
+## Mudanças no banco
 
-Mapa UF→bacia (constante no front): TODO simples baseado em estados (ex.: SP→Tietê, BA/MG/PE→São Francisco, etc.) — suficiente para visualização; pode evoluir depois para coluna `bacia` na ETE.
+1. **Nova tabela `agencias_reguladoras`**
+   - `nome`, `sigla`, `esfera` ('estadual' | 'municipal' | 'distrital'), `uf`, `municipio`, `cnpj`, `contato_email`, `site`, `ativo`.
+2. **`concessionarias`** ganha `agencia_reguladora_id` (FK opcional → `agencias_reguladoras`).
+3. **`profiles`** ganha `agencia_reguladora_id` (FK opcional) para vincular gestores de AR.
+4. **Enum `app_role`** ganha valor `gestor_ar`.
+5. **Função SECURITY DEFINER** `current_user_agencia()` análoga a `current_user_concessionaria()`.
+6. **Políticas RLS** atualizadas:
+   - `etes`, `dbo_medicoes`, `concessionarias`: `gestor_ar` lê tudo cuja `concessionaria.agencia_reguladora_id = current_user_agencia()`.
+   - `agencias_reguladoras`: leitura por `gestor_ana`/`superadmin` (full) e pelo próprio `gestor_ar` (linha própria); escrita só `superadmin`/`gestor_ana`.
 
-## Fora de escopo
+## Mudanças na aplicação
 
-- Filtros globais da sidebar conectarem em todos os blocos (já há `SidebarFilters` mas não emite eventos — fica para próxima iteração).
-- Coluna `bacia` formal em `etes`.
-- Ingestão real via API SNIRH/ANA (continuam mockadas no painel de endpoints).
+### Páginas novas
+- **`/admin/agencias`** (superadmin / gestor_ana) — CRUD de Agências Reguladoras (lista, busca, criar, editar, ativar/inativar).
+- **`/agencia`** (gestor_ar) — Dashboard escopado da agência: KPIs (nº de concessionárias, ETEs, conformidade DBO, alertas críticos), tabela de concessionárias supervisionadas, mapa filtrado, tendência DBO agregada.
+- **`/agencia/concessionarias`** — Lista de concessionárias da AR com drill-down para ver ETEs de cada uma.
 
-## Arquivos
+### Páginas alteradas
+- **`/admin/usuarios`** (`AdminPanel.tsx`):
+  - Nova role `gestor_ar` no `Select` de roles e nos filtros.
+  - Nova coluna **Agência Reguladora** com combobox server-side (mesma UX do combobox de concessionária recém-implementado).
+- **`/admin/concessionarias`** (`Concessionarias.tsx`):
+  - Coluna + filtro **Agência Reguladora**.
+  - Form de cadastro/edição com seletor de AR (combobox com busca).
+- **`AppSidebar`/`TopNavbar`**: novo item "Agência Reguladora" visível só para `gestor_ar`; item "Agências" no hub admin.
+- **`AuthContext`**: expor `isGestorAR` e `agenciaReguladoraId`.
+- **`ProtectedRoute`**: aceitar `gestor_ar` nas rotas de `/agencia/*`.
 
-- Migration nova (via tool).
-- `src/components/DboTrendChart.tsx` — refatorar para dados reais.
-- `src/components/AlertasDboPanel.tsx` — novo.
-- `src/components/ConformidadeCard.tsx` — novo.
-- `src/components/EteMap.tsx` — filtro por status + dados de conformidade no popup.
-- `src/pages/CommandCenter.tsx` — montar os novos blocos.
-- `src/lib/bacias.ts` — novo, mapa UF→bacia + helper.
+### Reuso
+- Componentes existentes (`EteMap`, `EteStatusTable`, `DboTrendChart`, `AlertasDboPanel`, `ConformidadeCard`) ganham prop opcional `concessionariaIds?: string[]` ou já operam por RLS (preferido). Como o RLS escopa automaticamente o `gestor_ar`, basta reaproveitar — sem filtros extras no front.
+
+## Documentação
+Atualizar cumulativamente:
+- `DATABASE_SCHEMA.md` — nova tabela, novas FKs, nova role, nova função.
+- `ARCHITECTURE.md` — diagrama da hierarquia ANA → AR → Concessionária → ETE.
+- `SECURITY_POLICIES.md` — políticas RLS para `gestor_ar`.
+- `BUSINESS_RULES.md` — regras de supervisão regulatória.
+- `README.md` — menção ao novo perfil.
+- Memória do projeto: novo arquivo `mem://features/agencias-reguladoras`.
+
+## Entrega faseada
+
+**Fase 1 — Modelo & RBAC**
+- Migração: tabela `agencias_reguladoras`, FKs em `concessionarias` e `profiles`, enum `gestor_ar`, função `current_user_agencia()`, RLS.
+
+**Fase 2 — Administração**
+- Página `/admin/agencias` (CRUD).
+- AdminPanel: role `gestor_ar` + combobox de AR para profiles.
+- Concessionarias: vincular AR (combobox + filtro).
+
+**Fase 3 — Portal AR**
+- `/agencia` dashboard + `/agencia/concessionarias`.
+- Sidebar/navbar + ProtectedRoute + AuthContext.
+
+**Fase 4 — Docs & Memória**
+- Atualizar todos os MDs e salvar memória.
+
+Aprovando, sigo direto pela Fase 1 (migração).

@@ -55,6 +55,8 @@ interface UserWithRoles {
   position: string | null;
   concessionaria_id: string | null;
   concessionaria_nome: string | null;
+  agencia_reguladora_id: string | null;
+  agencia_reguladora_nome: string | null;
   created_at: string;
   roles: AppRole[];
 }
@@ -64,9 +66,15 @@ interface ConcessionariaOpt {
   nome: string;
 }
 
+interface AgenciaOpt {
+  id: string;
+  nome: string;
+}
+
 const roleLabels: Record<AppRole, string> = {
   operador: "Operador",
   gestor_ana: "Gestor ANA",
+  gestor_ar: "Gestor AR",
   superadmin: "Super Admin",
 };
 
@@ -75,50 +83,49 @@ const roleBadgeVariant = (role: AppRole) =>
 
 const PAGE_SIZE = 20;
 
-function ConcessionariaCell({
+type RelTable = "concessionarias" | "agencias_reguladoras";
+
+function RelationCell({
+  table,
+  entityLabel,
   userId,
-  currentConcId,
-  currentConcNome,
+  currentId,
+  currentNome,
   onChange,
 }: {
+  table: RelTable;
+  entityLabel: string;
   userId: string;
-  currentConcId: string | null;
-  currentConcNome: string | null;
+  currentId: string | null;
+  currentNome: string | null;
   onChange: (userId: string, value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [options, setOptions] = useState<ConcessionariaOpt[]>([]);
+  const [options, setOptions] = useState<{ id: string; nome: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
-  // Debounce input
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDebounced(query.trim());
-      setPage(0);
-    }, 250);
+    const t = setTimeout(() => { setDebounced(query.trim()); setPage(0); }, 250);
     return () => clearTimeout(t);
   }, [query]);
 
-  // Fetch when open / query / page changes
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    const run = async () => {
+    (async () => {
       setLoading(true);
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       let q = supabase
-        .from("concessionarias")
+        .from(table)
         .select("id, nome", { count: "exact" })
         .order("nome")
         .range(from, to);
-
       if (debounced) {
-        // Search by nome (case-insensitive) OR exact id prefix
         const isUuidLike = /^[0-9a-fA-F-]{4,}$/.test(debounced);
         if (isUuidLike) {
           q = q.or(`nome.ilike.%${debounced}%,id::text.ilike.${debounced}%`);
@@ -126,24 +133,18 @@ function ConcessionariaCell({
           q = q.ilike("nome", `%${debounced}%`);
         }
       }
-
       const { data, count, error } = await q;
       if (cancelled) return;
-      if (error) {
-        setOptions([]);
-        setHasMore(false);
-      } else {
-        const rows = data ?? [];
+      if (error) { setOptions([]); setHasMore(false); }
+      else {
+        const rows = (data ?? []) as { id: string; nome: string }[];
         setOptions((prev) => (page === 0 ? rows : [...prev, ...rows]));
         setHasMore((count ?? 0) > to + 1);
       }
       setLoading(false);
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, debounced, page]);
+    })();
+    return () => { cancelled = true; };
+  }, [open, debounced, page, table]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -155,8 +156,8 @@ function ConcessionariaCell({
           className="h-8 justify-between text-xs w-full font-normal"
         >
           <span className="truncate">
-            {currentConcId
-              ? `${currentConcNome ?? "(sem nome)"} (${currentConcId.slice(0, 8)}…)`
+            {currentId
+              ? `${currentNome ?? "(sem nome)"} (${currentId.slice(0, 8)}…)`
               : "— Sem vínculo —"}
           </span>
           <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
@@ -165,7 +166,7 @@ function ConcessionariaCell({
       <PopoverContent className="w-[320px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Buscar por nome ou ID…"
+            placeholder={`Buscar ${entityLabel} por nome ou ID…`}
             value={query}
             onValueChange={setQuery}
           />
@@ -173,34 +174,23 @@ function ConcessionariaCell({
             {loading && options.length === 0 ? (
               <div className="py-6 text-center text-xs text-muted-foreground">Buscando…</div>
             ) : (
-              <CommandEmpty>Nenhuma concessionária encontrada.</CommandEmpty>
+              <CommandEmpty>Nenhum resultado.</CommandEmpty>
             )}
             <CommandGroup>
               <CommandItem
                 value="__none__"
-                onSelect={() => {
-                  onChange(userId, "__none__");
-                  setOpen(false);
-                }}
+                onSelect={() => { onChange(userId, "__none__"); setOpen(false); }}
               >
-                <Check className={cn("mr-2 h-4 w-4", !currentConcId ? "opacity-100" : "opacity-0")} />
+                <Check className={cn("mr-2 h-4 w-4", !currentId ? "opacity-100" : "opacity-0")} />
                 — Sem vínculo —
               </CommandItem>
               {options.map((c) => (
                 <CommandItem
                   key={c.id}
                   value={c.id}
-                  onSelect={() => {
-                    onChange(userId, c.id);
-                    setOpen(false);
-                  }}
+                  onSelect={() => { onChange(userId, c.id); setOpen(false); }}
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      currentConcId === c.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
+                  <Check className={cn("mr-2 h-4 w-4", currentId === c.id ? "opacity-100" : "opacity-0")} />
                   <span className="flex flex-col">
                     <span className="text-xs">{c.nome}</span>
                     <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
@@ -228,46 +218,63 @@ function ConcessionariaCell({
   );
 }
 
+
+
 export default function AdminPanel() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [concessionarias, setConcessionarias] = useState<ConcessionariaOpt[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [addRoleUserId, setAddRoleUserId] = useState("");
   const [addRoleValue, setAddRoleValue] = useState<AppRole | "">("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterConc, setFilterConc] = useState<string>("__all__");
+  const [filterAg, setFilterAg] = useState<string>("__all__");
   const [filterRole, setFilterRole] = useState<string>("__all__");
 
   const fetchUsers = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes, concRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, created_at"),
+    const [profilesRes, rolesRes, concRes, agRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, agencia_reguladora_id, created_at"),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("concessionarias").select("id, nome").order("nome").limit(200),
+      supabase.from("agencias_reguladoras").select("id, nome").order("nome").limit(200),
     ]);
 
     const profiles = profilesRes.data ?? [];
     const roles = rolesRes.data ?? [];
 
-    // Fetch names for any linked concessionarias that didn't come in the top-200 filter list
-    const linkedIds = Array.from(
+    // Concessionárias: complementar nomes de IDs vinculados não presentes na top-200
+    const linkedConcIds = Array.from(
       new Set(profiles.map((p) => p.concessionaria_id).filter((x): x is string => !!x))
     );
-    const knownIds = new Set((concRes.data ?? []).map((c) => c.id));
-    const missingIds = linkedIds.filter((id) => !knownIds.has(id));
+    const knownConcIds = new Set((concRes.data ?? []).map((c) => c.id));
+    const missingConc = linkedConcIds.filter((id) => !knownConcIds.has(id));
     let extraConc: ConcessionariaOpt[] = [];
-    if (missingIds.length > 0) {
-      const { data } = await supabase
-        .from("concessionarias")
-        .select("id, nome")
-        .in("id", missingIds);
+    if (missingConc.length > 0) {
+      const { data } = await supabase.from("concessionarias").select("id, nome").in("id", missingConc);
       extraConc = data ?? [];
     }
-    const nameById = new Map<string, string>(
+    const concNameById = new Map<string, string>(
       [...(concRes.data ?? []), ...extraConc].map((c) => [c.id, c.nome])
+    );
+
+    // Agências reguladoras: idem
+    const linkedAgIds = Array.from(
+      new Set(profiles.map((p) => p.agencia_reguladora_id).filter((x): x is string => !!x))
+    );
+    const knownAgIds = new Set((agRes.data ?? []).map((a) => a.id));
+    const missingAg = linkedAgIds.filter((id) => !knownAgIds.has(id));
+    let extraAg: AgenciaOpt[] = [];
+    if (missingAg.length > 0) {
+      const { data } = await supabase.from("agencias_reguladoras").select("id, nome").in("id", missingAg);
+      extraAg = data ?? [];
+    }
+    const agNameById = new Map<string, string>(
+      [...(agRes.data ?? []), ...extraAg].map((a) => [a.id, a.nome])
     );
 
     const userMap: Record<string, UserWithRoles> = {};
@@ -278,7 +285,9 @@ export default function AdminPanel() {
         organization: p.organization,
         position: p.position,
         concessionaria_id: p.concessionaria_id,
-        concessionaria_nome: p.concessionaria_id ? nameById.get(p.concessionaria_id) ?? null : null,
+        concessionaria_nome: p.concessionaria_id ? concNameById.get(p.concessionaria_id) ?? null : null,
+        agencia_reguladora_id: p.agencia_reguladora_id,
+        agencia_reguladora_nome: p.agencia_reguladora_id ? agNameById.get(p.agencia_reguladora_id) ?? null : null,
         created_at: p.created_at,
         roles: [],
       };
@@ -291,6 +300,7 @@ export default function AdminPanel() {
 
     setUsers(Object.values(userMap));
     setConcessionarias(concRes.data ?? []);
+    setAgencias(agRes.data ?? []);
     setLoading(false);
   };
 
@@ -334,7 +344,6 @@ export default function AdminPanel() {
   };
 
   const handleSetConcessionaria = async (userId: string, conc: string) => {
-
     const value = conc === "__none__" ? null : conc;
     const { error } = await supabase
       .from("profiles")
@@ -348,11 +357,26 @@ export default function AdminPanel() {
     }
   };
 
+  const handleSetAgencia = async (userId: string, ag: string) => {
+    const value = ag === "__none__" ? null : ag;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ agencia_reguladora_id: value })
+      .eq("user_id", userId);
+    if (error) {
+      toast({ title: "Erro ao vincular agência reguladora", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Agência reguladora vinculada" : "Vínculo removido" });
+      fetchUsers();
+    }
+  };
 
   const q = search.trim().toLowerCase();
   const filteredUsers = users.filter((u) => {
     if (filterConc === "__none__" && u.concessionaria_id) return false;
     if (filterConc !== "__all__" && filterConc !== "__none__" && u.concessionaria_id !== filterConc) return false;
+    if (filterAg === "__none__" && u.agencia_reguladora_id) return false;
+    if (filterAg !== "__all__" && filterAg !== "__none__" && u.agencia_reguladora_id !== filterAg) return false;
     if (filterRole === "__norole__" && u.roles.length > 0) return false;
     if (filterRole !== "__all__" && filterRole !== "__norole__" && !u.roles.includes(filterRole as AppRole)) return false;
     if (!q) return true;
@@ -409,6 +433,7 @@ export default function AdminPanel() {
                   <SelectContent>
                     <SelectItem value="operador">Operador</SelectItem>
                     <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
+                    <SelectItem value="gestor_ar">Gestor AR</SelectItem>
                     <SelectItem value="superadmin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
@@ -468,7 +493,7 @@ export default function AdminPanel() {
               />
             </div>
             <Select value={filterConc} onValueChange={setFilterConc}>
-              <SelectTrigger className="h-9 text-xs md:w-[260px]">
+              <SelectTrigger className="h-9 text-xs md:w-[220px]">
                 <SelectValue placeholder="Concessionária" />
               </SelectTrigger>
               <SelectContent>
@@ -476,6 +501,18 @@ export default function AdminPanel() {
                 <SelectItem value="__none__">— Sem vínculo —</SelectItem>
                 {concessionarias.map((c) => (
                   <SelectItem key={c.id} value={c.id} className="text-xs">{c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterAg} onValueChange={setFilterAg}>
+              <SelectTrigger className="h-9 text-xs md:w-[220px]">
+                <SelectValue placeholder="Agência Reguladora" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas as agências</SelectItem>
+                <SelectItem value="__none__">— Sem vínculo —</SelectItem>
+                {agencias.map((a) => (
+                  <SelectItem key={a.id} value={a.id} className="text-xs">{a.nome}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -488,6 +525,7 @@ export default function AdminPanel() {
                 <SelectItem value="__norole__">Sem role</SelectItem>
                 <SelectItem value="operador">Operador</SelectItem>
                 <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
+                <SelectItem value="gestor_ar">Gestor AR</SelectItem>
                 <SelectItem value="superadmin">Super Admin</SelectItem>
               </SelectContent>
             </Select>
@@ -503,6 +541,7 @@ export default function AdminPanel() {
                 <TableHead className="text-xs">Organização</TableHead>
                 <TableHead className="text-xs">Cargo</TableHead>
                 <TableHead className="text-xs">Concessionária</TableHead>
+                <TableHead className="text-xs">Agência Reguladora</TableHead>
                 <TableHead className="text-xs">Roles</TableHead>
                 <TableHead className="text-xs">Cadastro</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
@@ -511,7 +550,7 @@ export default function AdminPanel() {
             <TableBody>
               {filteredUsers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-xs text-muted-foreground py-6">
+                  <TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">
                     Nenhum usuário corresponde aos filtros aplicados.
                   </TableCell>
                 </TableRow>
@@ -524,12 +563,24 @@ export default function AdminPanel() {
                   </TableCell>
                   <TableCell className="text-sm">{u.organization || "—"}</TableCell>
                   <TableCell className="text-sm">{u.position || "—"}</TableCell>
-                  <TableCell className="text-sm min-w-[260px]">
-                    <ConcessionariaCell
+                  <TableCell className="text-sm min-w-[240px]">
+                    <RelationCell
+                      table="concessionarias"
+                      entityLabel="concessionária"
                       userId={u.user_id}
-                      currentConcId={u.concessionaria_id}
-                      currentConcNome={u.concessionaria_nome}
+                      currentId={u.concessionaria_id}
+                      currentNome={u.concessionaria_nome}
                       onChange={handleSetConcessionaria}
+                    />
+                  </TableCell>
+                  <TableCell className="text-sm min-w-[240px]">
+                    <RelationCell
+                      table="agencias_reguladoras"
+                      entityLabel="agência"
+                      userId={u.user_id}
+                      currentId={u.agencia_reguladora_id}
+                      currentNome={u.agencia_reguladora_nome}
+                      onChange={handleSetAgencia}
                     />
                   </TableCell>
                   <TableCell>

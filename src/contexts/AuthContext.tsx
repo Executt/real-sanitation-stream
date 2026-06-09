@@ -10,6 +10,8 @@ interface Profile {
   organization: string | null;
   position: string | null;
   avatar_url: string | null;
+  concessionaria_id: string | null;
+  agencia_reguladora_id: string | null;
 }
 
 interface AuthContextType {
@@ -20,6 +22,11 @@ interface AuthContextType {
   loading: boolean;
   hasRole: (role: AppRole) => boolean;
   isSuperAdmin: boolean;
+  isGestorAna: boolean;
+  isGestorAR: boolean;
+  isOperador: boolean;
+  agenciaReguladoraId: string | null;
+  concessionariaId: string | null;
   signOut: () => Promise<void>;
 }
 
@@ -39,10 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer fetching to avoid deadlock
           setTimeout(async () => {
             const [profileRes, rolesRes] = await Promise.all([
-              supabase.from("profiles").select("full_name, organization, position, avatar_url").eq("user_id", session.user.id).single(),
+              supabase
+                .from("profiles")
+                .select("full_name, organization, position, avatar_url, concessionaria_id, agencia_reguladora_id")
+                .eq("user_id", session.user.id)
+                .single(),
               supabase.from("user_roles").select("role").eq("user_id", session.user.id),
             ]);
             setProfile(profileRes.data);
@@ -66,13 +76,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasRole = (role: AppRole) => roles.includes(role);
   const isSuperAdmin = hasRole("superadmin");
+  const isGestorAna = hasRole("gestor_ana");
+  const isGestorAR = hasRole("gestor_ar");
+  const isOperador = hasRole("operador");
 
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, loading, hasRole, isSuperAdmin, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        profile,
+        roles,
+        loading,
+        hasRole,
+        isSuperAdmin,
+        isGestorAna,
+        isGestorAR,
+        isOperador,
+        agenciaReguladoraId: profile?.agencia_reguladora_id ?? null,
+        concessionariaId: profile?.concessionaria_id ?? null,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

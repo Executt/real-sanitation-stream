@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ClipboardEdit,
   FileCog,
+  Gavel,
   Globe,
   LayoutDashboard,
   LayoutGrid,
@@ -54,10 +55,15 @@ const anaItems = [
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
 ];
 
+const agenciaItems = [
+  { title: "Painel da Agência", url: "/agencia", icon: Gavel },
+];
+
 const adminItems = [
   { title: "Hub de Administração", url: "/admin", icon: LayoutGrid },
   { title: "Usuários & Roles", url: "/admin/usuarios", icon: Users },
-  { title: "Concessionárias & Agências", url: "/admin/concessionarias", icon: Building2 },
+  { title: "Concessionárias", url: "/admin/concessionarias", icon: Building2 },
+  { title: "Agências Reguladoras", url: "/admin/agencias", icon: Gavel },
   { title: "Configuração LDAP", url: "/admin/ldap", icon: Network },
   { title: "Configuração SMTP", url: "/admin/smtp", icon: Mail },
   { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
@@ -110,13 +116,14 @@ function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
 }
 
 export function TopNavbar() {
-  const { user, profile, roles, signOut, isSuperAdmin } = useAuth();
+  const { user, profile, roles, signOut, isSuperAdmin, isGestorAR } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const roleLabels: Record<string, string> = {
     operador: "Operador",
     gestor_ana: "Gestor ANA",
+    gestor_ar: "Gestor AR",
     superadmin: "Super Admin",
   };
 
@@ -136,6 +143,9 @@ export function TopNavbar() {
       <div className="hidden md:flex items-center gap-1">
         <NavDropdown label="Operador B2B" items={operadorItems} currentPath={location.pathname} />
         <NavDropdown label="Centro de Comando ANA" items={anaItems} currentPath={location.pathname} />
+        {(isGestorAR || isSuperAdmin) && (
+          <NavDropdown label="Agência Reguladora" items={agenciaItems} currentPath={location.pathname} />
+        )}
         {isSuperAdmin && (
           <NavDropdown label="Administração" items={adminItems} currentPath={location.pathname} />
         )}

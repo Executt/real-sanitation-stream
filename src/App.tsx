@@ -13,6 +13,8 @@ import Etes from "./pages/Etes";
 import AdminHub from "./pages/AdminHub";
 import AdminPanel from "./pages/AdminPanel";
 import Concessionarias from "./pages/Concessionarias";
+import AgenciasReguladoras from "./pages/AgenciasReguladoras";
+import AgenciaDashboard from "./pages/AgenciaDashboard";
 import LdapConfig from "./pages/LdapConfig";
 import SmtpConfig from "./pages/SmtpConfig";
 import SeiConfig from "./pages/SeiConfig";
@@ -54,10 +56,13 @@ const App = () => (
               <Route path="/command-center/mapa" element={<MapaPage />} />
               <Route path="/command-center/alertas" element={<AlertasDboPage />} />
               <Route path="/command-center/conformidade" element={<ConformidadePage />} />
+              {/* Portal da Agência Reguladora */}
+              <Route path="/agencia" element={<AgenciaDashboard />} />
               {/* Administração — Hub e módulos */}
               <Route path="/admin" element={<AdminHub />} />
               <Route path="/admin/usuarios" element={<AdminPanel />} />
               <Route path="/admin/concessionarias" element={<Concessionarias />} />
+              <Route path="/admin/agencias" element={<AgenciasReguladoras />} />
               <Route path="/admin/ldap" element={<LdapConfig />} />
               <Route path="/admin/smtp" element={<SmtpConfig />} />
               <Route path="/admin/sei" element={<SeiConfig />} />
