@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ClipboardEdit,
   FileCog,
+  Gavel,
   Globe,
   LayoutDashboard,
   LayoutGrid,
