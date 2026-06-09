@@ -13,6 +13,8 @@ import Etes from "./pages/Etes";
 import AdminHub from "./pages/AdminHub";
 import AdminPanel from "./pages/AdminPanel";
 import Concessionarias from "./pages/Concessionarias";
+import AgenciasReguladoras from "./pages/AgenciasReguladoras";
+import AgenciaDashboard from "./pages/AgenciaDashboard";
 import LdapConfig from "./pages/LdapConfig";
 import SmtpConfig from "./pages/SmtpConfig";
 import SeiConfig from "./pages/SeiConfig";
