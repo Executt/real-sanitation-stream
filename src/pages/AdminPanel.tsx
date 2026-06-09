@@ -449,6 +449,7 @@ export default function AdminPanel() {
                   <SelectContent>
                     <SelectItem value="operador">Operador</SelectItem>
                     <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
+                    <SelectItem value="gestor_ar">Gestor AR</SelectItem>
                     <SelectItem value="superadmin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
