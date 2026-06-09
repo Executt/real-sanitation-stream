@@ -67,6 +67,7 @@ interface ConcessionariaOpt {
 const roleLabels: Record<AppRole, string> = {
   operador: "Operador",
   gestor_ana: "Gestor ANA",
+  gestor_ar: "Gestor AR",
   superadmin: "Super Admin",
 };
 
