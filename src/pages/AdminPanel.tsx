@@ -246,11 +246,29 @@ export default function AdminPanel() {
     const [profilesRes, rolesRes, concRes] = await Promise.all([
       supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, created_at"),
       supabase.from("user_roles").select("user_id, role"),
-      supabase.from("concessionarias").select("id, nome").order("nome"),
+      supabase.from("concessionarias").select("id, nome").order("nome").limit(200),
     ]);
 
     const profiles = profilesRes.data ?? [];
     const roles = rolesRes.data ?? [];
+
+    // Fetch names for any linked concessionarias that didn't come in the top-200 filter list
+    const linkedIds = Array.from(
+      new Set(profiles.map((p) => p.concessionaria_id).filter((x): x is string => !!x))
+    );
+    const knownIds = new Set((concRes.data ?? []).map((c) => c.id));
+    const missingIds = linkedIds.filter((id) => !knownIds.has(id));
+    let extraConc: ConcessionariaOpt[] = [];
+    if (missingIds.length > 0) {
+      const { data } = await supabase
+        .from("concessionarias")
+        .select("id, nome")
+        .in("id", missingIds);
+      extraConc = data ?? [];
+    }
+    const nameById = new Map<string, string>(
+      [...(concRes.data ?? []), ...extraConc].map((c) => [c.id, c.nome])
+    );
 
     const userMap: Record<string, UserWithRoles> = {};
     profiles.forEach((p) => {
@@ -260,6 +278,7 @@ export default function AdminPanel() {
         organization: p.organization,
         position: p.position,
         concessionaria_id: p.concessionaria_id,
+        concessionaria_nome: p.concessionaria_id ? nameById.get(p.concessionaria_id) ?? null : null,
         created_at: p.created_at,
         roles: [],
       };
