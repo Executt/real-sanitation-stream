@@ -251,31 +251,44 @@ export default function AdminPanel() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes, concRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, created_at"),
+    const [profilesRes, rolesRes, concRes, agRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, organization, position, concessionaria_id, agencia_reguladora_id, created_at"),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("concessionarias").select("id, nome").order("nome").limit(200),
+      supabase.from("agencias_reguladoras").select("id, nome").order("nome").limit(200),
     ]);
 
     const profiles = profilesRes.data ?? [];
     const roles = rolesRes.data ?? [];
 
-    // Fetch names for any linked concessionarias that didn't come in the top-200 filter list
-    const linkedIds = Array.from(
+    // Concessionárias: complementar nomes de IDs vinculados não presentes na top-200
+    const linkedConcIds = Array.from(
       new Set(profiles.map((p) => p.concessionaria_id).filter((x): x is string => !!x))
     );
-    const knownIds = new Set((concRes.data ?? []).map((c) => c.id));
-    const missingIds = linkedIds.filter((id) => !knownIds.has(id));
+    const knownConcIds = new Set((concRes.data ?? []).map((c) => c.id));
+    const missingConc = linkedConcIds.filter((id) => !knownConcIds.has(id));
     let extraConc: ConcessionariaOpt[] = [];
-    if (missingIds.length > 0) {
-      const { data } = await supabase
-        .from("concessionarias")
-        .select("id, nome")
-        .in("id", missingIds);
+    if (missingConc.length > 0) {
+      const { data } = await supabase.from("concessionarias").select("id, nome").in("id", missingConc);
       extraConc = data ?? [];
     }
-    const nameById = new Map<string, string>(
+    const concNameById = new Map<string, string>(
       [...(concRes.data ?? []), ...extraConc].map((c) => [c.id, c.nome])
+    );
+
+    // Agências reguladoras: idem
+    const linkedAgIds = Array.from(
+      new Set(profiles.map((p) => p.agencia_reguladora_id).filter((x): x is string => !!x))
+    );
+    const knownAgIds = new Set((agRes.data ?? []).map((a) => a.id));
+    const missingAg = linkedAgIds.filter((id) => !knownAgIds.has(id));
+    let extraAg: AgenciaOpt[] = [];
+    if (missingAg.length > 0) {
+      const { data } = await supabase.from("agencias_reguladoras").select("id, nome").in("id", missingAg);
+      extraAg = data ?? [];
+    }
+    const agNameById = new Map<string, string>(
+      [...(agRes.data ?? []), ...extraAg].map((a) => [a.id, a.nome])
     );
 
     const userMap: Record<string, UserWithRoles> = {};
@@ -286,7 +299,9 @@ export default function AdminPanel() {
         organization: p.organization,
         position: p.position,
         concessionaria_id: p.concessionaria_id,
-        concessionaria_nome: p.concessionaria_id ? nameById.get(p.concessionaria_id) ?? null : null,
+        concessionaria_nome: p.concessionaria_id ? concNameById.get(p.concessionaria_id) ?? null : null,
+        agencia_reguladora_id: p.agencia_reguladora_id,
+        agencia_reguladora_nome: p.agencia_reguladora_id ? agNameById.get(p.agencia_reguladora_id) ?? null : null,
         created_at: p.created_at,
         roles: [],
       };
@@ -299,6 +314,7 @@ export default function AdminPanel() {
 
     setUsers(Object.values(userMap));
     setConcessionarias(concRes.data ?? []);
+    setAgencias(agRes.data ?? []);
     setLoading(false);
   };
 
