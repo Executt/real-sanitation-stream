@@ -360,7 +360,6 @@ export default function AdminPanel() {
   };
 
   const handleSetConcessionaria = async (userId: string, conc: string) => {
-
     const value = conc === "__none__" ? null : conc;
     const { error } = await supabase
       .from("profiles")
@@ -374,11 +373,26 @@ export default function AdminPanel() {
     }
   };
 
+  const handleSetAgencia = async (userId: string, ag: string) => {
+    const value = ag === "__none__" ? null : ag;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ agencia_reguladora_id: value })
+      .eq("user_id", userId);
+    if (error) {
+      toast({ title: "Erro ao vincular agência reguladora", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Agência reguladora vinculada" : "Vínculo removido" });
+      fetchUsers();
+    }
+  };
 
   const q = search.trim().toLowerCase();
   const filteredUsers = users.filter((u) => {
     if (filterConc === "__none__" && u.concessionaria_id) return false;
     if (filterConc !== "__all__" && filterConc !== "__none__" && u.concessionaria_id !== filterConc) return false;
+    if (filterAg === "__none__" && u.agencia_reguladora_id) return false;
+    if (filterAg !== "__all__" && filterAg !== "__none__" && u.agencia_reguladora_id !== filterAg) return false;
     if (filterRole === "__norole__" && u.roles.length > 0) return false;
     if (filterRole !== "__all__" && filterRole !== "__norole__" && !u.roles.includes(filterRole as AppRole)) return false;
     if (!q) return true;
