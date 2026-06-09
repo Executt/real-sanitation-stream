@@ -241,12 +241,14 @@ export default function AdminPanel() {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [concessionarias, setConcessionarias] = useState<ConcessionariaOpt[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [addRoleUserId, setAddRoleUserId] = useState("");
   const [addRoleValue, setAddRoleValue] = useState<AppRole | "">("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterConc, setFilterConc] = useState<string>("__all__");
+  const [filterAg, setFilterAg] = useState<string>("__all__");
   const [filterRole, setFilterRole] = useState<string>("__all__");
 
   const fetchUsers = async () => {
