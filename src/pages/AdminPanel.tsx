@@ -528,7 +528,7 @@ export default function AdminPanel() {
                     <ConcessionariaCell
                       userId={u.user_id}
                       currentConcId={u.concessionaria_id}
-                      concessionarias={concessionarias}
+                      currentConcNome={u.concessionaria_nome}
                       onChange={handleSetConcessionaria}
                     />
                   </TableCell>
