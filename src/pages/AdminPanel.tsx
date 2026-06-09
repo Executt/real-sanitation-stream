@@ -83,6 +83,142 @@ const roleBadgeVariant = (role: AppRole) =>
 
 const PAGE_SIZE = 20;
 
+type RelTable = "concessionarias" | "agencias_reguladoras";
+
+function RelationCell({
+  table,
+  entityLabel,
+  userId,
+  currentId,
+  currentNome,
+  onChange,
+}: {
+  table: RelTable;
+  entityLabel: string;
+  userId: string;
+  currentId: string | null;
+  currentNome: string | null;
+  onChange: (userId: string, value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [options, setOptions] = useState<{ id: string; nome: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setDebounced(query.trim()); setPage(0); }, 250);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let q = supabase
+        .from(table)
+        .select("id, nome", { count: "exact" })
+        .order("nome")
+        .range(from, to);
+      if (debounced) {
+        const isUuidLike = /^[0-9a-fA-F-]{4,}$/.test(debounced);
+        if (isUuidLike) {
+          q = q.or(`nome.ilike.%${debounced}%,id::text.ilike.${debounced}%`);
+        } else {
+          q = q.ilike("nome", `%${debounced}%`);
+        }
+      }
+      const { data, count, error } = await q;
+      if (cancelled) return;
+      if (error) { setOptions([]); setHasMore(false); }
+      else {
+        const rows = (data ?? []) as { id: string; nome: string }[];
+        setOptions((prev) => (page === 0 ? rows : [...prev, ...rows]));
+        setHasMore((count ?? 0) > to + 1);
+      }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [open, debounced, page, table]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="h-8 justify-between text-xs w-full font-normal"
+        >
+          <span className="truncate">
+            {currentId
+              ? `${currentNome ?? "(sem nome)"} (${currentId.slice(0, 8)}…)`
+              : "— Sem vínculo —"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={`Buscar ${entityLabel} por nome ou ID…`}
+            value={query}
+            onValueChange={setQuery}
+          />
+          <CommandList>
+            {loading && options.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">Buscando…</div>
+            ) : (
+              <CommandEmpty>Nenhum resultado.</CommandEmpty>
+            )}
+            <CommandGroup>
+              <CommandItem
+                value="__none__"
+                onSelect={() => { onChange(userId, "__none__"); setOpen(false); }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !currentId ? "opacity-100" : "opacity-0")} />
+                — Sem vínculo —
+              </CommandItem>
+              {options.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={c.id}
+                  onSelect={() => { onChange(userId, c.id); setOpen(false); }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", currentId === c.id ? "opacity-100" : "opacity-0")} />
+                  <span className="flex flex-col">
+                    <span className="text-xs">{c.nome}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
+                  </span>
+                </CommandItem>
+              ))}
+              {hasMore && (
+                <div className="p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-7 text-xs"
+                    disabled={loading}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    {loading ? "Carregando…" : "Carregar mais"}
+                  </Button>
+                </div>
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+
 function ConcessionariaCell({
   userId,
   currentConcId,
