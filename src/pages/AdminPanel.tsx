@@ -509,7 +509,7 @@ export default function AdminPanel() {
               />
             </div>
             <Select value={filterConc} onValueChange={setFilterConc}>
-              <SelectTrigger className="h-9 text-xs md:w-[260px]">
+              <SelectTrigger className="h-9 text-xs md:w-[220px]">
                 <SelectValue placeholder="Concessionária" />
               </SelectTrigger>
               <SelectContent>
@@ -517,6 +517,18 @@ export default function AdminPanel() {
                 <SelectItem value="__none__">— Sem vínculo —</SelectItem>
                 {concessionarias.map((c) => (
                   <SelectItem key={c.id} value={c.id} className="text-xs">{c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterAg} onValueChange={setFilterAg}>
+              <SelectTrigger className="h-9 text-xs md:w-[220px]">
+                <SelectValue placeholder="Agência Reguladora" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas as agências</SelectItem>
+                <SelectItem value="__none__">— Sem vínculo —</SelectItem>
+                {agencias.map((a) => (
+                  <SelectItem key={a.id} value={a.id} className="text-xs">{a.nome}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -529,6 +541,7 @@ export default function AdminPanel() {
                 <SelectItem value="__norole__">Sem role</SelectItem>
                 <SelectItem value="operador">Operador</SelectItem>
                 <SelectItem value="gestor_ana">Gestor ANA</SelectItem>
+                <SelectItem value="gestor_ar">Gestor AR</SelectItem>
                 <SelectItem value="superadmin">Super Admin</SelectItem>
               </SelectContent>
             </Select>
@@ -544,6 +557,7 @@ export default function AdminPanel() {
                 <TableHead className="text-xs">Organização</TableHead>
                 <TableHead className="text-xs">Cargo</TableHead>
                 <TableHead className="text-xs">Concessionária</TableHead>
+                <TableHead className="text-xs">Agência Reguladora</TableHead>
                 <TableHead className="text-xs">Roles</TableHead>
                 <TableHead className="text-xs">Cadastro</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
