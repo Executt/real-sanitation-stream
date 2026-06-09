@@ -54,10 +54,15 @@ const anaItems = [
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
 ];
 
+const agenciaItems = [
+  { title: "Painel da Agência", url: "/agencia", icon: Gavel },
+];
+
 const adminItems = [
   { title: "Hub de Administração", url: "/admin", icon: LayoutGrid },
   { title: "Usuários & Roles", url: "/admin/usuarios", icon: Users },
-  { title: "Concessionárias & Agências", url: "/admin/concessionarias", icon: Building2 },
+  { title: "Concessionárias", url: "/admin/concessionarias", icon: Building2 },
+  { title: "Agências Reguladoras", url: "/admin/agencias", icon: Gavel },
   { title: "Configuração LDAP", url: "/admin/ldap", icon: Network },
   { title: "Configuração SMTP", url: "/admin/smtp", icon: Mail },
   { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
