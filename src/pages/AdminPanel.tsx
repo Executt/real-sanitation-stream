@@ -72,19 +72,77 @@ const roleLabels: Record<AppRole, string> = {
 const roleBadgeVariant = (role: AppRole) =>
   role === "superadmin" ? "default" : role === "gestor_ana" ? "secondary" : "outline";
 
+const PAGE_SIZE = 20;
+
 function ConcessionariaCell({
   userId,
   currentConcId,
-  concessionarias,
+  currentConcNome,
   onChange,
 }: {
   userId: string;
   currentConcId: string | null;
-  concessionarias: ConcessionariaOpt[];
+  currentConcNome: string | null;
   onChange: (userId: string, value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const current = concessionarias.find((c) => c.id === currentConcId);
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [options, setOptions] = useState<ConcessionariaOpt[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  // Debounce input
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebounced(query.trim());
+      setPage(0);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Fetch when open / query / page changes
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let q = supabase
+        .from("concessionarias")
+        .select("id, nome", { count: "exact" })
+        .order("nome")
+        .range(from, to);
+
+      if (debounced) {
+        // Search by nome (case-insensitive) OR exact id prefix
+        const isUuidLike = /^[0-9a-fA-F-]{4,}$/.test(debounced);
+        if (isUuidLike) {
+          q = q.or(`nome.ilike.%${debounced}%,id::text.ilike.${debounced}%`);
+        } else {
+          q = q.ilike("nome", `%${debounced}%`);
+        }
+      }
+
+      const { data, count, error } = await q;
+      if (cancelled) return;
+      if (error) {
+        setOptions([]);
+        setHasMore(false);
+      } else {
+        const rows = data ?? [];
+        setOptions((prev) => (page === 0 ? rows : [...prev, ...rows]));
+        setHasMore((count ?? 0) > to + 1);
+      }
+      setLoading(false);
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, debounced, page]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -96,16 +154,26 @@ function ConcessionariaCell({
           className="h-8 justify-between text-xs w-full font-normal"
         >
           <span className="truncate">
-            {current ? `${current.nome} (${current.id.slice(0, 8)}…)` : "— Sem vínculo —"}
+            {currentConcId
+              ? `${currentConcNome ?? "(sem nome)"} (${currentConcId.slice(0, 8)}…)`
+              : "— Sem vínculo —"}
           </span>
           <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] p-0">
-        <Command>
-          <CommandInput placeholder="Buscar por nome ou ID…" />
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Buscar por nome ou ID…"
+            value={query}
+            onValueChange={setQuery}
+          />
           <CommandList>
-            <CommandEmpty>Nenhuma concessionária encontrada.</CommandEmpty>
+            {loading && options.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">Buscando…</div>
+            ) : (
+              <CommandEmpty>Nenhuma concessionária encontrada.</CommandEmpty>
+            )}
             <CommandGroup>
               <CommandItem
                 value="__none__"
@@ -117,10 +185,10 @@ function ConcessionariaCell({
                 <Check className={cn("mr-2 h-4 w-4", !currentConcId ? "opacity-100" : "opacity-0")} />
                 — Sem vínculo —
               </CommandItem>
-              {concessionarias.map((c) => (
+              {options.map((c) => (
                 <CommandItem
                   key={c.id}
-                  value={`${c.nome} ${c.id}`}
+                  value={c.id}
                   onSelect={() => {
                     onChange(userId, c.id);
                     setOpen(false);
@@ -138,6 +206,19 @@ function ConcessionariaCell({
                   </span>
                 </CommandItem>
               ))}
+              {hasMore && (
+                <div className="p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-7 text-xs"
+                    disabled={loading}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    {loading ? "Carregando…" : "Carregar mais"}
+                  </Button>
+                </div>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
