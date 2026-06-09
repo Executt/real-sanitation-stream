@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      agencias_reguladoras: {
+        Row: {
+          ativa: boolean
+          cnpj: string | null
+          created_at: string
+          email_contato: string | null
+          endereco: string | null
+          esfera: string
+          id: string
+          municipio: string | null
+          nome: string
+          observacoes: string | null
+          sigla: string | null
+          site: string | null
+          telefone: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email_contato?: string | null
+          endereco?: string | null
+          esfera: string
+          id?: string
+          municipio?: string | null
+          nome: string
+          observacoes?: string | null
+          sigla?: string | null
+          site?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email_contato?: string | null
+          endereco?: string | null
+          esfera?: string
+          id?: string
+          municipio?: string | null
+          nome?: string
+          observacoes?: string | null
+          sigla?: string | null
+          site?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       api_probe_log: {
         Row: {
           checked_at: string
@@ -83,6 +137,7 @@ export type Database = {
       concessionarias: {
         Row: {
           abrangencia: string | null
+          agencia_reguladora_id: string | null
           ativa: boolean
           cnpj: string | null
           created_at: string
@@ -103,6 +158,7 @@ export type Database = {
         }
         Insert: {
           abrangencia?: string | null
+          agencia_reguladora_id?: string | null
           ativa?: boolean
           cnpj?: string | null
           created_at?: string
@@ -123,6 +179,7 @@ export type Database = {
         }
         Update: {
           abrangencia?: string | null
+          agencia_reguladora_id?: string | null
           ativa?: boolean
           cnpj?: string | null
           created_at?: string
@@ -141,7 +198,15 @@ export type Database = {
           uf?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "concessionarias_agencia_reguladora_id_fkey"
+            columns: ["agencia_reguladora_id"]
+            isOneToOne: false
+            referencedRelation: "agencias_reguladoras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cron_config: {
         Row: {
@@ -329,6 +394,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agencia_reguladora_id: string | null
           avatar_url: string | null
           concessionaria_id: string | null
           created_at: string
@@ -340,6 +406,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agencia_reguladora_id?: string | null
           avatar_url?: string | null
           concessionaria_id?: string | null
           created_at?: string
@@ -351,6 +418,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agencia_reguladora_id?: string | null
           avatar_url?: string | null
           concessionaria_id?: string | null
           created_at?: string
@@ -362,6 +430,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_agencia_reguladora_id_fkey"
+            columns: ["agencia_reguladora_id"]
+            isOneToOne: false
+            referencedRelation: "agencias_reguladoras"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_concessionaria_id_fkey"
             columns: ["concessionaria_id"]
@@ -511,6 +586,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_agencia: { Args: never; Returns: string }
       current_user_concessionaria: { Args: never; Returns: string }
       has_role: {
         Args: {
