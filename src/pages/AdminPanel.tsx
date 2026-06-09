@@ -54,6 +54,7 @@ interface UserWithRoles {
   organization: string | null;
   position: string | null;
   concessionaria_id: string | null;
+  concessionaria_nome: string | null;
   created_at: string;
   roles: AppRole[];
 }
