@@ -55,11 +55,18 @@ interface UserWithRoles {
   position: string | null;
   concessionaria_id: string | null;
   concessionaria_nome: string | null;
+  agencia_reguladora_id: string | null;
+  agencia_reguladora_nome: string | null;
   created_at: string;
   roles: AppRole[];
 }
 
 interface ConcessionariaOpt {
+  id: string;
+  nome: string;
+}
+
+interface AgenciaOpt {
   id: string;
   nome: string;
 }
