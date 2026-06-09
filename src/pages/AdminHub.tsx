@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2 } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel } from "lucide-react";
 
 const modules = [
   {
@@ -10,10 +10,16 @@ const modules = [
     icon: Users,
   },
   {
-    title: "Concessionárias & Agências",
-    description: "Cadastro nacional de operadores de saneamento e órgãos reguladores.",
+    title: "Concessionárias",
+    description: "Cadastro nacional de operadores de saneamento e seus vínculos regulatórios.",
     url: "/admin/concessionarias",
     icon: Building2,
+  },
+  {
+    title: "Agências Reguladoras",
+    description: "Cadastro das ARs estaduais/municipais e supervisão das concessionárias.",
+    url: "/admin/agencias",
+    icon: Gavel,
   },
   {
     title: "Configuração LDAP",
