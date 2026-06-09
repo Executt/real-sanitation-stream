@@ -550,7 +550,7 @@ export default function AdminPanel() {
             <TableBody>
               {filteredUsers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-xs text-muted-foreground py-6">
+                  <TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">
                     Nenhum usuário corresponde aos filtros aplicados.
                   </TableCell>
                 </TableRow>
