@@ -116,13 +116,14 @@ function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
 }
 
 export function TopNavbar() {
-  const { user, profile, roles, signOut, isSuperAdmin } = useAuth();
+  const { user, profile, roles, signOut, isSuperAdmin, isGestorAR } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const roleLabels: Record<string, string> = {
     operador: "Operador",
     gestor_ana: "Gestor ANA",
+    gestor_ar: "Gestor AR",
     superadmin: "Super Admin",
   };
 
@@ -142,6 +143,9 @@ export function TopNavbar() {
       <div className="hidden md:flex items-center gap-1">
         <NavDropdown label="Operador B2B" items={operadorItems} currentPath={location.pathname} />
         <NavDropdown label="Centro de Comando ANA" items={anaItems} currentPath={location.pathname} />
+        {(isGestorAR || isSuperAdmin) && (
+          <NavDropdown label="Agência Reguladora" items={agenciaItems} currentPath={location.pathname} />
+        )}
         {isSuperAdmin && (
           <NavDropdown label="Administração" items={adminItems} currentPath={location.pathname} />
         )}
