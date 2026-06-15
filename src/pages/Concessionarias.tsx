@@ -106,7 +106,7 @@ export default function Concessionarias() {
     setLoadingData(true);
     const [{ data, error }, agRes] = await Promise.all([
       supabase.from("concessionarias").select("*").order("nome", { ascending: true }),
-      supabase.from("agencias_reguladoras").select("id, nome, sigla, uf").eq("ativo", true).order("nome"),
+      supabase.from("agencias_reguladoras").select("id, nome, sigla, uf").order("nome"),
     ]);
     if (error) {
       toast({ title: "Erro ao carregar", description: error.message, variant: "destructive" });
