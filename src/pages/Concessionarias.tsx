@@ -344,7 +344,8 @@ export default function Concessionarias() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>
