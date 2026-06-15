@@ -104,21 +104,45 @@ export default function Concessionarias() {
 
   const fetchData = async () => {
     setLoadingData(true);
-    const { data, error } = await supabase
-      .from("concessionarias")
-      .select("*")
-      .order("nome", { ascending: true });
+    const [{ data, error }, agRes] = await Promise.all([
+      supabase.from("concessionarias").select("*").order("nome", { ascending: true }),
+      supabase.from("agencias_reguladoras").select("id, nome, sigla, uf").eq("ativo", true).order("nome"),
+    ]);
     if (error) {
       toast({ title: "Erro ao carregar", description: error.message, variant: "destructive" });
     } else {
       setItems((data ?? []) as Concessionaria[]);
     }
+    setAgencias((agRes.data ?? []) as AgenciaOption[]);
     setLoadingData(false);
   };
 
   useEffect(() => {
     if (isSuperAdmin) fetchData();
   }, [isSuperAdmin]);
+
+  const agenciaMap = useMemo(() => {
+    const m = new Map<string, AgenciaOption>();
+    agencias.forEach((a) => m.set(a.id, a));
+    return m;
+  }, [agencias]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items.filter((it) => {
+      if (filterTipo !== "all" && it.tipo !== filterTipo) return false;
+      if (filterUf !== "all" && it.uf !== filterUf) return false;
+      if (filterAgencia !== "all") {
+        if (filterAgencia === "none" ? it.agencia_reguladora_id : it.agencia_reguladora_id !== filterAgencia) return false;
+      }
+      if (!q) return true;
+      return (
+        it.nome.toLowerCase().includes(q) ||
+        (it.sigla ?? "").toLowerCase().includes(q) ||
+        (it.cnpj ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [items, search, filterTipo, filterUf, filterAgencia]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
