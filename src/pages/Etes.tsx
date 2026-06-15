@@ -26,6 +26,13 @@ interface Concessionaria {
   nome: string;
   sigla: string | null;
   uf: string;
+  agencia_reguladora_id: string | null;
+}
+
+interface AgenciaOption {
+  id: string;
+  nome: string;
+  sigla: string | null;
 }
 
 interface Ete {
@@ -104,9 +111,11 @@ export default function Etes() {
 
   const [etes, setEtes] = useState<Ete[]>([]);
   const [concessionarias, setConcessionarias] = useState<Concessionaria[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterConcessionaria, setFilterConcessionaria] = useState<string>("all");
+  const [filterAgencia, setFilterAgencia] = useState<string>("all");
   const [filterUf, setFilterUf] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
@@ -117,14 +126,16 @@ export default function Etes() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [etesRes, concRes] = await Promise.all([
+    const [etesRes, concRes, agRes] = await Promise.all([
       supabase.from("etes").select("*").order("nome"),
-      supabase.from("concessionarias").select("id, nome, sigla, uf").order("nome"),
+      supabase.from("concessionarias").select("id, nome, sigla, uf, agencia_reguladora_id").order("nome"),
+      supabase.from("agencias_reguladoras").select("id, nome, sigla").order("nome"),
     ]);
     if (etesRes.error) toast({ title: "Erro ao carregar ETEs", description: etesRes.error.message, variant: "destructive" });
     if (concRes.error) toast({ title: "Erro ao carregar concessionárias", description: concRes.error.message, variant: "destructive" });
     setEtes((etesRes.data ?? []) as Ete[]);
     setConcessionarias((concRes.data ?? []) as Concessionaria[]);
+    setAgencias((agRes.data ?? []) as AgenciaOption[]);
     setLoading(false);
   };
 
@@ -140,6 +151,11 @@ export default function Etes() {
     const q = search.trim().toLowerCase();
     return etes.filter((e) => {
       if (filterConcessionaria !== "all" && e.concessionaria_id !== filterConcessionaria) return false;
+      if (filterAgencia !== "all") {
+        const conc = e.concessionaria_id ? concessionariaMap.get(e.concessionaria_id) : null;
+        const arId = conc?.agencia_reguladora_id ?? null;
+        if (filterAgencia === "none" ? arId !== null : arId !== filterAgencia) return false;
+      }
       if (filterUf !== "all" && e.uf !== filterUf) return false;
       if (filterStatus !== "all" && e.status !== filterStatus) return false;
       if (!q) return true;
@@ -149,7 +165,7 @@ export default function Etes() {
         e.municipio.toLowerCase().includes(q)
       );
     });
-  }, [etes, search, filterConcessionaria, filterUf, filterStatus]);
+  }, [etes, search, filterConcessionaria, filterAgencia, filterUf, filterStatus, concessionariaMap]);
 
   const stats = useMemo(() => ({
     total: etes.length,
@@ -277,6 +293,18 @@ export default function Etes() {
             {concessionarias.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.sigla ? `${c.sigla} — ${c.uf}` : `${c.nome} (${c.uf})`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterAgencia} onValueChange={setFilterAgencia}>
+          <SelectTrigger className="w-[240px]"><SelectValue placeholder="Agência Reguladora" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas agências</SelectItem>
+            <SelectItem value="none">Sem agência</SelectItem>
+            {agencias.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}
               </SelectItem>
             ))}
           </SelectContent>
