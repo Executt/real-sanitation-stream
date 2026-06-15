@@ -53,6 +53,14 @@ interface Concessionaria {
   endereco: string | null;
   ativa: boolean;
   observacoes: string | null;
+  agencia_reguladora_id: string | null;
+}
+
+interface AgenciaOption {
+  id: string;
+  nome: string;
+  sigla: string | null;
+  uf: string | null;
 }
 
 const ESTADOS_BR = [
@@ -77,6 +85,7 @@ const empty: Omit<Concessionaria, "id"> = {
   endereco: "",
   ativa: true,
   observacoes: "",
+  agencia_reguladora_id: null,
 };
 
 export default function Concessionarias() {
