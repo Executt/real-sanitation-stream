@@ -184,6 +184,7 @@ export default function Concessionarias() {
       observacoes: form.observacoes || null,
       municipios_atendidos: form.municipios_atendidos || null,
       populacao_atendida: form.populacao_atendida || null,
+      agencia_reguladora_id: form.agencia_reguladora_id || null,
     };
 
     const { error } = editing
