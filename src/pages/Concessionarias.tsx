@@ -421,6 +421,23 @@ export default function Concessionarias() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="md:col-span-2">
+              <Label>Agência Reguladora vinculada</Label>
+              <Select
+                value={form.agencia_reguladora_id ?? "__none__"}
+                onValueChange={(v) => setForm({ ...form, agencia_reguladora_id: v === "__none__" ? null : v })}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Sem agência vinculada —</SelectItem>
+                  {agencias.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}{a.uf ? ` (${a.uf})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label>Municípios atendidos</Label>
               <Input
