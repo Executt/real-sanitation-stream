@@ -302,16 +302,19 @@ export default function Concessionarias() {
               <TableHead>Tipo</TableHead>
               <TableHead>UF</TableHead>
               <TableHead>Abrangência</TableHead>
+              <TableHead>Agência Reguladora</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingData ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
-            ) : filtered.map((it) => (
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
+            ) : filtered.map((it) => {
+              const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
+              return (
               <TableRow key={it.id}>
                 <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
                 <TableCell className="font-medium">{it.nome}</TableCell>
@@ -322,6 +325,9 @@ export default function Concessionarias() {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{it.uf}</TableCell>
                 <TableCell className="text-xs capitalize">{it.abrangencia ?? "—"}</TableCell>
+                <TableCell className="text-xs">
+                  {ag ? (ag.sigla ? `${ag.sigla} — ${ag.nome}` : ag.nome) : <span className="text-muted-foreground">—</span>}
+                </TableCell>
                 <TableCell>
                   {it.ativa ? (
                     <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
