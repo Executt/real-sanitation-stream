@@ -111,9 +111,11 @@ export default function Etes() {
 
   const [etes, setEtes] = useState<Ete[]>([]);
   const [concessionarias, setConcessionarias] = useState<Concessionaria[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterConcessionaria, setFilterConcessionaria] = useState<string>("all");
+  const [filterAgencia, setFilterAgencia] = useState<string>("all");
   const [filterUf, setFilterUf] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
@@ -124,14 +126,16 @@ export default function Etes() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [etesRes, concRes] = await Promise.all([
+    const [etesRes, concRes, agRes] = await Promise.all([
       supabase.from("etes").select("*").order("nome"),
-      supabase.from("concessionarias").select("id, nome, sigla, uf").order("nome"),
+      supabase.from("concessionarias").select("id, nome, sigla, uf, agencia_reguladora_id").order("nome"),
+      supabase.from("agencias_reguladoras").select("id, nome, sigla").order("nome"),
     ]);
     if (etesRes.error) toast({ title: "Erro ao carregar ETEs", description: etesRes.error.message, variant: "destructive" });
     if (concRes.error) toast({ title: "Erro ao carregar concessionárias", description: concRes.error.message, variant: "destructive" });
     setEtes((etesRes.data ?? []) as Ete[]);
     setConcessionarias((concRes.data ?? []) as Concessionaria[]);
+    setAgencias((agRes.data ?? []) as AgenciaOption[]);
     setLoading(false);
   };
 
