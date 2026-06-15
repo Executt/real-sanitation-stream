@@ -151,6 +151,11 @@ export default function Etes() {
     const q = search.trim().toLowerCase();
     return etes.filter((e) => {
       if (filterConcessionaria !== "all" && e.concessionaria_id !== filterConcessionaria) return false;
+      if (filterAgencia !== "all") {
+        const conc = e.concessionaria_id ? concessionariaMap.get(e.concessionaria_id) : null;
+        const arId = conc?.agencia_reguladora_id ?? null;
+        if (filterAgencia === "none" ? arId !== null : arId !== filterAgencia) return false;
+      }
       if (filterUf !== "all" && e.uf !== filterUf) return false;
       if (filterStatus !== "all" && e.status !== filterStatus) return false;
       if (!q) return true;
@@ -160,7 +165,7 @@ export default function Etes() {
         e.municipio.toLowerCase().includes(q)
       );
     });
-  }, [etes, search, filterConcessionaria, filterUf, filterStatus]);
+  }, [etes, search, filterConcessionaria, filterAgencia, filterUf, filterStatus, concessionariaMap]);
 
   const stats = useMemo(() => ({
     total: etes.length,
