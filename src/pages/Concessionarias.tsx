@@ -278,6 +278,18 @@ export default function Concessionarias() {
             {ESTADOS_BR.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Select value={filterAgencia} onValueChange={setFilterAgencia}>
+          <SelectTrigger className="w-[240px]"><SelectValue placeholder="Agência Reguladora" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as agências</SelectItem>
+            <SelectItem value="none">Sem agência vinculada</SelectItem>
+            {agencias.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Tabela */}
