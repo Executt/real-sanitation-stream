@@ -297,6 +297,18 @@ export default function Etes() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={filterAgencia} onValueChange={setFilterAgencia}>
+          <SelectTrigger className="w-[240px]"><SelectValue placeholder="Agência Reguladora" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas agências</SelectItem>
+            <SelectItem value="none">Sem agência</SelectItem>
+            {agencias.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={filterUf} onValueChange={setFilterUf}>
           <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
           <SelectContent>
