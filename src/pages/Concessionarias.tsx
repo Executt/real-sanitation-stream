@@ -144,19 +144,6 @@ export default function Concessionarias() {
     });
   }, [items, search, filterTipo, filterUf, filterAgencia]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return items.filter((it) => {
-      if (filterTipo !== "all" && it.tipo !== filterTipo) return false;
-      if (filterUf !== "all" && it.uf !== filterUf) return false;
-      if (!q) return true;
-      return (
-        it.nome.toLowerCase().includes(q) ||
-        (it.sigla ?? "").toLowerCase().includes(q) ||
-        (it.cnpj ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [items, search, filterTipo, filterUf]);
 
   const stats = useMemo(() => ({
     total: items.length,
