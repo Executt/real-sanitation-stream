@@ -91,10 +91,12 @@ const empty: Omit<Concessionaria, "id"> = {
 export default function Concessionarias() {
   const { isSuperAdmin, loading } = useAuth();
   const [items, setItems] = useState<Concessionaria[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOption[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [search, setSearch] = useState("");
   const [filterTipo, setFilterTipo] = useState<"all" | Tipo>("all");
   const [filterUf, setFilterUf] = useState<string>("all");
+  const [filterAgencia, setFilterAgencia] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Concessionaria | null>(null);
   const [form, setForm] = useState<Omit<Concessionaria, "id">>(empty);
