@@ -53,6 +53,14 @@ interface Concessionaria {
   endereco: string | null;
   ativa: boolean;
   observacoes: string | null;
+  agencia_reguladora_id: string | null;
+}
+
+interface AgenciaOption {
+  id: string;
+  nome: string;
+  sigla: string | null;
+  uf: string | null;
 }
 
 const ESTADOS_BR = [
@@ -77,15 +85,18 @@ const empty: Omit<Concessionaria, "id"> = {
   endereco: "",
   ativa: true,
   observacoes: "",
+  agencia_reguladora_id: null,
 };
 
 export default function Concessionarias() {
   const { isSuperAdmin, loading } = useAuth();
   const [items, setItems] = useState<Concessionaria[]>([]);
+  const [agencias, setAgencias] = useState<AgenciaOption[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [search, setSearch] = useState("");
   const [filterTipo, setFilterTipo] = useState<"all" | Tipo>("all");
   const [filterUf, setFilterUf] = useState<string>("all");
+  const [filterAgencia, setFilterAgencia] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Concessionaria | null>(null);
   const [form, setForm] = useState<Omit<Concessionaria, "id">>(empty);
@@ -93,15 +104,16 @@ export default function Concessionarias() {
 
   const fetchData = async () => {
     setLoadingData(true);
-    const { data, error } = await supabase
-      .from("concessionarias")
-      .select("*")
-      .order("nome", { ascending: true });
+    const [{ data, error }, agRes] = await Promise.all([
+      supabase.from("concessionarias").select("*").order("nome", { ascending: true }),
+      supabase.from("agencias_reguladoras").select("id, nome, sigla, uf").order("nome"),
+    ]);
     if (error) {
       toast({ title: "Erro ao carregar", description: error.message, variant: "destructive" });
     } else {
       setItems((data ?? []) as Concessionaria[]);
     }
+    setAgencias((agRes.data ?? []) as AgenciaOption[]);
     setLoadingData(false);
   };
 
@@ -109,11 +121,20 @@ export default function Concessionarias() {
     if (isSuperAdmin) fetchData();
   }, [isSuperAdmin]);
 
+  const agenciaMap = useMemo(() => {
+    const m = new Map<string, AgenciaOption>();
+    agencias.forEach((a) => m.set(a.id, a));
+    return m;
+  }, [agencias]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return items.filter((it) => {
       if (filterTipo !== "all" && it.tipo !== filterTipo) return false;
       if (filterUf !== "all" && it.uf !== filterUf) return false;
+      if (filterAgencia !== "all") {
+        if (filterAgencia === "none" ? it.agencia_reguladora_id : it.agencia_reguladora_id !== filterAgencia) return false;
+      }
       if (!q) return true;
       return (
         it.nome.toLowerCase().includes(q) ||
@@ -121,7 +142,8 @@ export default function Concessionarias() {
         (it.cnpj ?? "").toLowerCase().includes(q)
       );
     });
-  }, [items, search, filterTipo, filterUf]);
+  }, [items, search, filterTipo, filterUf, filterAgencia]);
+
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -162,6 +184,7 @@ export default function Concessionarias() {
       observacoes: form.observacoes || null,
       municipios_atendidos: form.municipios_atendidos || null,
       populacao_atendida: form.populacao_atendida || null,
+      agencia_reguladora_id: form.agencia_reguladora_id || null,
     };
 
     const { error } = editing
@@ -255,6 +278,18 @@ export default function Concessionarias() {
             {ESTADOS_BR.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Select value={filterAgencia} onValueChange={setFilterAgencia}>
+          <SelectTrigger className="w-[240px]"><SelectValue placeholder="Agência Reguladora" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as agências</SelectItem>
+            <SelectItem value="none">Sem agência vinculada</SelectItem>
+            {agencias.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Tabela */}
@@ -267,16 +302,19 @@ export default function Concessionarias() {
               <TableHead>Tipo</TableHead>
               <TableHead>UF</TableHead>
               <TableHead>Abrangência</TableHead>
+              <TableHead>Agência Reguladora</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingData ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
-            ) : filtered.map((it) => (
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
+            ) : filtered.map((it) => {
+              const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
+              return (
               <TableRow key={it.id}>
                 <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
                 <TableCell className="font-medium">{it.nome}</TableCell>
@@ -287,6 +325,9 @@ export default function Concessionarias() {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{it.uf}</TableCell>
                 <TableCell className="text-xs capitalize">{it.abrangencia ?? "—"}</TableCell>
+                <TableCell className="text-xs">
+                  {ag ? (ag.sigla ? `${ag.sigla} — ${ag.nome}` : ag.nome) : <span className="text-muted-foreground">—</span>}
+                </TableCell>
                 <TableCell>
                   {it.ativa ? (
                     <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
@@ -303,7 +344,8 @@ export default function Concessionarias() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -376,6 +418,23 @@ export default function Concessionarias() {
                   <SelectItem value="regional">Regional</SelectItem>
                   <SelectItem value="municipal">Municipal</SelectItem>
                   <SelectItem value="multiestadual">Multiestadual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="md:col-span-2">
+              <Label>Agência Reguladora vinculada</Label>
+              <Select
+                value={form.agencia_reguladora_id ?? "__none__"}
+                onValueChange={(v) => setForm({ ...form, agencia_reguladora_id: v === "__none__" ? null : v })}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Sem agência vinculada —</SelectItem>
+                  {agencias.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.sigla ? `${a.sigla} — ${a.nome}` : a.nome}{a.uf ? ` (${a.uf})` : ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

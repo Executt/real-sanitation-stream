@@ -3,7 +3,7 @@
 ## Enums
 
 ```sql
-CREATE TYPE public.app_role AS ENUM ('operador', 'gestor_ana', 'superadmin');
+CREATE TYPE public.app_role AS ENUM ('operador', 'gestor_ana', 'gestor_ar', 'superadmin');
 ```
 
 ## Tabelas (estado atual)
