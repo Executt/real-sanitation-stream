@@ -26,6 +26,13 @@ interface Concessionaria {
   nome: string;
   sigla: string | null;
   uf: string;
+  agencia_reguladora_id: string | null;
+}
+
+interface AgenciaOption {
+  id: string;
+  nome: string;
+  sigla: string | null;
 }
 
 interface Ete {
