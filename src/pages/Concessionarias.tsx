@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -90,6 +90,7 @@ const empty: Omit<Concessionaria, "id"> = {
 
 export default function Concessionarias() {
   const { isSuperAdmin, loading } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<Concessionaria[]>([]);
   const [agencias, setAgencias] = useState<AgenciaOption[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -315,7 +316,7 @@ export default function Concessionarias() {
             ) : filtered.map((it) => {
               const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
               return (
-              <TableRow key={it.id}>
+              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/concessionarias/${it.id}`)}>
                 <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
                 <TableCell className="font-medium">{it.nome}</TableCell>
                 <TableCell>
@@ -335,7 +336,7 @@ export default function Concessionarias() {
                     <Badge variant="outline" className="text-[10px]">Inativa</Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(it)}>
                     <Pencil className="size-4" />
                   </Button>

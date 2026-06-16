@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,7 @@ const empty: Omit<Agencia, "id"> = {
 
 export default function AgenciasReguladoras() {
   const { isSuperAdmin, isGestorAna, loading } = useAuth();
+  const navigate = useNavigate();
   const canManage = isSuperAdmin || isGestorAna;
 
   const [items, setItems] = useState<Agencia[]>([]);
@@ -236,7 +237,7 @@ export default function AgenciasReguladoras() {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma agência cadastrada</TableCell></TableRow>
             ) : filtered.map((it) => (
-              <TableRow key={it.id}>
+              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/agencias/${it.id}`)}>
                 <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
                 <TableCell className="font-medium">{it.nome}</TableCell>
                 <TableCell className="text-xs capitalize">{it.esfera}</TableCell>
@@ -247,7 +248,7 @@ export default function AgenciasReguladoras() {
                     ? <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
                     : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(it)}><Pencil className="size-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(it)}><Trash2 className="size-4 text-destructive" /></Button>
                 </TableCell>

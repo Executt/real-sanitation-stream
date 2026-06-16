@@ -14,6 +14,8 @@ import AdminHub from "./pages/AdminHub";
 import AdminPanel from "./pages/AdminPanel";
 import Concessionarias from "./pages/Concessionarias";
 import AgenciasReguladoras from "./pages/AgenciasReguladoras";
+import AgenciaRegDetail from "./pages/AgenciaRegDetail";
+import ConcessionariaDetail from "./pages/ConcessionariaDetail";
 import AgenciaDashboard from "./pages/AgenciaDashboard";
 import LdapConfig from "./pages/LdapConfig";
 import SmtpConfig from "./pages/SmtpConfig";
@@ -62,7 +64,9 @@ const App = () => (
               <Route path="/admin" element={<AdminHub />} />
               <Route path="/admin/usuarios" element={<AdminPanel />} />
               <Route path="/admin/concessionarias" element={<Concessionarias />} />
+              <Route path="/admin/concessionarias/:id" element={<ConcessionariaDetail />} />
               <Route path="/admin/agencias" element={<AgenciasReguladoras />} />
+              <Route path="/admin/agencias/:id" element={<AgenciaRegDetail />} />
               <Route path="/admin/ldap" element={<LdapConfig />} />
               <Route path="/admin/smtp" element={<SmtpConfig />} />
               <Route path="/admin/sei" element={<SeiConfig />} />
