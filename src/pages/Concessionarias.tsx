@@ -336,7 +336,7 @@ export default function Concessionarias() {
                     <Badge variant="outline" className="text-[10px]">Inativa</Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(it)}>
                     <Pencil className="size-4" />
                   </Button>
