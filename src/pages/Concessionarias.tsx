@@ -316,7 +316,7 @@ export default function Concessionarias() {
             ) : filtered.map((it) => {
               const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
               return (
-              <TableRow key={it.id}>
+              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/concessionarias/${it.id}`)}>
                 <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
                 <TableCell className="font-medium">{it.nome}</TableCell>
                 <TableCell>
