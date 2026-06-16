@@ -46,11 +46,11 @@ export default function ConcessionariaDetail() {
       setItem(c as Concessionaria);
 
       const tasks: Promise<any>[] = [
-        supabase.from("profiles").select("id, full_name, organization, position, user_id").eq("concessionaria_id", id),
-        supabase.from("etes").select("id, codigo, nome, municipio, uf, status, vazao_atual_lps, populacao_atendida").eq("concessionaria_id", id).order("nome"),
+        Promise.resolve(supabase.from("profiles").select("id, full_name, organization, position, user_id").eq("concessionaria_id", id)),
+        Promise.resolve(supabase.from("etes").select("id, codigo, nome, municipio, uf, status, vazao_atual_lps, populacao_atendida").eq("concessionaria_id", id).order("nome")),
       ];
       if (c.agencia_reguladora_id) {
-        tasks.push(supabase.from("agencias_reguladoras").select("id, nome, sigla").eq("id", c.agencia_reguladora_id).maybeSingle());
+        tasks.push(Promise.resolve(supabase.from("agencias_reguladoras").select("id, nome, sigla").eq("id", c.agencia_reguladora_id).maybeSingle()));
       }
       const results = await Promise.all(tasks);
       setUsers((results[0].data ?? []) as any[]);
