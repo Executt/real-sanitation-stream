@@ -5,11 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { ArrowLeft, Building2, Pencil, ExternalLink } from "lucide-react";
+import { ArrowLeft, Building2, Pencil, ExternalLink, Radio } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { EntityUsersTab } from "@/components/EntityUsersTab";
+import { EtesListTab } from "@/components/EtesListTab";
+import { IntegrationsSnirhTab } from "@/components/IntegrationsSnirhTab";
+import { EntityAuditTab } from "@/components/EntityAuditTab";
 
 interface Concessionaria {
   id: string; nome: string; sigla: string | null; tipo: string;
@@ -23,13 +24,14 @@ interface Concessionaria {
 export default function ConcessionariaDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isSuperAdmin, isGestorAna, loading } = useAuth();
-  const canView = isSuperAdmin || isGestorAna;
+  const { isSuperAdmin, isGestorAna, isGestorAR, loading } = useAuth();
+  const canView = isSuperAdmin || isGestorAna || isGestorAR;
 
   const [item, setItem] = useState<Concessionaria | null>(null);
   const [agencia, setAgencia] = useState<{ id: string; nome: string; sigla: string | null } | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
-  const [etes, setEtes] = useState<any[]>([]);
+  const [userIds, setUserIds] = useState<string[]>([]);
+  const [eteCount, setEteCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
   const [dboStats, setDboStats] = useState<{ total: number; conformes: number; ultimoEnvio: string | null }>({ total: 0, conformes: 0, ultimoEnvio: null });
   const [loadingData, setLoadingData] = useState(true);
 
@@ -45,32 +47,33 @@ export default function ConcessionariaDetail() {
       }
       setItem(c as Concessionaria);
 
-      const tasks: Promise<any>[] = [
-        Promise.resolve(supabase.from("profiles").select("id, full_name, organization, position, user_id").eq("concessionaria_id", id)),
-        Promise.resolve(supabase.from("etes").select("id, codigo, nome, municipio, uf, status, vazao_atual_lps, populacao_atendida").eq("concessionaria_id", id).order("nome")),
-      ];
-      if (c.agencia_reguladora_id) {
-        tasks.push(Promise.resolve(supabase.from("agencias_reguladoras").select("id, nome, sigla").eq("id", c.agencia_reguladora_id).maybeSingle()));
-      }
-      const results = await Promise.all(tasks);
-      setUsers((results[0].data ?? []) as any[]);
-      const eteList = (results[1].data ?? []) as any[];
-      setEtes(eteList);
-      if (results[2]) setAgencia(results[2].data ?? null);
+      const [profsRes, etesCountRes, agRes] = await Promise.all([
+        supabase.from("profiles").select("user_id", { count: "exact" }).eq("concessionaria_id", id),
+        supabase.from("etes").select("id", { count: "exact", head: true }).eq("concessionaria_id", id),
+        c.agencia_reguladora_id
+          ? supabase.from("agencias_reguladoras").select("id, nome, sigla").eq("id", c.agencia_reguladora_id).maybeSingle()
+          : Promise.resolve({ data: null } as { data: null }),
+      ]);
+      setUserIds((profsRes.data ?? []).map((p) => p.user_id));
+      setUserCount(profsRes.count ?? (profsRes.data?.length ?? 0));
+      setEteCount(etesCountRes.count ?? 0);
+      setAgencia((agRes as { data: { id: string; nome: string; sigla: string | null } | null }).data ?? null);
 
-      if (eteList.length) {
-        const eteIds = eteList.map((e) => e.id);
+      // KPI DBO (últimas 1000 medições nas ETEs desta concessionária)
+      const { data: eIds } = await supabase.from("etes").select("id").eq("concessionaria_id", id).limit(500);
+      const ids = (eIds ?? []).map((e) => e.id);
+      if (ids.length) {
         const { data: dbo } = await supabase
           .from("dbo_medicoes")
-          .select("conforme, data_medicao")
-          .in("ete_id", eteIds)
-          .order("data_medicao", { ascending: false })
+          .select("conforme, medido_em")
+          .in("ete_id", ids)
+          .order("medido_em", { ascending: false })
           .limit(1000);
-        const rows = (dbo ?? []) as any[];
+        const rows = (dbo ?? []) as { conforme: boolean; medido_em: string }[];
         setDboStats({
           total: rows.length,
           conformes: rows.filter((r) => r.conforme).length,
-          ultimoEnvio: rows[0]?.data_medicao ?? null,
+          ultimoEnvio: rows[0]?.medido_em ?? null,
         });
       }
       setLoadingData(false);
@@ -83,6 +86,7 @@ export default function ConcessionariaDetail() {
   if (!item) return <div className="text-muted-foreground text-sm">Entidade não encontrada.</div>;
 
   const conformidade = dboStats.total ? Math.round((dboStats.conformes / dboStats.total) * 100) : null;
+  const conformidadeColor = conformidade == null ? "" : conformidade >= 85 ? "text-success" : conformidade >= 60 ? "text-warning" : "text-destructive";
 
   return (
     <div>
@@ -103,13 +107,13 @@ export default function ConcessionariaDetail() {
               : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
           </div>
           <p className="text-muted-foreground text-sm">
-            {item.tipo === "agencia_reguladora" ? "Agência Reguladora" : "Concessionária"} • {item.uf}
+            Concessionária • {item.uf}
             {item.abrangencia && ` • ${item.abrangencia}`}
             {item.natureza && ` • ${item.natureza}`}
           </p>
         </div>
         {isSuperAdmin && (
-          <Button variant="outline" onClick={() => navigate(`/admin/concessionarias?edit=${item.id}`)}>
+          <Button variant="outline" onClick={() => navigate("/admin/concessionarias")}>
             <Pencil className="size-4 mr-2" /> Editar cadastro
           </Button>
         )}
@@ -117,27 +121,13 @@ export default function ConcessionariaDetail() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <div className="bg-card border rounded-sm p-4">
-          <p className="text-xs text-muted-foreground uppercase">ETEs</p>
-          <p className="text-2xl font-semibold text-primary">{etes.length}</p>
-        </div>
-        <div className="bg-card border rounded-sm p-4">
-          <p className="text-xs text-muted-foreground uppercase">Usuários</p>
-          <p className="text-2xl font-semibold">{users.length}</p>
-        </div>
-        <div className="bg-card border rounded-sm p-4">
-          <p className="text-xs text-muted-foreground uppercase">Municípios</p>
-          <p className="text-2xl font-semibold">{item.municipios_atendidos ?? "—"}</p>
-        </div>
-        <div className="bg-card border rounded-sm p-4">
-          <p className="text-xs text-muted-foreground uppercase">População</p>
-          <p className="text-2xl font-semibold">
-            {item.populacao_atendida ? item.populacao_atendida.toLocaleString("pt-BR") : "—"}
-          </p>
-        </div>
+        <Kpi label="ETEs" value={eteCount} accent />
+        <Kpi label="Usuários" value={userCount} />
+        <Kpi label="Municípios" value={item.municipios_atendidos ?? "—"} />
+        <Kpi label="População" value={item.populacao_atendida ? item.populacao_atendida.toLocaleString("pt-BR") : "—"} />
         <div className="bg-card border rounded-sm p-4">
           <p className="text-xs text-muted-foreground uppercase">Conformidade DBO</p>
-          <p className="text-2xl font-semibold">
+          <p className={"text-2xl font-semibold " + conformidadeColor}>
             {conformidade !== null ? `${conformidade}%` : "—"}
           </p>
           {dboStats.total > 0 && (
@@ -149,21 +139,23 @@ export default function ConcessionariaDetail() {
       </div>
 
       <Tabs defaultValue="cadastro">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="cadastro">Cadastro</TabsTrigger>
-          <TabsTrigger value="etes">ETEs ({etes.length})</TabsTrigger>
-          <TabsTrigger value="usuarios">Usuários ({users.length})</TabsTrigger>
-          <TabsTrigger value="dbo">Monitoramento DBO</TabsTrigger>
+          <TabsTrigger value="etes">ETEs ({eteCount})</TabsTrigger>
+          <TabsTrigger value="usuarios">Usuários ({userCount})</TabsTrigger>
+          <TabsTrigger value="dbo">Conformidade DBO</TabsTrigger>
+          <TabsTrigger value="integracoes"><Radio className="size-3 mr-1.5" />Integrações SNIRH</TabsTrigger>
+          <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cadastro">
           <div className="bg-card border rounded-sm p-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <InfoRow label="CNPJ" value={item.cnpj} mono />
-            <InfoRow label="Natureza" value={item.natureza} />
-            <InfoRow label="Abrangência" value={item.abrangencia} />
-            <InfoRow label="UF" value={item.uf} mono />
-            <InfoRow label="E-mail" value={item.email_contato} />
-            <InfoRow label="Telefone" value={item.telefone} />
+            <Info label="CNPJ" value={item.cnpj} mono />
+            <Info label="Natureza" value={item.natureza} />
+            <Info label="Abrangência" value={item.abrangencia} />
+            <Info label="UF" value={item.uf} mono />
+            <Info label="E-mail" value={item.email_contato} />
+            <Info label="Telefone" value={item.telefone} />
             <div className="md:col-span-2">
               <p className="text-xs text-muted-foreground uppercase mb-1">Site</p>
               {item.site ? (
@@ -172,7 +164,7 @@ export default function ConcessionariaDetail() {
                 </a>
               ) : <p className="text-muted-foreground">—</p>}
             </div>
-            <InfoRow label="Endereço" value={item.endereco} fullWidth />
+            <Info label="Endereço" value={item.endereco} fullWidth />
             <div className="md:col-span-2">
               <p className="text-xs text-muted-foreground uppercase mb-1">Agência Reguladora</p>
               {agencia ? (
@@ -181,71 +173,16 @@ export default function ConcessionariaDetail() {
                 </Link>
               ) : <p className="text-muted-foreground">— Sem agência vinculada —</p>}
             </div>
-            <InfoRow label="Observações" value={item.observacoes} fullWidth />
+            <Info label="Observações" value={item.observacoes} fullWidth />
           </div>
         </TabsContent>
 
         <TabsContent value="etes">
-          <div className="bg-card border rounded-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Município/UF</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Vazão (L/s)</TableHead>
-                  <TableHead className="text-right">População</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {etes.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma ETE vinculada</TableCell></TableRow>
-                ) : etes.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="font-mono text-xs">{e.codigo ?? "—"}</TableCell>
-                    <TableCell className="font-medium">{e.nome}</TableCell>
-                    <TableCell className="text-xs">{e.municipio}/{e.uf}</TableCell>
-                    <TableCell><Badge variant="outline" className="text-[10px] capitalize">{(e.status ?? "—").replace("_", " ")}</Badge></TableCell>
-                    <TableCell className="text-right font-mono text-xs">{e.vazao_atual_lps ?? "—"}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{e.populacao_atendida?.toLocaleString("pt-BR") ?? "—"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <EtesListTab concessionariaIds={[item.id]} />
         </TabsContent>
 
         <TabsContent value="usuarios">
-          <div className="bg-card border rounded-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Organização</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum usuário vinculado</TableCell></TableRow>
-                ) : users.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.full_name ?? "—"}</TableCell>
-                    <TableCell className="text-xs">{u.position ?? "—"}</TableCell>
-                    <TableCell className="text-xs">{u.organization ?? "—"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          {isSuperAdmin && (
-            <div className="mt-3">
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin/usuarios")}>
-                Gerenciar usuários
-              </Button>
-            </div>
-          )}
+          <EntityUsersTab scope="concessionaria" entityId={item.id} entityName={item.nome} />
         </TabsContent>
 
         <TabsContent value="dbo">
@@ -261,12 +198,29 @@ export default function ConcessionariaDetail() {
             </div>
           </div>
         </TabsContent>
+
+        <TabsContent value="integracoes">
+          <IntegrationsSnirhTab sourceFilter="SNIRH" />
+        </TabsContent>
+
+        <TabsContent value="auditoria">
+          <EntityAuditTab userIds={userIds} entityId={item.id} entityTable="concessionarias" />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function InfoRow({ label, value, mono, fullWidth }: { label: string; value: string | null; mono?: boolean; fullWidth?: boolean }) {
+function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+  return (
+    <div className="bg-card border rounded-sm p-4">
+      <p className="text-xs text-muted-foreground uppercase">{label}</p>
+      <p className={"text-2xl font-semibold " + (accent ? "text-primary" : "")}>{value}</p>
+    </div>
+  );
+}
+
+function Info({ label, value, mono, fullWidth }: { label: string; value: string | null; mono?: boolean; fullWidth?: boolean }) {
   return (
     <div className={fullWidth ? "md:col-span-2" : ""}>
       <p className="text-xs text-muted-foreground uppercase mb-1">{label}</p>
