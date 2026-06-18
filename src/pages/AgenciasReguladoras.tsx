@@ -317,3 +317,64 @@ export default function AgenciasReguladoras() {
     </div>
   );
 }
+
+type ASortKey = "sigla" | "nome" | "esfera" | "uf" | "municipio" | "ativa";
+
+function AgenciasTable({
+  items, loading, onRowClick, canManage, onEdit, onDelete,
+}: {
+  items: Agencia[]; loading: boolean; onRowClick: (it: Agencia) => void;
+  canManage: boolean; onEdit: (it: Agencia) => void; onDelete: (it: Agencia) => void;
+}) {
+  const t = useTable(items, { initialSort: { key: "nome", dir: "asc" }, pageSize: 20 });
+  const cur = (t.sort?.key as ASortKey) ?? null;
+  const click = (k: ASortKey) => t.toggleSort(k as keyof Agencia);
+
+  return (
+    <div className="bg-card border rounded-sm overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <SortHeader<ASortKey> label="Sigla" sortKey="sigla" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <SortHeader<ASortKey> label="Nome" sortKey="nome" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <SortHeader<ASortKey> label="Esfera" sortKey="esfera" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <SortHeader<ASortKey> label="UF" sortKey="uf" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <SortHeader<ASortKey> label="Município" sortKey="municipio" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <SortHeader<ASortKey> label="Status" sortKey="ativa" currentKey={cur} dir={t.sort?.dir ?? null} onClick={click} />
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
+          ) : t.rows.length === 0 ? (
+            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma agência cadastrada</TableCell></TableRow>
+          ) : t.rows.map((it) => (
+            <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onRowClick(it)}>
+              <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
+              <TableCell className="font-medium">{it.nome}</TableCell>
+              <TableCell className="text-xs capitalize">{it.esfera}</TableCell>
+              <TableCell className="font-mono text-xs">{it.uf ?? "—"}</TableCell>
+              <TableCell className="text-xs">{it.municipio ?? "—"}</TableCell>
+              <TableCell>
+                {it.ativa
+                  ? <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
+                  : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
+              </TableCell>
+              <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                {canManage && <>
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(it)}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(it)}><Trash2 className="size-4 text-destructive" /></Button>
+                </>}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <TablePagination
+        page={t.page} pageCount={t.pageCount} pageSize={t.pageSize} total={t.total}
+        onPageChange={t.setPage} onPageSizeChange={t.setPageSize}
+      />
+    </div>
+  );
+}
