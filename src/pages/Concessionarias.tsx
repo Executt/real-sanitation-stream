@@ -33,6 +33,9 @@ import {
 } from "@/components/ui/table";
 import { Building2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useTable } from "@/lib/useTable";
+import { SortHeader } from "@/components/SortHeader";
+import { TablePagination } from "@/components/TablePagination";
 
 type Tipo = "concessionaria" | "agencia_reguladora";
 
@@ -293,63 +296,15 @@ export default function Concessionarias() {
         </Select>
       </div>
 
-      {/* Tabela */}
-      <div className="bg-card border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Sigla</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>UF</TableHead>
-              <TableHead>Abrangência</TableHead>
-              <TableHead>Agência Reguladora</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loadingData ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
-            ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
-            ) : filtered.map((it) => {
-              const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
-              return (
-              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/concessionarias/${it.id}`)}>
-                <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
-                <TableCell className="font-medium">{it.nome}</TableCell>
-                <TableCell>
-                  <Badge variant={it.tipo === "agencia_reguladora" ? "secondary" : "default"} className="text-[10px]">
-                    {it.tipo === "agencia_reguladora" ? "Agência" : "Concessionária"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-mono text-xs">{it.uf}</TableCell>
-                <TableCell className="text-xs capitalize">{it.abrangencia ?? "—"}</TableCell>
-                <TableCell className="text-xs">
-                  {ag ? (ag.sigla ? `${ag.sigla} — ${ag.nome}` : ag.nome) : <span className="text-muted-foreground">—</span>}
-                </TableCell>
-                <TableCell>
-                  {it.ativa ? (
-                    <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[10px]">Inativa</Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(it)}>
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(it)}>
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Tabela com sort + paginação */}
+      <ConcessionariasTable
+        items={filtered}
+        loading={loadingData}
+        agenciaMap={agenciaMap}
+        onRowClick={(it) => navigate(`/admin/concessionarias/${it.id}`)}
+        onEdit={openEdit}
+        onDelete={handleDelete}
+      />
 
       {/* Dialog Form */}
       <Dialog open={open} onOpenChange={setOpen}>
