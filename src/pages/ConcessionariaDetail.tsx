@@ -65,15 +65,15 @@ export default function ConcessionariaDetail() {
       if (ids.length) {
         const { data: dbo } = await supabase
           .from("dbo_medicoes")
-          .select("conforme, data_medicao")
+          .select("conforme, medido_em")
           .in("ete_id", ids)
-          .order("data_medicao", { ascending: false })
+          .order("medido_em", { ascending: false })
           .limit(1000);
-        const rows = (dbo ?? []) as { conforme: boolean; data_medicao: string }[];
+        const rows = (dbo ?? []) as { conforme: boolean; medido_em: string }[];
         setDboStats({
           total: rows.length,
           conformes: rows.filter((r) => r.conforme).length,
-          ultimoEnvio: rows[0]?.data_medicao ?? null,
+          ultimoEnvio: rows[0]?.medido_em ?? null,
         });
       }
       setLoadingData(false);

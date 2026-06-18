@@ -82,7 +82,7 @@ export default function AgenciaRegDetail() {
             .from("dbo_medicoes")
             .select("conforme")
             .in("ete_id", ids)
-            .order("data_medicao", { ascending: false })
+            .order("medido_em", { ascending: false })
             .limit(1000);
           const rows = (dbo ?? []) as { conforme: boolean }[];
           setDboStats({ total: rows.length, conformes: rows.filter((r) => r.conforme).length });
