@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/table";
 import { Gavel, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useTable } from "@/lib/useTable";
+import { SortHeader } from "@/components/SortHeader";
+import { TablePagination } from "@/components/TablePagination";
 
 type Esfera = "federal" | "estadual" | "distrital" | "municipal";
 
@@ -218,45 +221,14 @@ export default function AgenciasReguladoras() {
         </Select>
       </div>
 
-      <div className="bg-card border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Sigla</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Esfera</TableHead>
-              <TableHead>UF</TableHead>
-              <TableHead>Município</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loadingData ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
-            ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma agência cadastrada</TableCell></TableRow>
-            ) : filtered.map((it) => (
-              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/agencias/${it.id}`)}>
-                <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
-                <TableCell className="font-medium">{it.nome}</TableCell>
-                <TableCell className="text-xs capitalize">{it.esfera}</TableCell>
-                <TableCell className="font-mono text-xs">{it.uf ?? "—"}</TableCell>
-                <TableCell className="text-xs">{it.municipio ?? "—"}</TableCell>
-                <TableCell>
-                  {it.ativa
-                    ? <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
-                    : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
-                </TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(it)}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(it)}><Trash2 className="size-4 text-destructive" /></Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <AgenciasTable
+        items={filtered}
+        loading={loadingData}
+        onRowClick={(it) => navigate(`/admin/agencias/${it.id}`)}
+        canManage={canManage}
+        onEdit={openEdit}
+        onDelete={handleDelete}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
