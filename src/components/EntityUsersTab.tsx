@@ -126,8 +126,10 @@ export function EntityUsersTab({ scope, entityId, entityName }: Props) {
   const unlink = async (userId: string) => {
     if (!canManage) return;
     if (!confirm("Desvincular este usuário?")) return;
-    const col = scope === "concessionaria" ? "concessionaria_id" : "agencia_reguladora_id";
-    const { error } = await supabase.from("profiles").update({ [col]: null }).eq("user_id", userId);
+    const update = scope === "concessionaria"
+      ? { concessionaria_id: null as string | null }
+      : { agencia_reguladora_id: null as string | null };
+    const { error } = await supabase.from("profiles").update(update).eq("user_id", userId);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Vínculo removido" });
     fetchUsers();
