@@ -456,3 +456,82 @@ export default function Concessionarias() {
     </div>
   );
 }
+
+type SortKey = "sigla" | "nome" | "tipo" | "uf" | "abrangencia" | "agencia" | "ativa";
+
+function ConcessionariasTable({
+  items, loading, agenciaMap, onRowClick, onEdit, onDelete,
+}: {
+  items: Concessionaria[];
+  loading: boolean;
+  agenciaMap: Map<string, AgenciaOption>;
+  onRowClick: (it: Concessionaria) => void;
+  onEdit: (it: Concessionaria) => void;
+  onDelete: (it: Concessionaria) => void;
+}) {
+  const enriched = useMemo(
+    () => items.map((it) => ({
+      ...it,
+      agencia: it.agencia_reguladora_id ? (agenciaMap.get(it.agencia_reguladora_id)?.nome ?? "") : "",
+    })),
+    [items, agenciaMap],
+  );
+  const t = useTable(enriched, { initialSort: { key: "nome", dir: "asc" }, pageSize: 20 });
+
+  return (
+    <div className="bg-card border rounded-sm overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <SortHeader<SortKey> label="Sigla" sortKey="sigla" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="Nome" sortKey="nome" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="Tipo" sortKey="tipo" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="UF" sortKey="uf" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="Abrangência" sortKey="abrangencia" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="Agência Reguladora" sortKey="agencia" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <SortHeader<SortKey> label="Status" sortKey="ativa" currentKey={t.sort?.key as SortKey ?? null} dir={t.sort?.dir ?? null} onClick={(k) => t.toggleSort(k as keyof typeof enriched[number])} />
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>
+          ) : t.rows.length === 0 ? (
+            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
+          ) : t.rows.map((it) => {
+            const ag = it.agencia_reguladora_id ? agenciaMap.get(it.agencia_reguladora_id) : null;
+            return (
+              <TableRow key={it.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onRowClick(it)}>
+                <TableCell className="font-mono text-xs">{it.sigla ?? "—"}</TableCell>
+                <TableCell className="font-medium">{it.nome}</TableCell>
+                <TableCell>
+                  <Badge variant={it.tipo === "agencia_reguladora" ? "secondary" : "default"} className="text-[10px]">
+                    {it.tipo === "agencia_reguladora" ? "Agência" : "Concessionária"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="font-mono text-xs">{it.uf}</TableCell>
+                <TableCell className="text-xs capitalize">{it.abrangencia ?? "—"}</TableCell>
+                <TableCell className="text-xs">
+                  {ag ? (ag.sigla ? `${ag.sigla} — ${ag.nome}` : ag.nome) : <span className="text-muted-foreground">—</span>}
+                </TableCell>
+                <TableCell>
+                  {it.ativa
+                    ? <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
+                    : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
+                </TableCell>
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(it)}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(it)}><Trash2 className="size-4 text-destructive" /></Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <TablePagination
+        page={t.page} pageCount={t.pageCount} pageSize={t.pageSize} total={t.total}
+        onPageChange={t.setPage} onPageSizeChange={t.setPageSize}
+      />
+    </div>
+  );
+}
