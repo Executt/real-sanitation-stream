@@ -28,6 +28,7 @@ import AlertasDboPage from "./pages/AlertasDboPage";
 import ConformidadePage from "./pages/ConformidadePage";
 import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
+import CortexPage from "./pages/CortexPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
