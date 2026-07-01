@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, BarChart3, ClipboardEdit, Globe, LayoutDashboard, Radio, Settings, Shield, TrendingUp, Users } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Brain, ClipboardEdit, Globe, LayoutDashboard, Radio, Settings, Shield, TrendingUp, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +30,7 @@ const anaItems = [
   { title: "Mapa Interativo", url: "/command-center/mapa", icon: Globe },
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
+  { title: "Córtex IA", url: "/command-center/cortex", icon: Brain },
 ];
 
 const adminItems = [
