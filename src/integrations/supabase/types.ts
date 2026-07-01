@@ -101,6 +101,60 @@ export type Database = {
         }
         Relationships: []
       }
+      atlas_indicadores: {
+        Row: {
+          ano_referencia: number | null
+          bacia: string | null
+          carga_dbo_kg_dia: number | null
+          cobertura_coleta_pct: number | null
+          cobertura_tratamento_pct: number | null
+          created_at: string
+          fonte: string
+          ibge_code: string | null
+          id: string
+          municipio: string | null
+          populacao_urbana: number | null
+          raw: Json | null
+          rios_comprometidos_km: number | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ano_referencia?: number | null
+          bacia?: string | null
+          carga_dbo_kg_dia?: number | null
+          cobertura_coleta_pct?: number | null
+          cobertura_tratamento_pct?: number | null
+          created_at?: string
+          fonte?: string
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          populacao_urbana?: number | null
+          raw?: Json | null
+          rios_comprometidos_km?: number | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ano_referencia?: number | null
+          bacia?: string | null
+          carga_dbo_kg_dia?: number | null
+          cobertura_coleta_pct?: number | null
+          cobertura_tratamento_pct?: number | null
+          created_at?: string
+          fonte?: string
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          populacao_urbana?: number | null
+          raw?: Json | null
+          rios_comprometidos_km?: number | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -204,6 +258,140 @@ export type Database = {
             columns: ["agencia_reguladora_id"]
             isOneToOne: false
             referencedRelation: "agencias_reguladoras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cortex_modelos: {
+        Row: {
+          causal_report_url: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          falso_afluente_checklist: Json
+          id: string
+          metricas: Json
+          nome: string
+          provider_model: string
+          status: string
+          tipo: string
+          updated_at: string
+          versao: string
+        }
+        Insert: {
+          causal_report_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          falso_afluente_checklist?: Json
+          id?: string
+          metricas?: Json
+          nome: string
+          provider_model?: string
+          status?: string
+          tipo: string
+          updated_at?: string
+          versao: string
+        }
+        Update: {
+          causal_report_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          falso_afluente_checklist?: Json
+          id?: string
+          metricas?: Json
+          nome?: string
+          provider_model?: string
+          status?: string
+          tipo?: string
+          updated_at?: string
+          versao?: string
+        }
+        Relationships: []
+      }
+      cortex_predicoes: {
+        Row: {
+          agencia_reguladora_id: string | null
+          bacia: string | null
+          classificacao: string | null
+          concessionaria_id: string | null
+          confianca: number | null
+          criado_em: string
+          escopo: string
+          ete_id: string | null
+          explicacao: string | null
+          features: Json | null
+          features_hash: string | null
+          horizonte_dias: number | null
+          id: string
+          metrica: string
+          modelo_id: string
+          valor: number | null
+        }
+        Insert: {
+          agencia_reguladora_id?: string | null
+          bacia?: string | null
+          classificacao?: string | null
+          concessionaria_id?: string | null
+          confianca?: number | null
+          criado_em?: string
+          escopo: string
+          ete_id?: string | null
+          explicacao?: string | null
+          features?: Json | null
+          features_hash?: string | null
+          horizonte_dias?: number | null
+          id?: string
+          metrica: string
+          modelo_id: string
+          valor?: number | null
+        }
+        Update: {
+          agencia_reguladora_id?: string | null
+          bacia?: string | null
+          classificacao?: string | null
+          concessionaria_id?: string | null
+          confianca?: number | null
+          criado_em?: string
+          escopo?: string
+          ete_id?: string | null
+          explicacao?: string | null
+          features?: Json | null
+          features_hash?: string | null
+          horizonte_dias?: number | null
+          id?: string
+          metrica?: string
+          modelo_id?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortex_predicoes_agencia_reguladora_id_fkey"
+            columns: ["agencia_reguladora_id"]
+            isOneToOne: false
+            referencedRelation: "agencias_reguladoras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortex_predicoes_concessionaria_id_fkey"
+            columns: ["concessionaria_id"]
+            isOneToOne: false
+            referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortex_predicoes_ete_id_fkey"
+            columns: ["ete_id"]
+            isOneToOne: false
+            referencedRelation: "etes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortex_predicoes_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "cortex_modelos"
             referencedColumns: ["id"]
           },
         ]
