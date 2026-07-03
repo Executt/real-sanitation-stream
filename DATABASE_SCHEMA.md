@@ -138,3 +138,39 @@ O componente `AlertasDboPanel` deriva alertas dinamicamente de `dbo_medicoes` fi
 1. As consultas são rápidas (índice em `medido_em DESC`).
 2. Realtime em `dbo_medicoes` já entrega novos alertas ao painel.
 3. Evita sincronização e regras de invalidação extras.
+
+## Camada Córtex IA
+
+Tabelas dedicadas à análise preditiva. Ver `CORTEX_IA.md` para governança.
+
+### `atlas_indicadores`
+Indicadores públicos do Atlas Esgotos ANA (contexto para inferência).
+Campos: `bacia`, `uf`, `municipio`, `ibge_code`, `carga_dbo_kg_dia`, `cobertura_coleta_pct`, `cobertura_tratamento_pct`, `rios_comprometidos_km`, `populacao_urbana`, `fonte`, `ano_referencia`, `raw` (jsonb).
+
+**Índices únicos parciais para upsert incremental:**
+- `atlas_indicadores_ibge_ano_uidx` sobre `(ibge_code, ano_referencia)` quando `ibge_code IS NOT NULL`
+- `atlas_indicadores_uf_ano_uidx` sobre `(uf, ano_referencia)` para agregações estaduais
+
+**RLS:** leitura autenticada; escrita apenas via `service_role` (edge function `cortex-ingest-atlas`).
+
+### `cortex_modelos`
+Catálogo de modelos preditivos.
+Campos: `nome`, `versao`, `tipo`, `provider_model`, `status` (`shadow`|`prod`), `metricas` (jsonb), `falso_afluente_checklist` (jsonb com 5 booleans), `causal_report_url`.
+
+**Trigger `enforce_falso_afluente`** (BEFORE UPDATE): bloqueia `status='prod'` sem checklist completo ou sem `causal_report_url`.
+
+### `cortex_predicoes`
+Saída do modelo, uma linha por inferência.
+Campos: `modelo_id`, `escopo` (`ete|concessionaria|agencia|bacia`), `ete_id`, `concessionaria_id`, `agencia_reguladora_id`, `bacia`, `horizonte_dias`, `metrica`, `valor`, `confianca`, `classificacao`, `features` (jsonb), `explicacao`, `criado_em`. **Realtime habilitado.**
+
+**RLS:** operador vê predições da sua concessionária; `gestor_ar` vê da sua agência; `gestor_ana`/`superadmin` veem tudo. INSERT apenas via `service_role`.
+
+## Nova função de agendamento
+
+| Função | Propósito |
+|--------|-----------|
+| `schedule_cortex_infer(url, anon_key)` | Registra/atualiza job `cortex-infer-daily` (03:00 UTC) via `pg_cron` + `pg_net`. |
+
+## Extensão do `cron_config`
+
+Colunas adicionadas: `cortex_infer_url`, `cortex_ingest_url` — persistem as URLs das edge functions para reagendamento após rotação de chaves.

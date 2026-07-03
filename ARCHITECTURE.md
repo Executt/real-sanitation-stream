@@ -130,3 +130,19 @@
 - `PlaceholderPage.tsx` removido — todas as rotas têm componentes reais.
 - KPIs mockados (`SABESP | ID-OP: 4421-A`, `87.4%` fixos) substituídos por dados do banco.
 - Probes inline em `CommandCenter` (duplicados de `ApiMonitoring`) removidos em iteração anterior.
+
+## Camada Córtex IA (novo)
+
+Camada preditiva sobreposta ao domínio operacional. Documentada em detalhe em `CORTEX_IA.md`.
+
+**Componentes:**
+- Edge Functions:
+  - `cortex-ingest-atlas` — upsert incremental em `atlas_indicadores` a partir do Atlas Esgotos ANA (modo `seed` ou payload de ETL).
+  - `cortex-infer` — inferência via Lovable AI Gateway (`google/gemini-3-flash-preview`), grava em `cortex_predicoes` respeitando escopo.
+- Job `pg_cron`: `cortex-infer-daily` (03:00 UTC) — dispara inferência para ETEs ativas em lotes, escopo por concessionária/AR aplicado via RLS.
+- Frontend:
+  - `/command-center/cortex` — governança do modelo + feed global.
+  - Aba **Córtex IA** em `ConcessionariaDetail` e `AgenciaRegDetail` — predições escopadas + inferência sob demanda.
+- Governança: trigger `enforce_falso_afluente` bloqueia promoção `shadow → prod` sem `causal_report_url` e checklist 100%.
+
+**Fluxo:** Atlas → `cortex-ingest-atlas` → `atlas_indicadores` ∥ `dbo_medicoes` → `cortex-infer` (LOVABLE_API_KEY) → `cortex_predicoes` (Realtime) → UI escopada por RLS.
