@@ -398,18 +398,24 @@ export type Database = {
       }
       cron_config: {
         Row: {
+          cortex_infer_url: string | null
+          cortex_ingest_url: string | null
           id: string
           ldap_sync_anon_key: string
           ldap_sync_url: string
           updated_at: string
         }
         Insert: {
+          cortex_infer_url?: string | null
+          cortex_ingest_url?: string | null
           id?: string
           ldap_sync_anon_key: string
           ldap_sync_url: string
           updated_at?: string
         }
         Update: {
+          cortex_infer_url?: string | null
+          cortex_ingest_url?: string | null
           id?: string
           ldap_sync_anon_key?: string
           ldap_sync_url?: string
@@ -782,6 +788,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      schedule_cortex_infer: {
+        Args: { _anon_key: string; _function_url: string }
+        Returns: undefined
       }
       schedule_ldap_sync: {
         Args: { _anon_key: string; _function_url: string }

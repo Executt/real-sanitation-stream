@@ -5,12 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Building2, Pencil, ExternalLink, Radio } from "lucide-react";
+import { ArrowLeft, Building2, Pencil, ExternalLink, Radio, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { EntityUsersTab } from "@/components/EntityUsersTab";
 import { EtesListTab } from "@/components/EtesListTab";
 import { IntegrationsSnirhTab } from "@/components/IntegrationsSnirhTab";
 import { EntityAuditTab } from "@/components/EntityAuditTab";
+import { CortexTab } from "@/components/CortexTab";
 
 interface Concessionaria {
   id: string; nome: string; sigla: string | null; tipo: string;
@@ -145,6 +146,7 @@ export default function ConcessionariaDetail() {
           <TabsTrigger value="usuarios">Usuários ({userCount})</TabsTrigger>
           <TabsTrigger value="dbo">Conformidade DBO</TabsTrigger>
           <TabsTrigger value="integracoes"><Radio className="size-3 mr-1.5" />Integrações SNIRH</TabsTrigger>
+          <TabsTrigger value="cortex"><Brain className="size-3 mr-1.5" />Córtex IA</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
@@ -201,6 +203,10 @@ export default function ConcessionariaDetail() {
 
         <TabsContent value="integracoes">
           <IntegrationsSnirhTab sourceFilter="SNIRH" />
+        </TabsContent>
+
+        <TabsContent value="cortex">
+          <CortexTab scope="concessionaria" entityId={item.id} />
         </TabsContent>
 
         <TabsContent value="auditoria">

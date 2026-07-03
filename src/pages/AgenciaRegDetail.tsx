@@ -8,12 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Gavel, Pencil, ExternalLink, Radio } from "lucide-react";
+import { ArrowLeft, Gavel, Pencil, ExternalLink, Radio, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { EntityUsersTab } from "@/components/EntityUsersTab";
 import { EtesListTab } from "@/components/EtesListTab";
 import { IntegrationsSnirhTab } from "@/components/IntegrationsSnirhTab";
 import { EntityAuditTab } from "@/components/EntityAuditTab";
+import { CortexTab } from "@/components/CortexTab";
 import { useTable } from "@/lib/useTable";
 import { SortHeader } from "@/components/SortHeader";
 import { TablePagination } from "@/components/TablePagination";
@@ -153,6 +154,7 @@ export default function AgenciaRegDetail() {
           <TabsTrigger value="etes">ETEs ({eteCount})</TabsTrigger>
           <TabsTrigger value="usuarios">Usuários ({userCount})</TabsTrigger>
           <TabsTrigger value="integracoes"><Radio className="size-3 mr-1.5" />Integrações SNIRH</TabsTrigger>
+          <TabsTrigger value="cortex"><Brain className="size-3 mr-1.5" />Córtex IA</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
@@ -191,6 +193,10 @@ export default function AgenciaRegDetail() {
 
         <TabsContent value="integracoes">
           <IntegrationsSnirhTab sourceFilter="SNIRH" />
+        </TabsContent>
+
+        <TabsContent value="cortex">
+          <CortexTab scope="agencia" entityId={item.id} concessionariaIds={concessionarias.map((c) => c.id)} />
         </TabsContent>
 
         <TabsContent value="auditoria">
