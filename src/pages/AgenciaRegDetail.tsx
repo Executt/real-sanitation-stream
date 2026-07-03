@@ -8,12 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Gavel, Pencil, ExternalLink, Radio } from "lucide-react";
+import { ArrowLeft, Gavel, Pencil, ExternalLink, Radio, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { EntityUsersTab } from "@/components/EntityUsersTab";
 import { EtesListTab } from "@/components/EtesListTab";
 import { IntegrationsSnirhTab } from "@/components/IntegrationsSnirhTab";
 import { EntityAuditTab } from "@/components/EntityAuditTab";
+import { CortexTab } from "@/components/CortexTab";
 import { useTable } from "@/lib/useTable";
 import { SortHeader } from "@/components/SortHeader";
 import { TablePagination } from "@/components/TablePagination";
