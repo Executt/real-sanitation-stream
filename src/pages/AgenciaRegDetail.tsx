@@ -154,6 +154,7 @@ export default function AgenciaRegDetail() {
           <TabsTrigger value="etes">ETEs ({eteCount})</TabsTrigger>
           <TabsTrigger value="usuarios">Usuários ({userCount})</TabsTrigger>
           <TabsTrigger value="integracoes"><Radio className="size-3 mr-1.5" />Integrações SNIRH</TabsTrigger>
+          <TabsTrigger value="cortex"><Brain className="size-3 mr-1.5" />Córtex IA</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
