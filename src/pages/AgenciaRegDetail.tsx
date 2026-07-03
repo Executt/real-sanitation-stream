@@ -195,6 +195,10 @@ export default function AgenciaRegDetail() {
           <IntegrationsSnirhTab sourceFilter="SNIRH" />
         </TabsContent>
 
+        <TabsContent value="cortex">
+          <CortexTab scope="agencia" entityId={item.id} concessionariaIds={concessionarias.map((c) => c.id)} />
+        </TabsContent>
+
         <TabsContent value="auditoria">
           <EntityAuditTab userIds={userIds} entityId={item.id} entityTable="agencias_reguladoras" />
         </TabsContent>
