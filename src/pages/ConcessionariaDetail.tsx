@@ -5,12 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Building2, Pencil, ExternalLink, Radio } from "lucide-react";
+import { ArrowLeft, Building2, Pencil, ExternalLink, Radio, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { EntityUsersTab } from "@/components/EntityUsersTab";
 import { EtesListTab } from "@/components/EtesListTab";
 import { IntegrationsSnirhTab } from "@/components/IntegrationsSnirhTab";
 import { EntityAuditTab } from "@/components/EntityAuditTab";
+import { CortexTab } from "@/components/CortexTab";
 
 interface Concessionaria {
   id: string; nome: string; sigla: string | null; tipo: string;
