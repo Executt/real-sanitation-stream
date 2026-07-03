@@ -146,6 +146,7 @@ export default function ConcessionariaDetail() {
           <TabsTrigger value="usuarios">Usuários ({userCount})</TabsTrigger>
           <TabsTrigger value="dbo">Conformidade DBO</TabsTrigger>
           <TabsTrigger value="integracoes"><Radio className="size-3 mr-1.5" />Integrações SNIRH</TabsTrigger>
+          <TabsTrigger value="cortex"><Brain className="size-3 mr-1.5" />Córtex IA</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
