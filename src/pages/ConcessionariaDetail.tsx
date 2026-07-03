@@ -205,6 +205,10 @@ export default function ConcessionariaDetail() {
           <IntegrationsSnirhTab sourceFilter="SNIRH" />
         </TabsContent>
 
+        <TabsContent value="cortex">
+          <CortexTab scope="concessionaria" entityId={item.id} />
+        </TabsContent>
+
         <TabsContent value="auditoria">
           <EntityAuditTab userIds={userIds} entityId={item.id} entityTable="concessionarias" />
         </TabsContent>
