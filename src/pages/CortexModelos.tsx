@@ -139,13 +139,15 @@ export default function CortexModelos() {
       status: form.status,
       provider_model: form.provider_model,
       causal_report_url: form.causal_report_url || null,
-      falso_afluente_checklist: form.checklist,
-      metricas,
+      falso_afluente_checklist: form.checklist as unknown as Record<string, boolean>,
+      metricas: metricas as Record<string, unknown>,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyClient = supabase as any;
     const { error } = form.id
-      ? await supabase.from("cortex_modelos").update(payload).eq("id", form.id)
-      : await supabase.from("cortex_modelos").insert(payload);
+      ? await anyClient.from("cortex_modelos").update(payload).eq("id", form.id)
+      : await anyClient.from("cortex_modelos").insert(payload);
 
     setSaving(false);
     if (error) {
