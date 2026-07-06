@@ -75,6 +75,7 @@ const App = () => (
               <Route path="/admin/sei" element={<SeiConfig />} />
               <Route path="/admin/parametros" element={<SystemParameters />} />
               <Route path="/admin/auditoria" element={<AuditLog />} />
+              <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
