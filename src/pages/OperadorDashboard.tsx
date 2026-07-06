@@ -37,6 +37,47 @@ export default function OperadorDashboard() {
   const [stats, setStats] = useState<Stats>(empty);
   const [loading, setLoading] = useState(true);
   const [lastSync, setLastSync] = useState<string>(new Date().toLocaleTimeString("pt-BR"));
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("cortex_pred_dash")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, () => {
+        setProgress((p) => Math.min(100, p + 10));
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, []);
+
+  async function handleRunCortex() {
+    setRunning(true);
+    setProgress(5);
+    const conc = profile?.concessionaria_id as string | undefined;
+    const res = await runCortexInference(
+      conc ? { kind: "concessionaria", concessionariaId: conc, limit: 10 } : { kind: "all", limit: 10 },
+      30,
+    );
+    setRunning(false);
+    if (res.error) {
+      setProgress(0);
+      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
+      return;
+    }
+    if (!res.count) {
+      setProgress(0);
+      toast({ title: "Sem ETEs elegíveis", description: "Nenhuma ETE ativa no escopo." });
+      return;
+    }
+    setProgress(100);
+    toast({
+      title: "Inferência concluída",
+      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
+    });
+    setTimeout(() => setProgress(0), 4000);
+  }
 
   useEffect(() => {
     let cancelled = false;
