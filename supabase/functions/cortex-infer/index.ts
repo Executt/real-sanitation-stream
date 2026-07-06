@@ -71,9 +71,9 @@ Deno.serve(async (req) => {
       // Últimas 6 medições
       const { data: medicoes } = await admin
         .from("dbo_medicoes")
-        .select("data_medicao, dbo_entrada_mg_l, dbo_saida_mg_l, eficiencia_pct, conforme")
+        .select("medido_em, dbo_entrada_mg_l, dbo_saida_mg_l, eficiencia_pct, conforme")
         .eq("ete_id", ete.id)
-        .order("data_medicao", { ascending: false })
+        .order("medido_em", { ascending: false })
         .limit(6);
 
       // Indicador Atlas da UF/município (Regra do Falso Afluente: variável de contexto)
