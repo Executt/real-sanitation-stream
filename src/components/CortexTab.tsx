@@ -3,9 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { Brain, Zap, RefreshCw, ShieldAlert, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
+import { TablePagination } from "@/components/TablePagination";
+import { useTable } from "@/lib/useTable";
+import { parseCortexError, runCortexInference } from "@/lib/cortex";
 
 type Predicao = {
   id: string;
@@ -29,13 +33,20 @@ const classColor: Record<string, string> = {
 interface Props {
   scope: "concessionaria" | "agencia";
   entityId: string;
-  concessionariaIds?: string[]; // para escopo AR
+  concessionariaIds?: string[];
 }
 
 export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
   const [predicoes, setPredicoes] = useState<Predicao[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [runInfo, setRunInfo] = useState<string | null>(null);
+
+  const table = useTable<Predicao>(predicoes, {
+    initialSort: { key: "criado_em", dir: "desc" },
+    pageSize: 10,
+  });
 
   async function load() {
     setLoading(true);
@@ -43,7 +54,7 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
       .from("cortex_predicoes")
       .select("id, ete_id, classificacao, valor, confianca, explicacao, horizonte_dias, criado_em")
       .order("criado_em", { ascending: false })
-      .limit(30);
+      .limit(200);
 
     if (scope === "concessionaria") {
       q = q.eq("concessionaria_id", entityId);
@@ -63,7 +74,11 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
     load();
     const ch = supabase
       .channel(`cortex_pred_${scope}_${entityId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, load)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, (payload) => {
+        // Realtime progress: cada INSERT durante um run aumenta a barra
+        setProgress((p) => Math.min(100, p + 8));
+        load();
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
@@ -71,36 +86,43 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope, entityId, (concessionariaIds ?? []).join(",")]);
 
-  async function runInference() {
+  async function handleRun() {
     setRunning(true);
-    // Buscar ETEs elegíveis do escopo (RLS já aplica; aqui só listamos IDs)
-    let etesQ = supabase.from("etes").select("id").eq("status", "ativa").limit(10);
-    if (scope === "concessionaria") etesQ = etesQ.eq("concessionaria_id", entityId);
-    else if (concessionariaIds?.length) etesQ = etesQ.in("concessionaria_id", concessionariaIds);
+    setProgress(5);
+    setRunInfo("Selecionando ETEs elegíveis…");
 
-    const { data: etes, error: eErr } = await etesQ;
-    if (eErr || !etes?.length) {
+    const res = await runCortexInference(
+      scope === "concessionaria"
+        ? { kind: "concessionaria", concessionariaId: entityId, limit: 12 }
+        : { kind: "agencia", concessionariaIds: concessionariaIds ?? [], limit: 12 },
+      30,
+    );
+
+    if (res.error) {
       setRunning(false);
-      toast({
-        title: "Sem ETEs elegíveis",
-        description: eErr?.message ?? "Nenhuma ETE ativa no escopo para inferência.",
-        variant: eErr ? "destructive" : "default",
-      });
+      setProgress(0);
+      setRunInfo(null);
+      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
       return;
     }
-
-    const { data, error } = await supabase.functions.invoke("cortex-infer", {
-      body: { ete_ids: etes.map((e) => e.id), horizonte_dias: 30 },
-    });
-    setRunning(false);
-    if (error) {
-      toast({ title: "Falha no Córtex", description: error.message, variant: "destructive" });
+    if (!res.count) {
+      setRunning(false);
+      setProgress(0);
+      setRunInfo(null);
+      toast({ title: "Sem ETEs elegíveis", description: "Nenhuma ETE ativa neste escopo." });
       return;
     }
+    setProgress(100);
+    setRunInfo(`Inferência concluída para ${res.count} ETE(s).`);
     toast({
       title: "Inferência concluída",
-      description: `${(data?.predicoes ?? []).length} predições geradas (modo ${data?.modelo?.status ?? "?"}).`,
+      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
     });
+    setRunning(false);
+    setTimeout(() => {
+      setProgress(0);
+      setRunInfo(null);
+    }, 4000);
     load();
   }
 
@@ -110,8 +132,8 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
         <ShieldAlert className="size-4" />
         <AlertTitle className="text-sm">Governança Falso Afluente</AlertTitle>
         <AlertDescription className="text-xs">
-          Predições em <strong>shadow</strong> são auditadas e não substituem decisão humana. Contexto Atlas Esgotos +
-          histórico DBO + maturidade de dados. <Link to="/command-center/cortex" className="text-primary underline">Abrir Córtex central</Link>.
+          Predições em <strong>shadow</strong> são auditadas e não substituem decisão humana.{" "}
+          <Link to="/command-center/cortex" className="text-primary underline">Abrir Córtex central</Link>.
         </AlertDescription>
       </Alert>
 
@@ -121,42 +143,59 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
           <h3 className="text-sm font-semibold uppercase font-mono">Predições escopadas</h3>
           <Badge variant="outline" className="text-[10px]">{predicoes.length}</Badge>
         </div>
-        <Button size="sm" onClick={runInference} disabled={running}>
+        <Button size="sm" onClick={handleRun} disabled={running}>
           {running ? <RefreshCw className="size-3 mr-1.5 animate-spin" /> : <Zap className="size-3 mr-1.5" />}
-          Executar inferência
+          Executar inferência agora
         </Button>
       </div>
+
+      {(running || progress > 0) && (
+        <div className="space-y-1">
+          <Progress value={progress} className="h-1.5" />
+          {runInfo && <p className="text-[11px] font-mono text-muted-foreground">{runInfo}</p>}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : predicoes.length === 0 ? (
         <div className="bg-card border rounded-sm p-5 text-sm text-muted-foreground">
-          Nenhuma predição registrada para este escopo. Execute uma inferência ou aguarde o job diário do Córtex.
+          Nenhuma predição registrada para este escopo.
         </div>
       ) : (
-        <div className="space-y-2">
-          {predicoes.map((p) => (
-            <div key={p.id} className="border rounded-sm p-3 text-sm bg-card">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2">
-                  <Badge className={classColor[p.classificacao ?? "indeterminado"]}>{p.classificacao ?? "—"}</Badge>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    risco {(Number(p.valor) * 100 || 0).toFixed(0)}% · conf {(Number(p.confianca) * 100 || 0).toFixed(0)}% · {p.horizonte_dias ?? 30}d
+        <>
+          <div className="space-y-2">
+            {table.rows.map((p) => (
+              <div key={p.id} className="border rounded-sm p-3 text-sm bg-card">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2">
+                    <Badge className={classColor[p.classificacao ?? "indeterminado"]}>{p.classificacao ?? "—"}</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      risco {(Number(p.valor) * 100 || 0).toFixed(0)}% · conf {(Number(p.confianca) * 100 || 0).toFixed(0)}% · {p.horizonte_dias ?? 30}d
+                    </span>
+                    {p.ete_id && (
+                      <Link to={`/operador/etes`} className="text-primary text-xs inline-flex items-center gap-1 hover:underline">
+                        ETE <ExternalLink className="size-3" />
+                      </Link>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {new Date(p.criado_em).toLocaleString("pt-BR")}
                   </span>
-                  {p.ete_id && (
-                    <Link to={`/operador/etes`} className="text-primary text-xs inline-flex items-center gap-1 hover:underline">
-                      ETE <ExternalLink className="size-3" />
-                    </Link>
-                  )}
                 </div>
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  {new Date(p.criado_em).toLocaleString("pt-BR")}
-                </span>
+                {p.explicacao && <p className="text-xs text-muted-foreground leading-relaxed">{p.explicacao}</p>}
               </div>
-              {p.explicacao && <p className="text-xs text-muted-foreground leading-relaxed">{p.explicacao}</p>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <TablePagination
+            page={table.page}
+            pageCount={table.pageCount}
+            pageSize={table.pageSize}
+            total={table.total}
+            onPage={table.setPage}
+            onPageSize={(s) => table.setPageSize(s)}
+          />
+        </>
       )}
     </div>
   );
