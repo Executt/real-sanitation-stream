@@ -127,17 +127,27 @@ export default function OperadorDashboard() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4 gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Visão Operador B2B</h1>
           <p className="text-muted-foreground font-mono text-sm mt-1">
             {profile?.organization ?? "Concessionária não vinculada"}
           </p>
         </div>
-        <div className="bg-card px-4 py-2 border rounded-sm text-sm font-mono text-muted-foreground">
-          Atualizado: {lastSync}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/command-center/cortex"><Brain className="size-4 mr-1.5" />Córtex IA</Link>
+          </Button>
+          <Button size="sm" onClick={handleRunCortex} disabled={running}>
+            {running ? <RefreshCw className="size-4 mr-1.5 animate-spin" /> : <Zap className="size-4 mr-1.5" />}
+            Executar inferência agora
+          </Button>
+          <div className="bg-card px-4 py-2 border rounded-sm text-sm font-mono text-muted-foreground">
+            Atualizado: {lastSync}
+          </div>
         </div>
       </div>
+      {(running || progress > 0) && <Progress value={progress} className="h-1.5 mb-4" />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
