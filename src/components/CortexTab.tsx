@@ -192,9 +192,10 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
             pageCount={table.pageCount}
             pageSize={table.pageSize}
             total={table.total}
-            onPage={table.setPage}
-            onPageSize={(s) => table.setPageSize(s)}
+            onPageChange={table.setPage}
+            onPageSizeChange={(s) => table.setPageSize(s)}
           />
+
         </>
       )}
     </div>
