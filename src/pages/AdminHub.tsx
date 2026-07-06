@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain } from "lucide-react";
 
 const modules = [
   {
