@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain } from "lucide-react";
 
 const modules = [
   {
@@ -44,6 +44,12 @@ const modules = [
     description: "Configurações globais do sistema, limites e thresholds.",
     url: "/admin/parametros",
     icon: Settings2,
+  },
+  {
+    title: "Modelos Córtex IA",
+    description: "Cadastro de modelos treinados, online, pagos e RAG. Governança do Falso Afluente.",
+    url: "/admin/cortex-modelos",
+    icon: Brain,
   },
   {
     title: "Auditoria & Segurança",

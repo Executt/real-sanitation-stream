@@ -29,6 +29,7 @@ import ConformidadePage from "./pages/ConformidadePage";
 import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
 import CortexPage from "./pages/CortexPage";
+import CortexModelos from "./pages/CortexModelos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="/admin/sei" element={<SeiConfig />} />
               <Route path="/admin/parametros" element={<SystemParameters />} />
               <Route path="/admin/auditoria" element={<AuditLog />} />
+              <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

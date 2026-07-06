@@ -35,6 +35,7 @@ const anaItems = [
 
 const adminItems = [
   { title: "Usuários & Roles", url: "/admin", icon: Users },
+  { title: "Modelos Córtex IA", url: "/admin/cortex-modelos", icon: Brain },
 ];
 
 export function AppSidebar() {
