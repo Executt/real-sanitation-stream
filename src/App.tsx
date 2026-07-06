@@ -29,6 +29,7 @@ import ConformidadePage from "./pages/ConformidadePage";
 import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
 import CortexPage from "./pages/CortexPage";
+import CortexModelos from "./pages/CortexModelos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
