@@ -15,6 +15,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Brain,
   Building2,
   ChevronDown,
   ClipboardEdit,
