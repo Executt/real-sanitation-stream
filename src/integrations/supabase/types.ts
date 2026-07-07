@@ -396,6 +396,44 @@ export type Database = {
           },
         ]
       }
+      cortex_thresholds: {
+        Row: {
+          alto_min: number
+          bacia: string | null
+          created_at: string
+          critico_min: number
+          id: string
+          modelo_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          alto_min?: number
+          bacia?: string | null
+          created_at?: string
+          critico_min?: number
+          id?: string
+          modelo_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alto_min?: number
+          bacia?: string | null
+          created_at?: string
+          critico_min?: number
+          id?: string
+          modelo_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortex_thresholds_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "cortex_modelos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_config: {
         Row: {
           cortex_infer_url: string | null

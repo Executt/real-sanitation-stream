@@ -15,6 +15,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Brain,
   Building2,
   ChevronDown,
   ClipboardEdit,
@@ -53,6 +54,7 @@ const anaItems = [
   { title: "Mapa Interativo", url: "/command-center/mapa", icon: Globe },
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
+  { title: "Córtex IA", url: "/command-center/cortex", icon: Brain },
 ];
 
 const agenciaItems = [
