@@ -66,18 +66,21 @@ export default function CortexPage() {
 
   async function load() {
     setLoading(true);
-    const [{ data: modelos }, { data: preds }] = await Promise.all([
+    const [{ data: modelos }, { data: preds }, { data: ths }] = await Promise.all([
       supabase.from("cortex_modelos").select("*").order("created_at", { ascending: false }),
       supabase
         .from("cortex_predicoes")
         .select("id, ete_id, bacia, classificacao, valor, confianca, explicacao, horizonte_dias, criado_em, modelo_id")
         .order("criado_em", { ascending: false })
         .limit(500),
+      supabase.from("cortex_thresholds").select("id, bacia, modelo_id, alto_min, critico_min"),
     ]);
     const list = (modelos ?? []) as Modelo[];
     setModelo(list[0] ?? null);
+    setModelosList(list);
     setModelosMap(Object.fromEntries(list.map((m) => [m.id, m])));
     setPredicoes((preds as Predicao[]) ?? []);
+    setThresholds((ths ?? []) as Threshold[]);
     setLoading(false);
   }
 
