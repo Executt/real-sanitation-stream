@@ -14,6 +14,8 @@ import { Link } from "react-router-dom";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
 import { parseCortexError, runCortexInference } from "@/lib/cortex";
+import { classifyByThreshold, resolveThreshold, type Threshold } from "@/lib/cortexThresholds";
+import { CortexThresholdsPanel } from "@/components/CortexThresholdsPanel";
 import { useAuth } from "@/contexts/AuthContext";
 
 type Modelo = {
