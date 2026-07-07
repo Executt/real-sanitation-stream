@@ -284,6 +284,19 @@ export default function CortexPage() {
         </Card>
       </ErrorBoundary>
 
+      {isSuperAdmin && (
+        <ErrorBoundary section="Limiares Córtex">
+          <CortexThresholdsPanel
+            thresholds={thresholds}
+            modelos={modelosList.map((m) => ({ id: m.id, nome: m.nome, versao: m.versao }))}
+            bacias={baciasDisponiveis}
+            onChanged={load}
+          />
+        </ErrorBoundary>
+      )}
+
+
+
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={filterClass} onValueChange={setFilterClass}>
