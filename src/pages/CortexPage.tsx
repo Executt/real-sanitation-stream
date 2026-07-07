@@ -93,15 +93,35 @@ export default function CortexPage() {
         load();
       })
       .subscribe();
+    const chT = supabase
+      .channel("cortex_thresholds_all")
+      .on("postgres_changes", { event: "*", schema: "public", table: "cortex_thresholds" }, () => load())
+      .subscribe();
     return () => {
       supabase.removeChannel(ch);
+      supabase.removeChannel(chT);
     };
   }, []);
+
+  // Aplica os thresholds configurados sobre cada predição para reclassificar
+  const scored = useMemo(() => {
+    return predicoes.map((p) => {
+      const th = resolveThreshold(thresholds, p.bacia, p.modelo_id);
+      const cls = classifyByThreshold(p.valor, p.classificacao, th);
+      return { ...p, classificacao: cls };
+    });
+  }, [predicoes, thresholds]);
+
+  const baciasDisponiveis = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of predicoes) if (p.bacia?.trim()) s.add(p.bacia.trim());
+    return Array.from(s).sort();
+  }, [predicoes]);
 
   // KPIs por bacia
   const kpisPorBacia = useMemo(() => {
     const buckets = new Map<string, { total: number; critico: number; alto: number; riscoMed: number }>();
-    for (const p of predicoes) {
+    for (const p of scored) {
       const b = p.bacia?.trim() || "Sem bacia";
       const cur = buckets.get(b) ?? { total: 0, critico: 0, alto: 0, riscoMed: 0 };
       cur.total += 1;
@@ -114,15 +134,15 @@ export default function CortexPage() {
       .map(([bacia, v]) => ({ bacia, ...v, riscoMed: v.total ? v.riscoMed / v.total : 0 }))
       .sort((a, b) => b.critico + b.alto - (a.critico + a.alto) || b.total - a.total)
       .slice(0, 8);
-  }, [predicoes]);
+  }, [scored]);
 
   const filtered = useMemo(() => {
-    return predicoes.filter((p) => {
+    return scored.filter((p) => {
       if (filterClass !== "todas" && p.classificacao !== filterClass) return false;
       if (filterBacia && !(p.bacia ?? "").toLowerCase().includes(filterBacia.toLowerCase())) return false;
       return true;
     });
-  }, [predicoes, filterClass, filterBacia]);
+  }, [scored, filterClass, filterBacia]);
 
   const alerts = useMemo(
     () => filtered.filter((p) => (RISK_SCORE[p.classificacao ?? "indeterminado"] ?? 0) >= 3),
