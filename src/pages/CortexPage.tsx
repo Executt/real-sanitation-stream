@@ -55,6 +55,8 @@ export default function CortexPage() {
   const { isSuperAdmin } = useAuth();
   const [modelo, setModelo] = useState<Modelo | null>(null);
   const [modelosMap, setModelosMap] = useState<Record<string, Modelo>>({});
+  const [modelosList, setModelosList] = useState<Modelo[]>([]);
+  const [thresholds, setThresholds] = useState<Threshold[]>([]);
   const [predicoes, setPredicoes] = useState<Predicao[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
