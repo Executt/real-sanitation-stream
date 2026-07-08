@@ -174,3 +174,23 @@ Campos: `modelo_id`, `escopo` (`ete|concessionaria|agencia|bacia`), `ete_id`, `c
 ## Extensão do `cron_config`
 
 Colunas adicionadas: `cortex_infer_url`, `cortex_ingest_url` — persistem as URLs das edge functions para reagendamento após rotação de chaves.
+
+## Repositórios e Bases externas (fontes de dados para o Córtex)
+
+### `repositorios_artefatos`
+Cadastro de repositórios de arquivos (PDF, imagens, planilhas, arquivos geoespaciais, etc).
+Campos: `nome`, `tipo` (enum `repo_artefato_tipo`: `aws_s3|oci|gcp_gcs|azure_blob|filesystem|onedrive|google_drive|sharepoint|ftp|sftp|outro`), `descricao`, `bucket_ou_path`, `endpoint`, `regiao`, `config` (jsonb), `secret_ref` (**nome** da secret no Lovable Cloud — nunca o valor), `ativo`.
+**RLS:** leitura autenticada; escrita apenas `superadmin`. Auditada.
+
+### `bases_dados_externas`
+Cadastro de bancos externos consumíveis pelos modelos Córtex.
+Campos: `nome`, `tipo` (enum `base_dados_tipo`: `postgres|mysql|oracle|sqlserver|mongodb|snowflake|bigquery|clickhouse|duckdb|outro`), `descricao`, `host`, `porta`, `database_name`, `usuario`, `ssl_mode`, `config` (jsonb), `secret_ref`, `ativo`.
+**RLS:** leitura autenticada; escrita apenas `superadmin`. Auditada.
+
+### `cortex_modelos_fontes`
+Vínculo N:N entre modelos Córtex e fontes (repositório **ou** base — CHECK XOR).
+Campos: `modelo_id`, `repositorio_id`, `base_dados_id`, `papel` (enum `cortex_fonte_papel`: `treino|contexto_rag|inferencia|validacao`), `observacoes`.
+Índices únicos parciais impedem vincular a mesma fonte duas vezes com o mesmo papel.
+**RLS:** leitura autenticada; escrita apenas `superadmin`. Auditada.
+
+**Segurança:** credenciais dos repositórios e bases são armazenadas exclusivamente como segredos no Lovable Cloud (Edge Function Secrets). As tabelas guardam somente `secret_ref` — o nome da secret — e nunca o valor.

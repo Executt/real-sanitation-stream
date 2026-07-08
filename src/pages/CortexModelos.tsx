@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Brain, Plus, Pencil, Trash2, ShieldAlert, ExternalLink } from "lucide-react";
 import { parseCortexError } from "@/lib/cortex";
+import { CortexModeloFontes } from "@/components/CortexModeloFontes";
 
 type Tipo = "trained" | "online" | "paid" | "rag";
 
@@ -296,6 +297,8 @@ export default function CortexModelos() {
                   Para <strong>status = prod</strong>: relatório causal + checklist 100% + métricas em anos anômalos são obrigatórios.
                 </AlertDescription>
               </Alert>
+
+              {form.id && <CortexModeloFontes modeloId={form.id} />}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>

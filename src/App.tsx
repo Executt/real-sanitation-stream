@@ -30,6 +30,8 @@ import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
 import CortexPage from "./pages/CortexPage";
 import CortexModelos from "./pages/CortexModelos";
+import RepositoriosArtefatos from "./pages/RepositoriosArtefatos";
+import BasesDados from "./pages/BasesDados";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +78,8 @@ const App = () => (
               <Route path="/admin/parametros" element={<SystemParameters />} />
               <Route path="/admin/auditoria" element={<AuditLog />} />
               <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
+              <Route path="/admin/repositorios" element={<RepositoriosArtefatos />} />
+              <Route path="/admin/bases-dados" element={<BasesDados />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

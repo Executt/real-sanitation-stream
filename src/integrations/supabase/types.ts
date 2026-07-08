@@ -188,6 +188,57 @@ export type Database = {
         }
         Relationships: []
       }
+      bases_dados_externas: {
+        Row: {
+          ativo: boolean
+          config: Json
+          created_at: string
+          database_name: string | null
+          descricao: string | null
+          host: string | null
+          id: string
+          nome: string
+          porta: number | null
+          secret_ref: string | null
+          ssl_mode: string | null
+          tipo: Database["public"]["Enums"]["base_dados_tipo"]
+          updated_at: string
+          usuario: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          config?: Json
+          created_at?: string
+          database_name?: string | null
+          descricao?: string | null
+          host?: string | null
+          id?: string
+          nome: string
+          porta?: number | null
+          secret_ref?: string | null
+          ssl_mode?: string | null
+          tipo: Database["public"]["Enums"]["base_dados_tipo"]
+          updated_at?: string
+          usuario?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          config?: Json
+          created_at?: string
+          database_name?: string | null
+          descricao?: string | null
+          host?: string | null
+          id?: string
+          nome?: string
+          porta?: number | null
+          secret_ref?: string | null
+          ssl_mode?: string | null
+          tipo?: Database["public"]["Enums"]["base_dados_tipo"]
+          updated_at?: string
+          usuario?: string | null
+        }
+        Relationships: []
+      }
       concessionarias: {
         Row: {
           abrangencia: string | null
@@ -309,6 +360,58 @@ export type Database = {
           versao?: string
         }
         Relationships: []
+      }
+      cortex_modelos_fontes: {
+        Row: {
+          base_dados_id: string | null
+          created_at: string
+          id: string
+          modelo_id: string
+          observacoes: string | null
+          papel: Database["public"]["Enums"]["cortex_fonte_papel"]
+          repositorio_id: string | null
+        }
+        Insert: {
+          base_dados_id?: string | null
+          created_at?: string
+          id?: string
+          modelo_id: string
+          observacoes?: string | null
+          papel?: Database["public"]["Enums"]["cortex_fonte_papel"]
+          repositorio_id?: string | null
+        }
+        Update: {
+          base_dados_id?: string | null
+          created_at?: string
+          id?: string
+          modelo_id?: string
+          observacoes?: string | null
+          papel?: Database["public"]["Enums"]["cortex_fonte_papel"]
+          repositorio_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortex_modelos_fontes_base_dados_id_fkey"
+            columns: ["base_dados_id"]
+            isOneToOne: false
+            referencedRelation: "bases_dados_externas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortex_modelos_fontes_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "cortex_modelos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortex_modelos_fontes_repositorio_id_fkey"
+            columns: ["repositorio_id"]
+            isOneToOne: false
+            referencedRelation: "repositorios_artefatos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cortex_predicoes: {
         Row: {
@@ -678,6 +781,51 @@ export type Database = {
           },
         ]
       }
+      repositorios_artefatos: {
+        Row: {
+          ativo: boolean
+          bucket_ou_path: string | null
+          config: Json
+          created_at: string
+          descricao: string | null
+          endpoint: string | null
+          id: string
+          nome: string
+          regiao: string | null
+          secret_ref: string | null
+          tipo: Database["public"]["Enums"]["repo_artefato_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          bucket_ou_path?: string | null
+          config?: Json
+          created_at?: string
+          descricao?: string | null
+          endpoint?: string | null
+          id?: string
+          nome: string
+          regiao?: string | null
+          secret_ref?: string | null
+          tipo: Database["public"]["Enums"]["repo_artefato_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          bucket_ou_path?: string | null
+          config?: Json
+          created_at?: string
+          descricao?: string | null
+          endpoint?: string | null
+          id?: string
+          nome?: string
+          regiao?: string | null
+          secret_ref?: string | null
+          tipo?: Database["public"]["Enums"]["repo_artefato_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sei_config: {
         Row: {
           api_key: string
@@ -838,6 +986,30 @@ export type Database = {
     }
     Enums: {
       app_role: "operador" | "gestor_ana" | "superadmin" | "gestor_ar"
+      base_dados_tipo:
+        | "postgres"
+        | "mysql"
+        | "oracle"
+        | "sqlserver"
+        | "mongodb"
+        | "snowflake"
+        | "bigquery"
+        | "clickhouse"
+        | "duckdb"
+        | "outro"
+      cortex_fonte_papel: "treino" | "contexto_rag" | "inferencia" | "validacao"
+      repo_artefato_tipo:
+        | "aws_s3"
+        | "oci"
+        | "gcp_gcs"
+        | "azure_blob"
+        | "filesystem"
+        | "onedrive"
+        | "google_drive"
+        | "sharepoint"
+        | "ftp"
+        | "sftp"
+        | "outro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -966,6 +1138,32 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["operador", "gestor_ana", "superadmin", "gestor_ar"],
+      base_dados_tipo: [
+        "postgres",
+        "mysql",
+        "oracle",
+        "sqlserver",
+        "mongodb",
+        "snowflake",
+        "bigquery",
+        "clickhouse",
+        "duckdb",
+        "outro",
+      ],
+      cortex_fonte_papel: ["treino", "contexto_rag", "inferencia", "validacao"],
+      repo_artefato_tipo: [
+        "aws_s3",
+        "oci",
+        "gcp_gcs",
+        "azure_blob",
+        "filesystem",
+        "onedrive",
+        "google_drive",
+        "sharepoint",
+        "ftp",
+        "sftp",
+        "outro",
+      ],
     },
   },
 } as const

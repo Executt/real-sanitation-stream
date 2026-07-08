@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain, HardDrive, Database } from "lucide-react";
 
 const modules = [
   {
@@ -40,6 +40,18 @@ const modules = [
     icon: FileCog,
   },
   {
+    title: "Repositórios de Artefatos",
+    description: "AWS S3, OCI, GCP, Azure, OneDrive, Google Drive, SharePoint, FTP/SFTP, filesystem. Fonte para modelos Córtex.",
+    url: "/admin/repositorios",
+    icon: HardDrive,
+  },
+  {
+    title: "Bases de Dados Externas",
+    description: "Postgres, Oracle, MySQL, SQL Server, Snowflake, BigQuery, ClickHouse e outros — consumíveis pelos modelos Córtex.",
+    url: "/admin/bases-dados",
+    icon: Database,
+  },
+  {
     title: "Parâmetros Gerais",
     description: "Configurações globais do sistema, limites e thresholds.",
     url: "/admin/parametros",
@@ -47,7 +59,7 @@ const modules = [
   },
   {
     title: "Modelos Córtex IA",
-    description: "Cadastro de modelos treinados, online, pagos e RAG. Governança do Falso Afluente.",
+    description: "Configuração de modelos treinados, online, pagos e RAG. Vincule repositórios e bases como fontes.",
     url: "/admin/cortex-modelos",
     icon: Brain,
   },
