@@ -40,10 +40,28 @@ const modules = [
     icon: FileCog,
   },
   {
+    title: "Repositórios de Artefatos",
+    description: "AWS S3, OCI, GCP, Azure, OneDrive, Google Drive, SharePoint, FTP/SFTP, filesystem. Fonte para modelos Córtex.",
+    url: "/admin/repositorios",
+    icon: HardDrive,
+  },
+  {
+    title: "Bases de Dados Externas",
+    description: "Postgres, Oracle, MySQL, SQL Server, Snowflake, BigQuery, ClickHouse e outros — consumíveis pelos modelos Córtex.",
+    url: "/admin/bases-dados",
+    icon: Database,
+  },
+  {
     title: "Parâmetros Gerais",
     description: "Configurações globais do sistema, limites e thresholds.",
     url: "/admin/parametros",
     icon: Settings2,
+  },
+  {
+    title: "Modelos Córtex IA",
+    description: "Configuração de modelos treinados, online, pagos e RAG. Vincule repositórios e bases como fontes.",
+    url: "/admin/cortex-modelos",
+    icon: Brain,
   },
   {
     title: "Modelos Córtex IA",
