@@ -30,6 +30,8 @@ import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
 import CortexPage from "./pages/CortexPage";
 import CortexModelos from "./pages/CortexModelos";
+import RepositoriosArtefatos from "./pages/RepositoriosArtefatos";
+import BasesDados from "./pages/BasesDados";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
