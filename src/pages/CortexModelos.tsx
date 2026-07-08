@@ -297,6 +297,8 @@ export default function CortexModelos() {
                   Para <strong>status = prod</strong>: relatório causal + checklist 100% + métricas em anos anômalos são obrigatórios.
                 </AlertDescription>
               </Alert>
+
+              {form.id && <CortexModeloFontes modeloId={form.id} />}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
