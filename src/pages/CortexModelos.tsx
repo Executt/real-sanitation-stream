@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Brain, Plus, Pencil, Trash2, ShieldAlert, ExternalLink } from "lucide-react";
 import { parseCortexError } from "@/lib/cortex";
+import { CortexModeloFontes } from "@/components/CortexModeloFontes";
 
 type Tipo = "trained" | "online" | "paid" | "rag";
 
