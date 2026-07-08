@@ -78,6 +78,8 @@ const App = () => (
               <Route path="/admin/parametros" element={<SystemParameters />} />
               <Route path="/admin/auditoria" element={<AuditLog />} />
               <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
+              <Route path="/admin/repositorios" element={<RepositoriosArtefatos />} />
+              <Route path="/admin/bases-dados" element={<BasesDados />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
