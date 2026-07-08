@@ -64,12 +64,6 @@ const modules = [
     icon: Brain,
   },
   {
-    title: "Modelos Córtex IA",
-    description: "Cadastro de modelos treinados, online, pagos e RAG. Governança do Falso Afluente.",
-    url: "/admin/cortex-modelos",
-    icon: Brain,
-  },
-  {
     title: "Auditoria & Segurança",
     description: "Visualize logs de auditoria e políticas de segurança.",
     url: "/admin/auditoria",
