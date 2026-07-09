@@ -17,7 +17,7 @@ import { ArrowLeft, Brain, Plus, Pencil, Trash2, ShieldAlert, ExternalLink } fro
 import { parseCortexError } from "@/lib/cortex";
 import { CortexModeloFontes } from "@/components/CortexModeloFontes";
 
-type Tipo = "trained" | "online" | "paid" | "rag";
+type Tipo = "trained" | "online" | "paid" | "rag" | "mcp";
 
 type Modelo = {
   id: string;
@@ -46,6 +46,7 @@ const TIPO_LABEL: Record<string, string> = {
   online: "Modelo online (gateway)",
   paid: "Modelo pago / premium",
   rag: "RAG (recuperação + LLM)",
+  mcp: "MCP (ferramentas externas)",
 };
 
 const emptyForm = () => ({
@@ -61,6 +62,8 @@ const emptyForm = () => ({
   anos_anomalos: '{\n  "2014": { "mae": null, "rmse": null },\n  "2021": { "mae": null, "rmse": null }\n}',
   rag_source: "",
   rag_top_k: 5,
+  mcp_server_url: "",
+  mcp_tools: "",
 });
 
 export default function CortexModelos() {
@@ -87,6 +90,7 @@ export default function CortexModelos() {
   function edit(m: Modelo) {
     const anos = (m.metricas as Record<string, unknown> | null)?.anos_anomalos ?? {};
     const rag = ((m.metricas as Record<string, unknown> | null)?.rag ?? {}) as Record<string, unknown>;
+    const mcp = ((m.metricas as Record<string, unknown> | null)?.mcp ?? {}) as Record<string, unknown>;
     setForm({
       id: m.id,
       nome: m.nome,
@@ -103,6 +107,8 @@ export default function CortexModelos() {
       anos_anomalos: JSON.stringify(anos, null, 2),
       rag_source: String(rag.source ?? ""),
       rag_top_k: Number(rag.top_k ?? 5),
+      mcp_server_url: String(mcp.server_url ?? ""),
+      mcp_tools: String(mcp.tools ?? ""),
     });
     setOpen(true);
   }
@@ -130,6 +136,12 @@ export default function CortexModelos() {
     const metricas: Record<string, unknown> = { anos_anomalos: anosParsed };
     if (form.tipo === "rag") {
       metricas.rag = { source: form.rag_source, top_k: form.rag_top_k };
+    }
+    if (form.tipo === "mcp") {
+      metricas.mcp = {
+        server_url: form.mcp_server_url,
+        tools: form.mcp_tools.split(",").map((s) => s.trim()).filter(Boolean),
+      };
     }
 
     const payload = {
@@ -253,6 +265,25 @@ export default function CortexModelos() {
                       max={50}
                       value={form.rag_top_k}
                       onChange={(e) => setForm({ ...form, rag_top_k: Number(e.target.value) })}
+                    />
+                  </Field>
+                </div>
+              )}
+
+              {form.tipo === "mcp" && (
+                <div className="grid grid-cols-2 gap-3 border rounded-sm p-3 bg-muted/30">
+                  <Field label="MCP: URL do servidor" full>
+                    <Input
+                      value={form.mcp_server_url}
+                      onChange={(e) => setForm({ ...form, mcp_server_url: e.target.value })}
+                      placeholder="https://mcp.exemplo.gov.br/sse"
+                    />
+                  </Field>
+                  <Field label="MCP: ferramentas (separadas por vírgula)" full>
+                    <Input
+                      value={form.mcp_tools}
+                      onChange={(e) => setForm({ ...form, mcp_tools: e.target.value })}
+                      placeholder="atlas_lookup, snirh_query, sei_search"
                     />
                   </Field>
                 </div>
