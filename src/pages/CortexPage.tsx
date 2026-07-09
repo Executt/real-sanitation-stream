@@ -87,7 +87,6 @@ export default function CortexPage() {
     const ch = supabase
       .channel("cortex_pred_all")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, () => {
-        setProgress((p) => Math.min(100, p + 6));
         load();
       })
       .subscribe();
