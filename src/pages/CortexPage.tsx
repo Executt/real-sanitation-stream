@@ -59,7 +59,7 @@ export default function CortexPage() {
   const [thresholds, setThresholds] = useState<Threshold[]>([]);
   const [predicoes, setPredicoes] = useState<Predicao[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterClass_unused, _fc] = [0, 0]; void filterClass_unused; void _fc;
+  
   const [filterClass, setFilterClass] = useState<string>("todas");
   const [filterBacia, setFilterBacia] = useState<string>("");
 
