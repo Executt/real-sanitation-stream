@@ -4,13 +4,12 @@ import { EteStatusTable } from "@/components/EteStatusTable";
 import { AlertasDboPanel } from "@/components/AlertasDboPanel";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Zap, RefreshCw, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { parseCortexError, runCortexInference } from "@/lib/cortex";
+import { useCortexRun } from "@/hooks/useCortexRun";
+import { CortexRunStatus } from "@/components/CortexRunStatus";
 
 interface Stats {
   totalEtes: number;
@@ -37,46 +36,15 @@ export default function OperadorDashboard() {
   const [stats, setStats] = useState<Stats>(empty);
   const [loading, setLoading] = useState(true);
   const [lastSync, setLastSync] = useState<string>(new Date().toLocaleTimeString("pt-BR"));
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const ch = supabase
-      .channel("cortex_pred_dash")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, () => {
-        setProgress((p) => Math.min(100, p + 10));
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, []);
+  const cortexRun = useCortexRun(`dash_${profile?.concessionaria_id ?? "all"}`);
+  const running = cortexRun.state === "running" || cortexRun.state === "queued";
 
   async function handleRunCortex() {
-    setRunning(true);
-    setProgress(5);
     const conc = profile?.concessionaria_id as string | undefined;
-    const res = await runCortexInference(
+    await cortexRun.run(
       conc ? { kind: "concessionaria", concessionariaId: conc, limit: 10 } : { kind: "all", limit: 10 },
       30,
     );
-    setRunning(false);
-    if (res.error) {
-      setProgress(0);
-      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
-      return;
-    }
-    if (!res.count) {
-      setProgress(0);
-      toast({ title: "Sem ETEs elegíveis", description: "Nenhuma ETE ativa no escopo." });
-      return;
-    }
-    setProgress(100);
-    toast({
-      title: "Inferência concluída",
-      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
-    });
-    setTimeout(() => setProgress(0), 4000);
   }
 
   useEffect(() => {
@@ -147,7 +115,9 @@ export default function OperadorDashboard() {
           </div>
         </div>
       </div>
-      {(running || progress > 0) && <Progress value={progress} className="h-1.5 mb-4" />}
+      <div className="mb-4">
+        <CortexRunStatus state={cortexRun.state} progress={cortexRun.progress} info={cortexRun.info} error={cortexRun.error} />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard

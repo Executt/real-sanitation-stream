@@ -6,17 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/hooks/use-toast";
 import { Brain, ShieldAlert, Zap, RefreshCw, ExternalLink, Settings2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Link } from "react-router-dom";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
-import { parseCortexError, runCortexInference } from "@/lib/cortex";
 import { classifyByThreshold, resolveThreshold, type Threshold } from "@/lib/cortexThresholds";
 import { CortexThresholdsPanel } from "@/components/CortexThresholdsPanel";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCortexRun } from "@/hooks/useCortexRun";
+import { CortexRunStatus } from "@/components/CortexRunStatus";
 
 type Modelo = {
   id: string;
@@ -59,8 +58,7 @@ export default function CortexPage() {
   const [thresholds, setThresholds] = useState<Threshold[]>([]);
   const [predicoes, setPredicoes] = useState<Predicao[]>([]);
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
+  
   const [filterClass, setFilterClass] = useState<string>("todas");
   const [filterBacia, setFilterBacia] = useState<string>("");
 
@@ -89,7 +87,6 @@ export default function CortexPage() {
     const ch = supabase
       .channel("cortex_pred_all")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, () => {
-        setProgress((p) => Math.min(100, p + 6));
         load();
       })
       .subscribe();
@@ -152,23 +149,12 @@ export default function CortexPage() {
   const alertTable = useTable<Predicao>(alerts, { pageSize: 10 });
   const allTable = useTable<Predicao>(filtered, { pageSize: 15 });
 
+  const cortexRun = useCortexRun("central");
+  const running = cortexRun.state === "running" || cortexRun.state === "queued";
+
   async function runInference() {
-    setRunning(true);
-    setProgress(5);
-    const res = await runCortexInference({ kind: "all", limit: 10 }, 30);
-    setRunning(false);
-    if (res.error) {
-      setProgress(0);
-      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
-      return;
-    }
-    setProgress(100);
-    toast({
-      title: "Inferência concluída",
-      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
-    });
-    setTimeout(() => setProgress(0), 4000);
-    load();
+    const r = await cortexRun.run({ kind: "all", limit: 10 }, 30);
+    if (r.ok) load();
   }
 
   const checklistItems = modelo?.falso_afluente_checklist ?? {};
@@ -198,7 +184,7 @@ export default function CortexPage() {
         </div>
       </div>
 
-      {(running || progress > 0) && <Progress value={progress} className="h-1.5" />}
+      <CortexRunStatus state={cortexRun.state} progress={cortexRun.progress} info={cortexRun.info} error={cortexRun.error} />
 
       <Alert>
         <ShieldAlert className="size-4" />
