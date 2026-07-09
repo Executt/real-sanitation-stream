@@ -6,17 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/hooks/use-toast";
 import { Brain, ShieldAlert, Zap, RefreshCw, ExternalLink, Settings2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Link } from "react-router-dom";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
-import { parseCortexError, runCortexInference } from "@/lib/cortex";
 import { classifyByThreshold, resolveThreshold, type Threshold } from "@/lib/cortexThresholds";
 import { CortexThresholdsPanel } from "@/components/CortexThresholdsPanel";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCortexRun } from "@/hooks/useCortexRun";
+import { CortexRunStatus } from "@/components/CortexRunStatus";
 
 type Modelo = {
   id: string;
