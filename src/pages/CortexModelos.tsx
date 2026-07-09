@@ -17,7 +17,7 @@ import { ArrowLeft, Brain, Plus, Pencil, Trash2, ShieldAlert, ExternalLink } fro
 import { parseCortexError } from "@/lib/cortex";
 import { CortexModeloFontes } from "@/components/CortexModeloFontes";
 
-type Tipo = "trained" | "online" | "paid" | "rag";
+type Tipo = "trained" | "online" | "paid" | "rag" | "mcp";
 
 type Modelo = {
   id: string;
@@ -46,6 +46,7 @@ const TIPO_LABEL: Record<string, string> = {
   online: "Modelo online (gateway)",
   paid: "Modelo pago / premium",
   rag: "RAG (recuperação + LLM)",
+  mcp: "MCP (ferramentas externas)",
 };
 
 const emptyForm = () => ({
@@ -61,6 +62,8 @@ const emptyForm = () => ({
   anos_anomalos: '{\n  "2014": { "mae": null, "rmse": null },\n  "2021": { "mae": null, "rmse": null }\n}',
   rag_source: "",
   rag_top_k: 5,
+  mcp_server_url: "",
+  mcp_tools: "",
 });
 
 export default function CortexModelos() {
