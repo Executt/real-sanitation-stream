@@ -137,6 +137,12 @@ export default function CortexModelos() {
     if (form.tipo === "rag") {
       metricas.rag = { source: form.rag_source, top_k: form.rag_top_k };
     }
+    if (form.tipo === "mcp") {
+      metricas.mcp = {
+        server_url: form.mcp_server_url,
+        tools: form.mcp_tools.split(",").map((s) => s.trim()).filter(Boolean),
+      };
+    }
 
     const payload = {
       nome: form.nome,
