@@ -184,7 +184,7 @@ export default function CortexPage() {
         </div>
       </div>
 
-      {(running || progress > 0) && <Progress value={progress} className="h-1.5" />}
+      <CortexRunStatus state={cortexRun.state} progress={cortexRun.progress} info={cortexRun.info} error={cortexRun.error} />
 
       <Alert>
         <ShieldAlert className="size-4" />
