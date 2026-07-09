@@ -3,13 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/hooks/use-toast";
 import { Brain, Zap, RefreshCw, ShieldAlert, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TablePagination } from "@/components/TablePagination";
 import { useTable } from "@/lib/useTable";
-import { parseCortexError, runCortexInference } from "@/lib/cortex";
+import { useCortexRun } from "@/hooks/useCortexRun";
+import { CortexRunStatus } from "@/components/CortexRunStatus";
 
 type Predicao = {
   id: string;
