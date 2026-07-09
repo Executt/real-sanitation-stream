@@ -90,6 +90,7 @@ export default function CortexModelos() {
   function edit(m: Modelo) {
     const anos = (m.metricas as Record<string, unknown> | null)?.anos_anomalos ?? {};
     const rag = ((m.metricas as Record<string, unknown> | null)?.rag ?? {}) as Record<string, unknown>;
+    const mcp = ((m.metricas as Record<string, unknown> | null)?.mcp ?? {}) as Record<string, unknown>;
     setForm({
       id: m.id,
       nome: m.nome,
@@ -106,6 +107,8 @@ export default function CortexModelos() {
       anos_anomalos: JSON.stringify(anos, null, 2),
       rag_source: String(rag.source ?? ""),
       rag_top_k: Number(rag.top_k ?? 5),
+      mcp_server_url: String(mcp.server_url ?? ""),
+      mcp_tools: String(mcp.tools ?? ""),
     });
     setOpen(true);
   }
