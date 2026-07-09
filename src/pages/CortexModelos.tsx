@@ -270,6 +270,25 @@ export default function CortexModelos() {
                 </div>
               )}
 
+              {form.tipo === "mcp" && (
+                <div className="grid grid-cols-2 gap-3 border rounded-sm p-3 bg-muted/30">
+                  <Field label="MCP: URL do servidor" full>
+                    <Input
+                      value={form.mcp_server_url}
+                      onChange={(e) => setForm({ ...form, mcp_server_url: e.target.value })}
+                      placeholder="https://mcp.exemplo.gov.br/sse"
+                    />
+                  </Field>
+                  <Field label="MCP: ferramentas (separadas por vírgula)" full>
+                    <Input
+                      value={form.mcp_tools}
+                      onChange={(e) => setForm({ ...form, mcp_tools: e.target.value })}
+                      placeholder="atlas_lookup, snirh_query, sei_search"
+                    />
+                  </Field>
+                </div>
+              )}
+
               <div className="border rounded-sm p-3 space-y-2">
                 <p className="text-xs font-mono uppercase text-muted-foreground">Regra do Falso Afluente — checklist</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
