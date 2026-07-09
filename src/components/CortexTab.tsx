@@ -38,9 +38,8 @@ interface Props {
 export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
   const [predicoes, setPredicoes] = useState<Predicao[]>([]);
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [runInfo, setRunInfo] = useState<string | null>(null);
+  const cortexRun = useCortexRun(`${scope}_${entityId}`);
+  const running = cortexRun.state === "running" || cortexRun.state === "queued";
 
   const table = useTable<Predicao>(predicoes, {
     initialSort: { key: "criado_em", dir: "desc" },
@@ -73,9 +72,7 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
     load();
     const ch = supabase
       .channel(`cortex_pred_${scope}_${entityId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, (payload) => {
-        // Realtime progress: cada INSERT durante um run aumenta a barra
-        setProgress((p) => Math.min(100, p + 8));
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "cortex_predicoes" }, () => {
         load();
       })
       .subscribe();
@@ -86,43 +83,13 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
   }, [scope, entityId, (concessionariaIds ?? []).join(",")]);
 
   async function handleRun() {
-    setRunning(true);
-    setProgress(5);
-    setRunInfo("Selecionando ETEs elegíveis…");
-
-    const res = await runCortexInference(
+    const r = await cortexRun.run(
       scope === "concessionaria"
         ? { kind: "concessionaria", concessionariaId: entityId, limit: 12 }
         : { kind: "agencia", concessionariaIds: concessionariaIds ?? [], limit: 12 },
       30,
     );
-
-    if (res.error) {
-      setRunning(false);
-      setProgress(0);
-      setRunInfo(null);
-      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
-      return;
-    }
-    if (!res.count) {
-      setRunning(false);
-      setProgress(0);
-      setRunInfo(null);
-      toast({ title: "Sem ETEs elegíveis", description: "Nenhuma ETE ativa neste escopo." });
-      return;
-    }
-    setProgress(100);
-    setRunInfo(`Inferência concluída para ${res.count} ETE(s).`);
-    toast({
-      title: "Inferência concluída",
-      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
-    });
-    setRunning(false);
-    setTimeout(() => {
-      setProgress(0);
-      setRunInfo(null);
-    }, 4000);
-    load();
+    if (r.ok) load();
   }
 
   return (
@@ -148,12 +115,13 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
         </Button>
       </div>
 
-      {(running || progress > 0) && (
-        <div className="space-y-1">
-          <Progress value={progress} className="h-1.5" />
-          {runInfo && <p className="text-[11px] font-mono text-muted-foreground">{runInfo}</p>}
-        </div>
-      )}
+      <CortexRunStatus
+        state={cortexRun.state}
+        progress={cortexRun.progress}
+        info={cortexRun.info}
+        error={cortexRun.error}
+        compact
+      />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
