@@ -152,23 +152,12 @@ export default function CortexPage() {
   const alertTable = useTable<Predicao>(alerts, { pageSize: 10 });
   const allTable = useTable<Predicao>(filtered, { pageSize: 15 });
 
+  const cortexRun = useCortexRun("central");
+  const running = cortexRun.state === "running" || cortexRun.state === "queued";
+
   async function runInference() {
-    setRunning(true);
-    setProgress(5);
-    const res = await runCortexInference({ kind: "all", limit: 10 }, 30);
-    setRunning(false);
-    if (res.error) {
-      setProgress(0);
-      toast({ title: "Falha no Córtex", description: parseCortexError(res.error.message), variant: "destructive" });
-      return;
-    }
-    setProgress(100);
-    toast({
-      title: "Inferência concluída",
-      description: `${(res.data?.predicoes ?? []).length} predições geradas (${res.data?.modelo?.status ?? "?"}).`,
-    });
-    setTimeout(() => setProgress(0), 4000);
-    load();
+    const r = await cortexRun.run({ kind: "all", limit: 10 }, 30);
+    if (r.ok) load();
   }
 
   const checklistItems = modelo?.falso_afluente_checklist ?? {};
