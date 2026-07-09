@@ -4,13 +4,12 @@ import { EteStatusTable } from "@/components/EteStatusTable";
 import { AlertasDboPanel } from "@/components/AlertasDboPanel";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Zap, RefreshCw, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { parseCortexError, runCortexInference } from "@/lib/cortex";
+import { useCortexRun } from "@/hooks/useCortexRun";
+import { CortexRunStatus } from "@/components/CortexRunStatus";
 
 interface Stats {
   totalEtes: number;
