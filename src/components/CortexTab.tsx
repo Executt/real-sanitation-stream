@@ -120,8 +120,15 @@ export function CortexTab({ scope, entityId, concessionariaIds }: Props) {
         progress={cortexRun.progress}
         info={cortexRun.info}
         error={cortexRun.error}
+        runId={cortexRun.runId}
+        result={cortexRun.result}
+        onCancel={() => {
+          cortexRun.cancel();
+          load();
+        }}
         compact
       />
+
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
