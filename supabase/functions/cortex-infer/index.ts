@@ -15,7 +15,9 @@ type Payload = {
   ete_ids?: string[];
   horizonte_dias?: number;
   limit?: number;
+  run_id?: string;
 };
+
 
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), {
@@ -111,6 +113,8 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as Payload;
     const horizonte = body.horizonte_dias ?? 30;
     const limit = Math.min(body.limit ?? 10, 25);
+    const runId = body.run_id ?? crypto.randomUUID();
+
 
     // 1) Modelo
     let modelo: Record<string, unknown> | null;
@@ -165,14 +169,18 @@ Deno.serve(async (req) => {
 
     // 3) MCP tools (opcional)
     let mcpTools: string[] = [];
+    let mcpDeclared: string[] = [];
+    let mcpDiscovered: string[] = [];
+    const mcpUsed: string[] = [];
     let mcpServerUrl: string | null = null;
     if (tipo === "mcp") {
       const mcpCfg = (metricasCfg.mcp ?? {}) as { server_url?: string; tools?: string[] };
       mcpServerUrl = mcpCfg.server_url ?? null;
-      const declared = Array.isArray(mcpCfg.tools) ? mcpCfg.tools : [];
-      const discovered = mcpServerUrl ? await discoverMcpTools(mcpServerUrl) : [];
-      mcpTools = Array.from(new Set([...declared, ...discovered]));
+      mcpDeclared = Array.isArray(mcpCfg.tools) ? mcpCfg.tools : [];
+      mcpDiscovered = mcpServerUrl ? await discoverMcpTools(mcpServerUrl) : [];
+      mcpTools = Array.from(new Set([...mcpDeclared, ...mcpDiscovered]));
     }
+
 
     // 4) Thresholds
     const { data: thsRaw } = await admin.from("cortex_thresholds").select("bacia, modelo_id, alto_min, critico_min");
@@ -196,9 +204,16 @@ Deno.serve(async (req) => {
 
     const results: unknown[] = [];
     const errors: { ete_id: string; error: string }[] = [];
+    let cancelado = false;
 
     for (const ete of etes) {
+      // Cancelamento: o cliente abortou o fetch → interrompe o laço mantendo o já gravado
+      if (req.signal.aborted) {
+        cancelado = true;
+        break;
+      }
       try {
+
         const { data: medicoes } = await admin
           .from("dbo_medicoes")
           .select("medido_em, dbo_entrada_mg_l, dbo_saida_mg_l, eficiencia_pct, conforme")
@@ -299,6 +314,11 @@ Features: ${JSON.stringify(features)}`;
 
     const duracaoMs = Date.now() - started;
     const baciasSet = Array.from(new Set(etes.map((e) => ufToBacia(e.uf))));
+    // Ferramentas MCP efetivamente disponibilizadas ao modelo nesta execução
+    if (tipo === "mcp" && results.length) mcpUsed.push(...mcpTools);
+    const mcpInfo = tipo === "mcp"
+      ? { server_url: mcpServerUrl, declared: mcpDeclared, discovered: mcpDiscovered, used: Array.from(new Set(mcpUsed)) }
+      : null;
 
     // Audit log
     await admin.from("audit_log").insert({
@@ -306,26 +326,34 @@ Features: ${JSON.stringify(features)}`;
       user_email: userEmail,
       action: "CORTEX_INFER_RUN",
       target: "cortex_predicoes",
-      severity: errors.length ? "warning" : "info",
+      severity: errors.length || cancelado ? "warning" : "info",
       metadata: {
+        run_id: runId,
+        cancelado,
         parametros: { ete_ids: body.ete_ids ?? null, horizonte_dias: horizonte, limit, modelo_id: body.modelo_id ?? null },
         modelo: { id: modeloId, nome: modelo.nome, versao: modelo.versao, status: modelo.status, tipo, provider_model: providerModel },
         bacias: baciasSet,
         fontes: fontesResumo,
-        mcp: tipo === "mcp" ? { server_url: mcpServerUrl, tools: mcpTools } : null,
+        mcp: mcpInfo,
         contagem: { etes: etes.length, predicoes: results.length, erros: errors.length },
+        erros: errors,
         duracao_ms: duracaoMs,
       },
     });
 
     return json({
+      run_id: runId,
+      cancelado,
       modelo: { id: modeloId, nome: modelo.nome, status: modelo.status, tipo, provider_model: providerModel },
       predicoes: results,
       erros: errors,
       duracao_ms: duracaoMs,
+      bacias: baciasSet,
       fontes: fontesResumo,
+      mcp: mcpInfo,
       mcp_tools: mcpTools,
     });
+
   } catch (e) {
     return json({ error: (e as Error).message, code: "internal" }, 500);
   }

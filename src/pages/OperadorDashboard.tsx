@@ -116,8 +116,17 @@ export default function OperadorDashboard() {
         </div>
       </div>
       <div className="mb-4">
-        <CortexRunStatus state={cortexRun.state} progress={cortexRun.progress} info={cortexRun.info} error={cortexRun.error} />
+        <CortexRunStatus
+          state={cortexRun.state}
+          progress={cortexRun.progress}
+          info={cortexRun.info}
+          error={cortexRun.error}
+          runId={cortexRun.runId}
+          result={cortexRun.result}
+          onCancel={cortexRun.cancel}
+        />
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
