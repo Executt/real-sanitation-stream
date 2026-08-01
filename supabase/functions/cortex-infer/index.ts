@@ -204,9 +204,16 @@ Deno.serve(async (req) => {
 
     const results: unknown[] = [];
     const errors: { ete_id: string; error: string }[] = [];
+    let cancelado = false;
 
     for (const ete of etes) {
+      // Cancelamento: o cliente abortou o fetch → interrompe o laço mantendo o já gravado
+      if (req.signal.aborted) {
+        cancelado = true;
+        break;
+      }
       try {
+
         const { data: medicoes } = await admin
           .from("dbo_medicoes")
           .select("medido_em, dbo_entrada_mg_l, dbo_saida_mg_l, eficiencia_pct, conforme")
