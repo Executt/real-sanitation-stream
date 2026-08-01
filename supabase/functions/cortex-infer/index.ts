@@ -314,6 +314,11 @@ Features: ${JSON.stringify(features)}`;
 
     const duracaoMs = Date.now() - started;
     const baciasSet = Array.from(new Set(etes.map((e) => ufToBacia(e.uf))));
+    // Ferramentas MCP efetivamente disponibilizadas ao modelo nesta execução
+    if (tipo === "mcp" && results.length) mcpUsed.push(...mcpTools);
+    const mcpInfo = tipo === "mcp"
+      ? { server_url: mcpServerUrl, declared: mcpDeclared, discovered: mcpDiscovered, used: Array.from(new Set(mcpUsed)) }
+      : null;
 
     // Audit log
     await admin.from("audit_log").insert({
@@ -321,26 +326,34 @@ Features: ${JSON.stringify(features)}`;
       user_email: userEmail,
       action: "CORTEX_INFER_RUN",
       target: "cortex_predicoes",
-      severity: errors.length ? "warning" : "info",
+      severity: errors.length || cancelado ? "warning" : "info",
       metadata: {
+        run_id: runId,
+        cancelado,
         parametros: { ete_ids: body.ete_ids ?? null, horizonte_dias: horizonte, limit, modelo_id: body.modelo_id ?? null },
         modelo: { id: modeloId, nome: modelo.nome, versao: modelo.versao, status: modelo.status, tipo, provider_model: providerModel },
         bacias: baciasSet,
         fontes: fontesResumo,
-        mcp: tipo === "mcp" ? { server_url: mcpServerUrl, tools: mcpTools } : null,
+        mcp: mcpInfo,
         contagem: { etes: etes.length, predicoes: results.length, erros: errors.length },
+        erros: errors,
         duracao_ms: duracaoMs,
       },
     });
 
     return json({
+      run_id: runId,
+      cancelado,
       modelo: { id: modeloId, nome: modelo.nome, status: modelo.status, tipo, provider_model: providerModel },
       predicoes: results,
       erros: errors,
       duracao_ms: duracaoMs,
+      bacias: baciasSet,
       fontes: fontesResumo,
+      mcp: mcpInfo,
       mcp_tools: mcpTools,
     });
+
   } catch (e) {
     return json({ error: (e as Error).message, code: "internal" }, 500);
   }
