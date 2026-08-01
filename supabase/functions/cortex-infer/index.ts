@@ -169,14 +169,18 @@ Deno.serve(async (req) => {
 
     // 3) MCP tools (opcional)
     let mcpTools: string[] = [];
+    let mcpDeclared: string[] = [];
+    let mcpDiscovered: string[] = [];
+    const mcpUsed: string[] = [];
     let mcpServerUrl: string | null = null;
     if (tipo === "mcp") {
       const mcpCfg = (metricasCfg.mcp ?? {}) as { server_url?: string; tools?: string[] };
       mcpServerUrl = mcpCfg.server_url ?? null;
-      const declared = Array.isArray(mcpCfg.tools) ? mcpCfg.tools : [];
-      const discovered = mcpServerUrl ? await discoverMcpTools(mcpServerUrl) : [];
-      mcpTools = Array.from(new Set([...declared, ...discovered]));
+      mcpDeclared = Array.isArray(mcpCfg.tools) ? mcpCfg.tools : [];
+      mcpDiscovered = mcpServerUrl ? await discoverMcpTools(mcpServerUrl) : [];
+      mcpTools = Array.from(new Set([...mcpDeclared, ...mcpDiscovered]));
     }
+
 
     // 4) Thresholds
     const { data: thsRaw } = await admin.from("cortex_thresholds").select("bacia, modelo_id, alto_min, critico_min");
