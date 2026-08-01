@@ -29,6 +29,8 @@ import ConformidadePage from "./pages/ConformidadePage";
 import TendenciaPage from "./pages/TendenciaPage";
 import MapaPage from "./pages/MapaPage";
 import CortexPage from "./pages/CortexPage";
+import CortexExecucoes from "./pages/CortexExecucoes";
+
 import CortexModelos from "./pages/CortexModelos";
 import RepositoriosArtefatos from "./pages/RepositoriosArtefatos";
 import BasesDados from "./pages/BasesDados";
