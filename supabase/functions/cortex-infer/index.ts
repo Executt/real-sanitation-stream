@@ -15,7 +15,9 @@ type Payload = {
   ete_ids?: string[];
   horizonte_dias?: number;
   limit?: number;
+  run_id?: string;
 };
+
 
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), {
