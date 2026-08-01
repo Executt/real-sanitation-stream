@@ -172,6 +172,9 @@ export default function CortexPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/command-center/cortex/execucoes"><Settings2 className="size-4 mr-2" />Execuções</Link>
+          </Button>
           {isSuperAdmin && (
             <Button variant="outline" asChild>
               <Link to="/admin/cortex-modelos"><Settings2 className="size-4 mr-2" />Gerenciar modelos</Link>
@@ -184,7 +187,16 @@ export default function CortexPage() {
         </div>
       </div>
 
-      <CortexRunStatus state={cortexRun.state} progress={cortexRun.progress} info={cortexRun.info} error={cortexRun.error} />
+      <CortexRunStatus
+        state={cortexRun.state}
+        progress={cortexRun.progress}
+        info={cortexRun.info}
+        error={cortexRun.error}
+        runId={cortexRun.runId}
+        result={cortexRun.result}
+        onCancel={cortexRun.cancel}
+      />
+
 
       <Alert>
         <ShieldAlert className="size-4" />
