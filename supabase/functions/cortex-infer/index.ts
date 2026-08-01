@@ -113,6 +113,8 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as Payload;
     const horizonte = body.horizonte_dias ?? 30;
     const limit = Math.min(body.limit ?? 10, 25);
+    const runId = body.run_id ?? crypto.randomUUID();
+
 
     // 1) Modelo
     let modelo: Record<string, unknown> | null;
