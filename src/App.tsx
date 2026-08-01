@@ -65,6 +65,8 @@ const App = () => (
               <Route path="/command-center/alertas" element={<AlertasDboPage />} />
               <Route path="/command-center/conformidade" element={<ConformidadePage />} />
               <Route path="/command-center/cortex" element={<CortexPage />} />
+              <Route path="/command-center/cortex/execucoes" element={<CortexExecucoes />} />
+
               {/* Portal da Agência Reguladora */}
               <Route path="/agencia" element={<AgenciaDashboard />} />
               {/* Administração — Hub e módulos */}
