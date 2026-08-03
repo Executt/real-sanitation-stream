@@ -149,10 +149,10 @@ export default function Distribuicao() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Cobertura média" value={kpis.cobertura != null ? `${kpis.cobertura.toFixed(1)}%` : "—"} icon={Gauge} />
-        <StatCard title="IVI médio" value={kpis.ivi != null ? kpis.ivi.toFixed(1) : "—"} icon={Waves} />
-        <StatCard title="TMA médio" value={kpis.tma != null ? `${kpis.tma.toFixed(1)} h` : "—"} icon={Gauge} />
-        <StatCard title="Municípios críticos" value={String(kpis.criticos)} icon={Waves} />
+        <StatCard label="Cobertura média" value={kpis.cobertura != null ? `${kpis.cobertura.toFixed(1)}%` : "—"} icon={Gauge} />
+        <StatCard label="IVI médio" value={kpis.ivi != null ? kpis.ivi.toFixed(1) : "—"} icon={Waves} />
+        <StatCard label="TMA médio" value={kpis.tma != null ? `${kpis.tma.toFixed(1)} h` : "—"} icon={Gauge} />
+        <StatCard label="Municípios críticos" value={String(kpis.criticos)} icon={Waves} />
       </div>
 
       <ModuleFilters orgId={orgId} onOrgId={setOrgId} uf={uf} onUf={setUf} search={search} onSearch={setSearch} />
