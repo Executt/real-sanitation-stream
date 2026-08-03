@@ -727,6 +727,82 @@ export type Database = {
         }
         Relationships: []
       }
+      organizations: {
+        Row: {
+          ativa: boolean
+          cnpj: string | null
+          created_at: string
+          ibge_code: string | null
+          id: string
+          legacy_agencia_id: string | null
+          legacy_concessionaria_id: string | null
+          location_data: Json
+          municipio: string | null
+          name: string
+          parent_id: string | null
+          sigla: string | null
+          type: Database["public"]["Enums"]["org_type"]
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          ibge_code?: string | null
+          id?: string
+          legacy_agencia_id?: string | null
+          legacy_concessionaria_id?: string | null
+          location_data?: Json
+          municipio?: string | null
+          name: string
+          parent_id?: string | null
+          sigla?: string | null
+          type: Database["public"]["Enums"]["org_type"]
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          cnpj?: string | null
+          created_at?: string
+          ibge_code?: string | null
+          id?: string
+          legacy_agencia_id?: string | null
+          legacy_concessionaria_id?: string | null
+          location_data?: Json
+          municipio?: string | null
+          name?: string
+          parent_id?: string | null
+          sigla?: string | null
+          type?: Database["public"]["Enums"]["org_type"]
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_legacy_agencia_id_fkey"
+            columns: ["legacy_agencia_id"]
+            isOneToOne: false
+            referencedRelation: "agencias_reguladoras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_legacy_concessionaria_id_fkey"
+            columns: ["legacy_concessionaria_id"]
+            isOneToOne: false
+            referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           agencia_reguladora_id: string | null
@@ -735,6 +811,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          org_id: string | null
           organization: string | null
           position: string | null
           updated_at: string
@@ -747,6 +824,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          org_id?: string | null
           organization?: string | null
           position?: string | null
           updated_at?: string
@@ -759,6 +837,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          org_id?: string | null
           organization?: string | null
           position?: string | null
           updated_at?: string
@@ -777,6 +856,13 @@ export type Database = {
             columns: ["concessionaria_id"]
             isOneToOne: false
             referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -966,14 +1052,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_org: { Args: { _org: string }; Returns: boolean }
       current_user_agencia: { Args: never; Returns: string }
       current_user_concessionaria: { Args: never; Returns: string }
+      current_user_org: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      org_subtree: {
+        Args: { _root: string }
+        Returns: {
+          id: string
+        }[]
       }
       schedule_cortex_infer: {
         Args: { _anon_key: string; _function_url: string }
@@ -998,6 +1092,7 @@ export type Database = {
         | "duckdb"
         | "outro"
       cortex_fonte_papel: "treino" | "contexto_rag" | "inferencia" | "validacao"
+      org_type: "STATE_AGENCY" | "MUNICIPAL_AGENCY" | "CONCESSIONAIRE"
       repo_artefato_tipo:
         | "aws_s3"
         | "oci"
@@ -1151,6 +1246,7 @@ export const Constants = {
         "outro",
       ],
       cortex_fonte_papel: ["treino", "contexto_rag", "inferencia", "validacao"],
+      org_type: ["STATE_AGENCY", "MUNICIPAL_AGENCY", "CONCESSIONAIRE"],
       repo_artefato_tipo: [
         "aws_s3",
         "oci",
