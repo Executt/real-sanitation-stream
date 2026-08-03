@@ -37,6 +37,10 @@ import {
   User,
   Users,
   X,
+  Coins,
+  Droplets,
+  Factory,
+  Waves,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +59,14 @@ const anaItems = [
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
   { title: "Córtex IA", url: "/command-center/cortex", icon: Brain },
+];
+
+const atlasItems = [
+  { title: "Mananciais", url: "/agua/mananciais", icon: Droplets },
+  { title: "Sistemas Produtores", url: "/agua/sistemas", icon: Factory },
+  { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
+  { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
+  { title: "Investimentos", url: "/investimentos", icon: Coins },
 ];
 
 const agenciaItems = [
@@ -145,6 +157,7 @@ export function TopNavbar() {
       <div className="hidden md:flex items-center gap-1">
         <NavDropdown label="Operador B2B" items={operadorItems} currentPath={location.pathname} />
         <NavDropdown label="Centro de Comando ANA" items={anaItems} currentPath={location.pathname} />
+        <NavDropdown label="Atlas Águas" items={atlasItems} currentPath={location.pathname} />
         {(isGestorAR || isSuperAdmin) && (
           <NavDropdown label="Agência Reguladora" items={agenciaItems} currentPath={location.pathname} />
         )}

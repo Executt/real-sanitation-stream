@@ -12,6 +12,7 @@ interface Profile {
   avatar_url: string | null;
   concessionaria_id: string | null;
   agencia_reguladora_id: string | null;
+  org_id: string | null;
 }
 
 interface AuthContextType {
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const [profileRes, rolesRes] = await Promise.all([
               supabase
                 .from("profiles")
-                .select("full_name, organization, position, avatar_url, concessionaria_id, agencia_reguladora_id")
+                .select("full_name, organization, position, avatar_url, concessionaria_id, agencia_reguladora_id, org_id")
                 .eq("user_id", session.user.id)
                 .single(),
               supabase.from("user_roles").select("role").eq("user_id", session.user.id),

@@ -3,6 +3,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { OrgProvider } from "@/contexts/OrgContext";
+import Mananciais from "./pages/Mananciais";
+import SistemasProducao from "./pages/SistemasProducao";
+import Distribuicao from "./pages/Distribuicao";
+import IshDashboard from "./pages/IshDashboard";
+import Investimentos from "./pages/Investimentos";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Login from "./pages/Login";
@@ -44,6 +50,7 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <AuthProvider>
+          <OrgProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
@@ -67,6 +74,13 @@ const App = () => (
               <Route path="/command-center/cortex" element={<CortexPage />} />
               <Route path="/command-center/cortex/execucoes" element={<CortexExecucoes />} />
 
+              {/* Módulos Atlas Águas */}
+              <Route path="/agua/mananciais" element={<Mananciais />} />
+              <Route path="/agua/sistemas" element={<SistemasProducao />} />
+              <Route path="/distribuicao" element={<Distribuicao />} />
+              <Route path="/ish-u" element={<IshDashboard />} />
+              <Route path="/investimentos" element={<Investimentos />} />
+
               {/* Portal da Agência Reguladora */}
               <Route path="/agencia" element={<AgenciaDashboard />} />
               {/* Administração — Hub e módulos */}
@@ -87,6 +101,7 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </OrgProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

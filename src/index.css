@@ -36,6 +36,15 @@
     --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
 
+    /* Escala ISH-U (Índice de Segurança Hídrica Urbana) */
+    --ish-minima: 0 72% 51%;
+    --ish-baixa: 24 90% 52%;
+    --ish-media: 45 95% 55%;
+    --ish-alta: 152 60% 42%;
+    --ish-maxima: 205 90% 38%;
+
+
+
     --border: 220 14% 90%;
     --input: 220 14% 90%;
     --ring: 220 72% 50%;
