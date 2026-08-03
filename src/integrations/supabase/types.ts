@@ -605,6 +605,62 @@ export type Database = {
           },
         ]
       }
+      distribution_metrics: {
+        Row: {
+          ano_referencia: number
+          coverage_percentage: number | null
+          created_at: string
+          ibge_code: string | null
+          id: string
+          ivi_loss_index: number | null
+          municipio: string | null
+          observacoes: string | null
+          org_id: string
+          pms_pressure: number | null
+          tma_hours: number | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ano_referencia?: number
+          coverage_percentage?: number | null
+          created_at?: string
+          ibge_code?: string | null
+          id?: string
+          ivi_loss_index?: number | null
+          municipio?: string | null
+          observacoes?: string | null
+          org_id: string
+          pms_pressure?: number | null
+          tma_hours?: number | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ano_referencia?: number
+          coverage_percentage?: number | null
+          created_at?: string
+          ibge_code?: string | null
+          id?: string
+          ivi_loss_index?: number | null
+          municipio?: string | null
+          observacoes?: string | null
+          org_id?: string
+          pms_pressure?: number | null
+          tma_hours?: number | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distribution_metrics_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       etes: {
         Row: {
           codigo: string | null
@@ -617,6 +673,7 @@ export type Database = {
           municipio: string
           nome: string
           observacoes: string | null
+          org_id: string | null
           populacao_atendida: number | null
           status: string
           tipo_tratamento: string | null
@@ -636,6 +693,7 @@ export type Database = {
           municipio: string
           nome: string
           observacoes?: string | null
+          org_id?: string | null
           populacao_atendida?: number | null
           status?: string
           tipo_tratamento?: string | null
@@ -655,6 +713,7 @@ export type Database = {
           municipio?: string
           nome?: string
           observacoes?: string | null
+          org_id?: string | null
           populacao_atendida?: number | null
           status?: string
           tipo_tratamento?: string | null
@@ -669,6 +728,72 @@ export type Database = {
             columns: ["concessionaria_id"]
             isOneToOne: false
             referencedRelation: "concessionarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investments_planning: {
+        Row: {
+          category: Database["public"]["Enums"]["investment_category"]
+          created_at: string
+          descricao: string | null
+          eppo: Database["public"]["Enums"]["eppo_type"]
+          estimated_value: number
+          horizonte_ano: number | null
+          ibge_code: string | null
+          id: string
+          municipio: string | null
+          org_id: string
+          status: Database["public"]["Enums"]["investment_status"]
+          titulo: string
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["investment_category"]
+          created_at?: string
+          descricao?: string | null
+          eppo?: Database["public"]["Enums"]["eppo_type"]
+          estimated_value?: number
+          horizonte_ano?: number | null
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          org_id: string
+          status?: Database["public"]["Enums"]["investment_status"]
+          titulo: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["investment_category"]
+          created_at?: string
+          descricao?: string | null
+          eppo?: Database["public"]["Enums"]["eppo_type"]
+          estimated_value?: number
+          horizonte_ano?: number | null
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          org_id?: string
+          status?: Database["public"]["Enums"]["investment_status"]
+          titulo?: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_planning_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -799,6 +924,75 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_systems: {
+        Row: {
+          capacidade_instalada_lps: number | null
+          created_at: string
+          demanda_2035_lps: number | null
+          gad_metric: number | null
+          ibge_code: string | null
+          id: string
+          municipio: string | null
+          nome: string
+          observacoes: string | null
+          org_id: string
+          status: Database["public"]["Enums"]["production_system_status"]
+          type: Database["public"]["Enums"]["production_system_type"]
+          uf: string | null
+          updated_at: string
+          water_source_id: string | null
+        }
+        Insert: {
+          capacidade_instalada_lps?: number | null
+          created_at?: string
+          demanda_2035_lps?: number | null
+          gad_metric?: number | null
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          nome: string
+          observacoes?: string | null
+          org_id: string
+          status?: Database["public"]["Enums"]["production_system_status"]
+          type: Database["public"]["Enums"]["production_system_type"]
+          uf?: string | null
+          updated_at?: string
+          water_source_id?: string | null
+        }
+        Update: {
+          capacidade_instalada_lps?: number | null
+          created_at?: string
+          demanda_2035_lps?: number | null
+          gad_metric?: number | null
+          ibge_code?: string | null
+          id?: string
+          municipio?: string | null
+          nome?: string
+          observacoes?: string | null
+          org_id?: string
+          status?: Database["public"]["Enums"]["production_system_status"]
+          type?: Database["public"]["Enums"]["production_system_type"]
+          uf?: string | null
+          updated_at?: string
+          water_source_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_systems_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_systems_water_source_id_fkey"
+            columns: ["water_source_id"]
+            isOneToOne: false
+            referencedRelation: "water_sources"
             referencedColumns: ["id"]
           },
         ]
@@ -1047,9 +1241,86 @@ export type Database = {
         }
         Relationships: []
       }
+      water_sources: {
+        Row: {
+          created_at: string
+          gad_metric: number | null
+          ibge_code: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          municipio: string | null
+          nome: string
+          observacoes: string | null
+          org_id: string
+          type: Database["public"]["Enums"]["water_source_type"]
+          uf: string | null
+          updated_at: string
+          vazao_disponivel_lps: number | null
+          vazao_outorgada_lps: number | null
+          vulnerability_level: Database["public"]["Enums"]["vulnerability_level"]
+        }
+        Insert: {
+          created_at?: string
+          gad_metric?: number | null
+          ibge_code?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          municipio?: string | null
+          nome: string
+          observacoes?: string | null
+          org_id: string
+          type: Database["public"]["Enums"]["water_source_type"]
+          uf?: string | null
+          updated_at?: string
+          vazao_disponivel_lps?: number | null
+          vazao_outorgada_lps?: number | null
+          vulnerability_level?: Database["public"]["Enums"]["vulnerability_level"]
+        }
+        Update: {
+          created_at?: string
+          gad_metric?: number | null
+          ibge_code?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          municipio?: string | null
+          nome?: string
+          observacoes?: string | null
+          org_id?: string
+          type?: Database["public"]["Enums"]["water_source_type"]
+          uf?: string | null
+          updated_at?: string
+          vazao_disponivel_lps?: number | null
+          vazao_outorgada_lps?: number | null
+          vulnerability_level?: Database["public"]["Enums"]["vulnerability_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_sources_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      ish_urban_index: {
+        Row: {
+          distribution_score: number | null
+          ibge_code: string | null
+          ish_class: string | null
+          ish_score: number | null
+          municipio: string | null
+          org_id: string | null
+          production_score: number | null
+          uf: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_org: { Args: { _org: string }; Returns: boolean }
@@ -1092,7 +1363,23 @@ export type Database = {
         | "duckdb"
         | "outro"
       cortex_fonte_papel: "treino" | "contexto_rag" | "inferencia" | "validacao"
+      eppo_type: "ESTUDO" | "PLANO" | "PROJETO" | "OBRA"
+      investment_category:
+        | "PRODUCTION"
+        | "DISTRIBUTION"
+        | "REPLACEMENT"
+        | "SEWAGE"
+      investment_status:
+        | "PLANEJADO"
+        | "EM_ANDAMENTO"
+        | "CONCLUIDO"
+        | "CANCELADO"
       org_type: "STATE_AGENCY" | "MUNICIPAL_AGENCY" | "CONCESSIONAIRE"
+      production_system_status:
+        | "SATISFACTORY"
+        | "NEEDS_ADEQUATION"
+        | "NEEDS_AMPLIFICATION"
+      production_system_type: "ISOLATED" | "INTEGRATED"
       repo_artefato_tipo:
         | "aws_s3"
         | "oci"
@@ -1105,6 +1392,8 @@ export type Database = {
         | "ftp"
         | "sftp"
         | "outro"
+      vulnerability_level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+      water_source_type: "SURFACE" | "GROUNDWATER" | "MIXED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1246,7 +1535,26 @@ export const Constants = {
         "outro",
       ],
       cortex_fonte_papel: ["treino", "contexto_rag", "inferencia", "validacao"],
+      eppo_type: ["ESTUDO", "PLANO", "PROJETO", "OBRA"],
+      investment_category: [
+        "PRODUCTION",
+        "DISTRIBUTION",
+        "REPLACEMENT",
+        "SEWAGE",
+      ],
+      investment_status: [
+        "PLANEJADO",
+        "EM_ANDAMENTO",
+        "CONCLUIDO",
+        "CANCELADO",
+      ],
       org_type: ["STATE_AGENCY", "MUNICIPAL_AGENCY", "CONCESSIONAIRE"],
+      production_system_status: [
+        "SATISFACTORY",
+        "NEEDS_ADEQUATION",
+        "NEEDS_AMPLIFICATION",
+      ],
+      production_system_type: ["ISOLATED", "INTEGRATED"],
       repo_artefato_tipo: [
         "aws_s3",
         "oci",
@@ -1260,6 +1568,8 @@ export const Constants = {
         "sftp",
         "outro",
       ],
+      vulnerability_level: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      water_source_type: ["SURFACE", "GROUNDWATER", "MIXED"],
     },
   },
 } as const
