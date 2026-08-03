@@ -1,75 +1,67 @@
-# Gestão de ETEs por Concessionárias & Agências Reguladoras
+# Plataforma Integrada de Saneamento e Segurança Hídrica
 
-## Contexto
+Evolução do HydrosNet para governança multi-tenant hierárquica (Estado → Município → Concessionária) e cinco módulos de negócio baseados no Atlas Águas / Nota Técnica 4/2022 (ISH-U).
 
-Hoje a hierarquia é: **ANA (nacional) → Concessionárias → ETEs**. Faltam as **Agências Reguladoras** (ARs estaduais/municipais como ARSESP, AGEPAR, ADASA, AGENERSA etc.), que fiscalizam concessionárias dentro do seu território. Esta evolução introduz a AR como nível intermediário e dá a ela um painel de gestão equivalente ao da ANA, porém escopado.
+## 1. Governança hierárquica (banco)
 
-## Hierarquia final
+Nova tabela `organizations` com auto-relacionamento:
 
 ```text
-ANA (gestor_ana / superadmin)
- └── Agência Reguladora (gestor_ar)         ← NOVO nível
-      └── Concessionária (operador)
-           └── ETE
+STATE_AGENCY (nível 1)
+  └── MUNICIPAL_AGENCY (nível 2)
+        └── CONCESSIONAIRE (nível 3)
+  └── CONCESSIONAIRE (estadual, direto sob o estado)
 ```
 
-## Mudanças no banco
+- `organizations`: id, name, sigla, type, parent_id (FK self), uf, municipio, ibge_code, location_data (jsonb), ativa.
+- `profiles.org_id` (FK) passa a ser o vínculo canônico do usuário.
+- Função `public.org_subtree(_root uuid)` — CTE recursiva retornando o nó e todos os descendentes.
+- Função `public.current_user_org()` (SECURITY DEFINER) e `public.can_access_org(_org uuid)` = `_org ∈ org_subtree(current_user_org())` ou `superadmin`.
+- Migração de dados: `agencias_reguladoras` → organizations (STATE/MUNICIPAL conforme esfera); `concessionarias` → organizations (CONCESSIONAIRE, parent = sua AR). Tabelas legadas permanecem com `org_id` para não quebrar telas existentes.
 
-1. **Nova tabela `agencias_reguladoras`**
-   - `nome`, `sigla`, `esfera` ('estadual' | 'municipal' | 'distrital'), `uf`, `municipio`, `cnpj`, `contato_email`, `site`, `ativo`.
-2. **`concessionarias`** ganha `agencia_reguladora_id` (FK opcional → `agencias_reguladoras`).
-3. **`profiles`** ganha `agencia_reguladora_id` (FK opcional) para vincular gestores de AR.
-4. **Enum `app_role`** ganha valor `gestor_ar`.
-5. **Função SECURITY DEFINER** `current_user_agencia()` análoga a `current_user_concessionaria()`.
-6. **Políticas RLS** atualizadas:
-   - `etes`, `dbo_medicoes`, `concessionarias`: `gestor_ar` lê tudo cuja `concessionaria.agencia_reguladora_id = current_user_agencia()`.
-   - `agencias_reguladoras`: leitura por `gestor_ana`/`superadmin` (full) e pelo próprio `gestor_ar` (linha própria); escrita só `superadmin`/`gestor_ana`.
+## 2. Módulos e tabelas novas
 
-## Mudanças na aplicação
+- **Mananciais e Produção**: `water_sources` (type SURFACE/GROUNDWATER/MIXED, vulnerability_level, gad_metric, vazao, manancial nome, ibge_code), `production_systems` (type ISOLATED/INTEGRATED, status SATISFACTORY/NEEDS_ADEQUATION/NEEDS_AMPLIFICATION, capacidade, demanda).
+- **Distribuição e Perdas**: `distribution_metrics` (coverage_percentage, ivi_loss_index, tma_hours, pms_pressure, ano_referencia, classificação técnica derivada do IVI).
+- **ISH-U**: view `ish_urban_index` cruzando eficiência de produção (GAD/status do sistema) e de distribuição (cobertura + IVI + TMA + PMS) → classe MINIMA/BAIXA/MEDIA/ALTA/MAXIMA por município/org.
+- **Investimentos (EPPOs)**: `investments_planning` (category PRODUCTION/DISTRIBUTION/REPLACEMENT/SEWAGE, tipo EPPO estudo/plano/projeto/obra, estimated_value, horizonte, status).
+- **Esgotamento (legado)**: `etes` e `dbo_medicoes` ganham `org_id` alinhado à nova hierarquia.
 
-### Páginas novas
-- **`/admin/agencias`** (superadmin / gestor_ana) — CRUD de Agências Reguladoras (lista, busca, criar, editar, ativar/inativar).
-- **`/agencia`** (gestor_ar) — Dashboard escopado da agência: KPIs (nº de concessionárias, ETEs, conformidade DBO, alertas críticos), tabela de concessionárias supervisionadas, mapa filtrado, tendência DBO agregada.
-- **`/agencia/concessionarias`** — Lista de concessionárias da AR com drill-down para ver ETEs de cada uma.
+Todas com GRANTs explícitos, `created_at/updated_at` + trigger, triggers de auditoria e RLS.
 
-### Páginas alteradas
-- **`/admin/usuarios`** (`AdminPanel.tsx`):
-  - Nova role `gestor_ar` no `Select` de roles e nos filtros.
-  - Nova coluna **Agência Reguladora** com combobox server-side (mesma UX do combobox de concessionária recém-implementado).
-- **`/admin/concessionarias`** (`Concessionarias.tsx`):
-  - Coluna + filtro **Agência Reguladora**.
-  - Form de cadastro/edição com seletor de AR (combobox com busca).
-- **`AppSidebar`/`TopNavbar`**: novo item "Agência Reguladora" visível só para `gestor_ar`; item "Agências" no hub admin.
-- **`AuthContext`**: expor `isGestorAR` e `agenciaReguladoraId`.
-- **`ProtectedRoute`**: aceitar `gestor_ar` nas rotas de `/agencia/*`.
+## 3. RLS recursiva
 
-### Reuso
-- Componentes existentes (`EteMap`, `EteStatusTable`, `DboTrendChart`, `AlertasDboPanel`, `ConformidadeCard`) ganham prop opcional `concessionariaIds?: string[]` ou já operam por RLS (preferido). Como o RLS escopa automaticamente o `gestor_ar`, basta reaproveitar — sem filtros extras no front.
+Padrão por tabela de módulo:
 
-## Documentação
-Atualizar cumulativamente:
-- `DATABASE_SCHEMA.md` — nova tabela, novas FKs, nova role, nova função.
-- `ARCHITECTURE.md` — diagrama da hierarquia ANA → AR → Concessionária → ETE.
-- `SECURITY_POLICIES.md` — políticas RLS para `gestor_ar`.
-- `BUSINESS_RULES.md` — regras de supervisão regulatória.
-- `README.md` — menção ao novo perfil.
-- Memória do projeto: novo arquivo `mem://features/agencias-reguladoras`.
+- SELECT: `public.can_access_org(org_id)` — agência estadual vê toda a subárvore, municipal vê a sua, concessionária só a si.
+- INSERT/UPDATE/DELETE: apenas `org_id = current_user_org()` (ou superadmin) — subordinado escreve só o próprio dado; agência audita mas não edita operação alheia.
+- `organizations`: leitura da própria subárvore; escrita restrita a superadmin e à agência pai.
 
-## Entrega faseada
+## 4. Frontend
 
-**Fase 1 — Modelo & RBAC**
-- Migração: tabela `agencias_reguladoras`, FKs em `concessionarias` e `profiles`, enum `gestor_ar`, função `current_user_agencia()`, RLS.
+- **Menu lateral modular** (substitui/complementa a navbar atual): Esgotamento · Produção de Água · Distribuição e Perdas · Segurança Hídrica (ISH-U) · Investimentos · Córtex IA · Administração.
+- **Contexto de organização**: `OrgContext` expõe org atual, tipo, nível e subárvore para filtros em cascata (UF → município → concessionária).
+- **Dashboards por nível**:
+  - Agências: mapa Leaflet colorido por classe ISH-U (vermelho → azul), filtros em cascata, gráfico consolidado de investimentos por categoria.
+  - Concessionária: visão operacional — status dos mananciais, alertas de IVI/TMA, formulários de atualização de obras.
+- **Páginas novas**: `/agua/mananciais`, `/agua/sistemas`, `/distribuicao`, `/ish-u`, `/investimentos`, cada uma com CRUD/tabela paginada (reuso de `useTable`, `SortHeader`, `TablePagination`).
+- **Design system**: mantém a base institucional atual (Precision Industrial / gov.br), adiciona tokens semânticos para a escala ISH-U de 5 classes.
 
-**Fase 2 — Administração**
-- Página `/admin/agencias` (CRUD).
-- AdminPanel: role `gestor_ar` + combobox de AR para profiles.
-- Concessionarias: vincular AR (combobox + filtro).
+## 5. Carga dos dados do Atlas
 
-**Fase 3 — Portal AR**
-- `/agencia` dashboard + `/agencia/concessionarias`.
-- Sidebar/navbar + ProtectedRoute + AuthContext.
+Edge function `atlas-import` + script de ingestão das planilhas enviadas (Mananciais/Sistemas, Investimentos Produção, Distribuição v2, UF, Indicadores ISH) para popular `water_sources`, `production_systems`, `distribution_metrics` e `investments_planning` por código IBGE.
 
-**Fase 4 — Docs & Memória**
-- Atualizar todos os MDs e salvar memória.
+## Ordem de execução
 
-Aprovando, sigo direto pela Fase 1 (migração).
+1. Migração 1: `organizations`, funções recursivas, `profiles.org_id`, backfill a partir de agências/concessionárias.
+2. Migração 2: tabelas dos módulos + RLS + GRANTs + view ISH-U.
+3. Frontend: OrgContext, menu lateral modular, rotas.
+4. Páginas de módulo com tabelas e formulários.
+5. Dashboards ISH-U (mapa + KPIs) e Investimentos.
+6. Ingestão das planilhas do Atlas e atualização de README/ARCHITECTURE/DATABASE_SCHEMA.
+
+## Detalhes técnicos
+
+- Hierarquia resolvida com `WITH RECURSIVE` dentro de funções `SECURITY DEFINER` para evitar recursão de RLS.
+- ISH-U calculado como view `security_invoker=on`, herdando o RLS das tabelas base.
+- Compatibilidade: telas atuais (ETEs, Córtex, Concessionárias, Agências) continuam funcionando sobre as tabelas legadas, agora espelhadas em `organizations`.
