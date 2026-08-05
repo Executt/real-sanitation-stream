@@ -38,6 +38,8 @@ import {
   Users,
   X,
   Coins,
+  FileSpreadsheet,
+  Eye,
   Droplets,
   Factory,
   Waves,
@@ -67,6 +69,7 @@ const atlasItems = [
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
   { title: "Investimentos", url: "/investimentos", icon: Coins },
+  { title: "Importar planilhas Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 const agenciaItems = [

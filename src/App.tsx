@@ -40,6 +40,8 @@ import CortexExecucoes from "./pages/CortexExecucoes";
 import CortexModelos from "./pages/CortexModelos";
 import RepositoriosArtefatos from "./pages/RepositoriosArtefatos";
 import BasesDados from "./pages/BasesDados";
+import AtlasImport from "./pages/AtlasImport";
+import GovernancaAudit from "./pages/GovernancaAudit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -95,6 +97,8 @@ const App = () => (
               <Route path="/admin/sei" element={<SeiConfig />} />
               <Route path="/admin/parametros" element={<SystemParameters />} />
               <Route path="/admin/auditoria" element={<AuditLog />} />
+              <Route path="/admin/governanca" element={<GovernancaAudit />} />
+              <Route path="/admin/atlas-import" element={<AtlasImport />} />
               <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
               <Route path="/admin/repositorios" element={<RepositoriosArtefatos />} />
               <Route path="/admin/bases-dados" element={<BasesDados />} />
