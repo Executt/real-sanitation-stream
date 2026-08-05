@@ -10,6 +10,12 @@ export interface HierarchyFilterValue {
   search: string;
 }
 
+interface LooseQuery {
+  in: (c: string, v: readonly string[]) => LooseQuery;
+  eq: (c: string, v: unknown) => LooseQuery;
+  ilike: (c: string, v: string) => LooseQuery;
+}
+
 const INITIAL: HierarchyFilterValue = {
   uf: "all",
   municipio: "all",
@@ -62,25 +68,21 @@ export function useHierarchyFilter(initial?: Partial<HierarchyFilterValue>) {
 
   /** Aplica os filtros a uma query PostgREST de qualquer módulo. */
   const applyTo = useCallback(
-    <T extends {
-      in: (c: string, v: readonly string[]) => T;
-      eq: (c: string, v: unknown) => T;
-      ilike: (c: string, v: string) => T;
-    }>(
+    <T,>(
       query: T,
       opts?: { orgColumn?: string | null; ufColumn?: string | null; municipioColumn?: string | null },
     ): T => {
       const orgColumn = opts?.orgColumn === undefined ? "org_id" : opts.orgColumn;
       const ufColumn = opts?.ufColumn === undefined ? "uf" : opts.ufColumn;
       const municipioColumn = opts?.municipioColumn === undefined ? "municipio" : opts.municipioColumn;
-      let q = query;
+      let q = query as unknown as LooseQuery;
       if (orgColumn && orgIds) q = q.in(orgColumn, orgIds);
       if (ufColumn && value.uf !== "all") q = q.eq(ufColumn, value.uf);
       if (municipioColumn && value.municipio !== "all") q = q.eq(municipioColumn, value.municipio);
       if (municipioColumn && value.municipio === "all" && value.search.trim()) {
         q = q.ilike(municipioColumn, `%${value.search.trim()}%`);
       }
-      return q;
+      return q as unknown as T;
     },
     [orgIds, value.uf, value.municipio, value.search],
   );
