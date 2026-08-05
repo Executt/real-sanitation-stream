@@ -86,6 +86,8 @@ const adminItems = [
   { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
   { title: "Parâmetros Gerais", url: "/admin/parametros", icon: Settings2 },
   { title: "Auditoria & Segurança", url: "/admin/auditoria", icon: ShieldCheck },
+  { title: "Auditoria de Governança", url: "/admin/governanca", icon: Eye },
+  { title: "Importação Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 interface NavDropdownProps {
