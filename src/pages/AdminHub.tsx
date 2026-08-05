@@ -69,7 +69,20 @@ const modules = [
     url: "/admin/auditoria",
     icon: ShieldCheck,
   },
+  {
+    title: "Auditoria de Governança",
+    description: "Quem acessou quais organizações (org_id) e quais alterações foram feitas em cada módulo.",
+    url: "/admin/governanca",
+    icon: Eye,
+  },
+  {
+    title: "Importação Atlas Águas",
+    description: "Upload das planilhas oficiais com validação de dicionário e carga em investimentos.",
+    url: "/admin/atlas-import",
+    icon: FileSpreadsheet,
+  },
 ];
+
 
 export default function AdminHub() {
   const { isSuperAdmin, loading } = useAuth();
