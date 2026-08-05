@@ -194,3 +194,16 @@ Campos: `modelo_id`, `repositorio_id`, `base_dados_id`, `papel` (enum `cortex_fo
 **RLS:** leitura autenticada; escrita apenas `superadmin`. Auditada.
 
 **Segurança:** credenciais dos repositórios e bases são armazenadas exclusivamente como segredos no Lovable Cloud (Edge Function Secrets). As tabelas guardam somente `secret_ref` — o nome da secret — e nunca o valor.
+
+## Importação Atlas Águas e Auditoria de Governança
+
+### `investments_planning` (evoluída)
+`org_id` passa a ser **opcional**: registros nacionais do Atlas Águas (sem dono) são legíveis por qualquer autenticado e graváveis apenas por `superadmin`/`gestor_ana`. Novos campos: `fonte`, `external_key` (único, idempotência da carga), `tipo_intervencao`, `manancial`, `horizonte_faixa`, `requer_estudo`, `import_batch_id`. Trigger de auditoria `trg_investments_audit`.
+
+Carga inicial (Atlas Águas 2021): 3.743 EPPOs de produção (R$ 390 bi), 5.561 de distribuição (R$ 47 bi) e 5.570 de reposição (R$ 60 bi).
+
+### `atlas_import_batches`
+Lotes de importação: `arquivo`, `planilha`, `dataset`, `status`, `linhas_lidas/gravadas/ignoradas`, `erros` (jsonb), `mapeamento`. RLS: `superadmin`/`gestor_ana`.
+
+### `access_audit_log`
+Trilha de **acesso** por governança: `user_id`, `user_email`, `modulo`, `acao`, `org_id`, `record_id`, `registros`, `filtros`. Gravada pela função `log_access(...)` (SECURITY DEFINER) chamada pelo hook `useAccessLog`. RLS: cada usuário vê os próprios; ANA/superadmin e responsáveis pela organização veem a subárvore. Sem UPDATE/DELETE.
