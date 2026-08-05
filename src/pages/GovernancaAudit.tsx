@@ -177,10 +177,10 @@ export default function GovernancaAudit() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {accessTable.pageItems.length === 0 && (
+                    {accessTable.rows.length === 0 && (
                       <TableRow><TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">Nenhum acesso no período.</TableCell></TableRow>
                     )}
-                    {accessTable.pageItems.map((r) => (
+                    {accessTable.rows.map((r) => (
                       <TableRow key={r.id}>
                         <TableCell className="font-mono text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString("pt-BR")}</TableCell>
                         <TableCell className="text-xs">{r.user_email ?? "—"}</TableCell>
@@ -197,7 +197,7 @@ export default function GovernancaAudit() {
                 </Table>
                 <TablePagination
                   page={accessTable.page} pageCount={accessTable.pageCount} pageSize={accessTable.pageSize}
-                  total={access.length} onPage={accessTable.setPage} onPageSize={accessTable.setPageSize}
+                  total={access.length} onPageChange={accessTable.setPage} onPageSizeChange={accessTable.setPageSize}
                 />
               </>
             )}
@@ -217,10 +217,10 @@ export default function GovernancaAudit() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {changeTable.pageItems.length === 0 && (
+                {changeTable.rows.length === 0 && (
                   <TableRow><TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">Nenhuma alteração no período.</TableCell></TableRow>
                 )}
-                {changeTable.pageItems.map((r) => (
+                {changeTable.rows.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-mono text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString("pt-BR")}</TableCell>
                     <TableCell className="text-xs">{r.user_email ?? "sistema"}</TableCell>
@@ -235,7 +235,7 @@ export default function GovernancaAudit() {
             </Table>
             <TablePagination
               page={changeTable.page} pageCount={changeTable.pageCount} pageSize={changeTable.pageSize}
-              total={changes.length} onPage={changeTable.setPage} onPageSize={changeTable.setPageSize}
+              total={changes.length} onPageChange={changeTable.setPage} onPageSizeChange={changeTable.setPageSize}
             />
           </div>
         </TabsContent>
