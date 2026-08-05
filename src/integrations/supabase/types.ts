@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_audit_log: {
+        Row: {
+          acao: string
+          created_at: string
+          filtros: Json
+          id: string
+          modulo: string
+          org_id: string | null
+          record_id: string | null
+          registros: number | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acao?: string
+          created_at?: string
+          filtros?: Json
+          id?: string
+          modulo: string
+          org_id?: string | null
+          record_id?: string | null
+          registros?: number | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          filtros?: Json
+          id?: string
+          modulo?: string
+          org_id?: string | null
+          record_id?: string | null
+          registros?: number | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_audit_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agencias_reguladoras: {
         Row: {
           ativa: boolean
@@ -98,6 +145,54 @@ export type Database = {
           id?: string
           source?: string
           state?: string
+        }
+        Relationships: []
+      }
+      atlas_import_batches: {
+        Row: {
+          arquivo: string
+          created_at: string
+          created_by: string | null
+          dataset: string
+          erros: Json
+          id: string
+          linhas_gravadas: number
+          linhas_ignoradas: number
+          linhas_lidas: number
+          mapeamento: Json
+          planilha: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo: string
+          created_at?: string
+          created_by?: string | null
+          dataset: string
+          erros?: Json
+          id?: string
+          linhas_gravadas?: number
+          linhas_ignoradas?: number
+          linhas_lidas?: number
+          mapeamento?: Json
+          planilha?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo?: string
+          created_at?: string
+          created_by?: string | null
+          dataset?: string
+          erros?: Json
+          id?: string
+          linhas_gravadas?: number
+          linhas_ignoradas?: number
+          linhas_lidas?: number
+          mapeamento?: Json
+          planilha?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -746,12 +841,19 @@ export type Database = {
           descricao: string | null
           eppo: Database["public"]["Enums"]["eppo_type"]
           estimated_value: number
+          external_key: string | null
+          fonte: string | null
           horizonte_ano: number | null
+          horizonte_faixa: string | null
           ibge_code: string | null
           id: string
+          import_batch_id: string | null
+          manancial: string | null
           municipio: string | null
-          org_id: string
+          org_id: string | null
+          requer_estudo: boolean | null
           status: Database["public"]["Enums"]["investment_status"]
+          tipo_intervencao: string | null
           titulo: string
           uf: string | null
           updated_at: string
@@ -762,12 +864,19 @@ export type Database = {
           descricao?: string | null
           eppo?: Database["public"]["Enums"]["eppo_type"]
           estimated_value?: number
+          external_key?: string | null
+          fonte?: string | null
           horizonte_ano?: number | null
+          horizonte_faixa?: string | null
           ibge_code?: string | null
           id?: string
+          import_batch_id?: string | null
+          manancial?: string | null
           municipio?: string | null
-          org_id: string
+          org_id?: string | null
+          requer_estudo?: boolean | null
           status?: Database["public"]["Enums"]["investment_status"]
+          tipo_intervencao?: string | null
           titulo: string
           uf?: string | null
           updated_at?: string
@@ -778,12 +887,19 @@ export type Database = {
           descricao?: string | null
           eppo?: Database["public"]["Enums"]["eppo_type"]
           estimated_value?: number
+          external_key?: string | null
+          fonte?: string | null
           horizonte_ano?: number | null
+          horizonte_faixa?: string | null
           ibge_code?: string | null
           id?: string
+          import_batch_id?: string | null
+          manancial?: string | null
           municipio?: string | null
-          org_id?: string
+          org_id?: string | null
+          requer_estudo?: boolean | null
           status?: Database["public"]["Enums"]["investment_status"]
+          tipo_intervencao?: string | null
           titulo?: string
           uf?: string | null
           updated_at?: string
@@ -1333,6 +1449,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_access: {
+        Args: {
+          _acao?: string
+          _filtros?: Json
+          _modulo: string
+          _org?: string
+          _record?: string
+          _registros?: number
+        }
+        Returns: undefined
       }
       org_subtree: {
         Args: { _root: string }

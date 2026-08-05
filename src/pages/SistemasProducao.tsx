@@ -4,7 +4,9 @@ import { useOrg } from "@/contexts/OrgContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
-import { ModuleFilters } from "@/components/ModuleFilters";
+import { HierarchyFilters } from "@/components/HierarchyFilters";
+import { useHierarchyFilter } from "@/lib/useHierarchyFilter";
+import { useAccessLog } from "@/hooks/useAccessLog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -43,9 +45,7 @@ export default function SistemasProducao() {
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [orgId, setOrgId] = useState("all");
-  const [uf, setUf] = useState("all");
-  const [search, setSearch] = useState("");
+  const filter = useHierarchyFilter();
   const [status, setStatus] = useState("all");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -56,10 +56,8 @@ export default function SistemasProducao() {
   const load = async () => {
     setLoading(true);
     let q = supabase.from("production_systems").select("id, org_id, nome, type, status, capacidade_instalada_lps, demanda_2035_lps, gad_metric, uf, municipio").order("nome");
-    if (orgId !== "all") q = q.eq("org_id", orgId);
-    if (uf !== "all") q = q.eq("uf", uf);
+    q = filter.applyTo(q);
     if (status !== "all") q = q.eq("status", status as ProductionSystemStatus);
-    if (search.trim()) q = q.ilike("municipio", `%${search.trim()}%`);
     const { data, error } = await q;
     if (error) toast({ title: "Erro ao carregar sistemas", description: error.message, variant: "destructive" });
     setRows((data ?? []) as Row[]);
@@ -70,7 +68,9 @@ export default function SistemasProducao() {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId, uf, search, status]);
+  }, [filter.key, status]);
+
+  useAccessLog({ modulo: "Sistemas Produtores", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
   const orgName = (id: string) => orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name || "—";
@@ -151,7 +151,7 @@ export default function SistemasProducao() {
         </Dialog>
       </div>
 
-      <ModuleFilters orgId={orgId} onOrgId={setOrgId} uf={uf} onUf={setUf} search={search} onSearch={setSearch}>
+      <HierarchyFilters filter={filter}>
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="h-9 w-[200px]"><SelectValue placeholder="Situação" /></SelectTrigger>
           <SelectContent>
@@ -159,7 +159,7 @@ export default function SistemasProducao() {
             {Object.entries(PRODUCTION_STATUS_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
-      </ModuleFilters>
+      </HierarchyFilters>
 
       <div className="bg-card border rounded-sm">
         <Table>

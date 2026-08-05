@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain, HardDrive, Database } from "lucide-react";
+import { Users, Network, Mail, FileCog, Settings2, ShieldCheck, Building2, Gavel, Brain, HardDrive, Database, Eye, FileSpreadsheet } from "lucide-react";
 
 const modules = [
   {
@@ -69,7 +69,20 @@ const modules = [
     url: "/admin/auditoria",
     icon: ShieldCheck,
   },
+  {
+    title: "Auditoria de Governança",
+    description: "Quem acessou quais organizações (org_id) e quais alterações foram feitas em cada módulo.",
+    url: "/admin/governanca",
+    icon: Eye,
+  },
+  {
+    title: "Importação Atlas Águas",
+    description: "Upload das planilhas oficiais com validação de dicionário e carga em investimentos.",
+    url: "/admin/atlas-import",
+    icon: FileSpreadsheet,
+  },
 ];
+
 
 export default function AdminHub() {
   const { isSuperAdmin, loading } = useAuth();

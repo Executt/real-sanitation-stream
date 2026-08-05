@@ -38,6 +38,8 @@ import {
   Users,
   X,
   Coins,
+  FileSpreadsheet,
+  Eye,
   Droplets,
   Factory,
   Waves,
@@ -67,6 +69,7 @@ const atlasItems = [
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
   { title: "Investimentos", url: "/investimentos", icon: Coins },
+  { title: "Importar planilhas Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 const agenciaItems = [
@@ -83,6 +86,8 @@ const adminItems = [
   { title: "Integração SEI", url: "/admin/sei", icon: FileCog },
   { title: "Parâmetros Gerais", url: "/admin/parametros", icon: Settings2 },
   { title: "Auditoria & Segurança", url: "/admin/auditoria", icon: ShieldCheck },
+  { title: "Auditoria de Governança", url: "/admin/governanca", icon: Eye },
+  { title: "Importação Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 interface NavDropdownProps {

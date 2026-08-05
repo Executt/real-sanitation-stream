@@ -4,7 +4,9 @@ import { useOrg } from "@/contexts/OrgContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
-import { ModuleFilters } from "@/components/ModuleFilters";
+import { HierarchyFilters } from "@/components/HierarchyFilters";
+import { useHierarchyFilter } from "@/lib/useHierarchyFilter";
+import { useAccessLog } from "@/hooks/useAccessLog";
 import { StatCard } from "@/components/StatCard";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,16 +32,12 @@ export default function IshDashboard() {
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [orgId, setOrgId] = useState("all");
-  const [uf, setUf] = useState("all");
-  const [search, setSearch] = useState("");
+  const filter = useHierarchyFilter();
 
   const load = async () => {
     setLoading(true);
     let q = supabase.from("ish_urban_index").select("*");
-    if (orgId !== "all") q = q.eq("org_id", orgId);
-    if (uf !== "all") q = q.eq("uf", uf);
-    if (search.trim()) q = q.ilike("municipio", `%${search.trim()}%`);
+    q = filter.applyTo(q);
     const { data, error } = await q;
     if (error) toast({ title: "Erro ao calcular o ISH-U", description: error.message, variant: "destructive" });
     setRows((data ?? []) as Row[]);
@@ -50,7 +48,9 @@ export default function IshDashboard() {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId, uf, search]);
+  }, [filter.key]);
+
+  useAccessLog({ modulo: "ISH-U", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
   const orgName = (id: string | null) =>
@@ -106,7 +106,7 @@ export default function IshDashboard() {
         </div>
       </div>
 
-      <ModuleFilters orgId={orgId} onOrgId={setOrgId} uf={uf} onUf={setUf} search={search} onSearch={setSearch} />
+      <HierarchyFilters filter={filter} />
 
       <div className="bg-card border rounded-sm">
         <Table>

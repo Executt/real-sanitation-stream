@@ -4,7 +4,9 @@ import { useOrg } from "@/contexts/OrgContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTable } from "@/lib/useTable";
 import { TablePagination } from "@/components/TablePagination";
-import { ModuleFilters } from "@/components/ModuleFilters";
+import { HierarchyFilters } from "@/components/HierarchyFilters";
+import { useHierarchyFilter } from "@/lib/useHierarchyFilter";
+import { useAccessLog } from "@/hooks/useAccessLog";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,9 +52,7 @@ export default function Investimentos() {
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [orgId, setOrgId] = useState("all");
-  const [uf, setUf] = useState("all");
-  const [search, setSearch] = useState("");
+  const filter = useHierarchyFilter();
   const [category, setCategory] = useState("all");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -66,10 +66,9 @@ export default function Investimentos() {
     let q = supabase.from("investments_planning")
       .select("id, org_id, titulo, category, eppo, estimated_value, status, horizonte_ano, uf, municipio")
       .order("estimated_value", { ascending: false });
-    if (orgId !== "all") q = q.eq("org_id", orgId);
-    if (uf !== "all") q = q.eq("uf", uf);
+    q = filter.applyTo(q);
     if (category !== "all") q = q.eq("category", category as InvestmentCategory);
-    if (search.trim()) q = q.ilike("municipio", `%${search.trim()}%`);
+    q = q.limit(2000);
     const { data, error } = await q;
     if (error) toast({ title: "Erro ao carregar investimentos", description: error.message, variant: "destructive" });
     setRows((data ?? []) as Row[]);
@@ -80,7 +79,9 @@ export default function Investimentos() {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId, uf, search, category]);
+  }, [filter.key, category]);
+
+  useAccessLog({ modulo: "Investimentos", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: { ...filter.auditFilters, categoria: category }, key: `${filter.key}|${category}`, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
   const orgName = (id: string) => orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name || "—";
@@ -200,7 +201,7 @@ export default function Investimentos() {
         </div>
       </div>
 
-      <ModuleFilters orgId={orgId} onOrgId={setOrgId} uf={uf} onUf={setUf} search={search} onSearch={setSearch}>
+      <HierarchyFilters filter={filter}>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="h-9 w-[200px]"><SelectValue placeholder="Categoria" /></SelectTrigger>
           <SelectContent>
@@ -208,7 +209,7 @@ export default function Investimentos() {
             {Object.entries(INVESTMENT_CATEGORY_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
-      </ModuleFilters>
+      </HierarchyFilters>
 
       <div className="bg-card border rounded-sm">
         <Table>
