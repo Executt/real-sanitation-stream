@@ -84,24 +84,34 @@ const App = () => (
               <Route path="/investimentos" element={<Investimentos />} />
 
               {/* Portal da Agência Reguladora */}
-              <Route path="/agencia" element={<AgenciaDashboard />} />
-              {/* Administração — Hub e módulos */}
-              <Route path="/admin" element={<AdminHub />} />
-              <Route path="/admin/usuarios" element={<AdminPanel />} />
-              <Route path="/admin/concessionarias" element={<Concessionarias />} />
-              <Route path="/admin/concessionarias/:id" element={<ConcessionariaDetail />} />
-              <Route path="/admin/agencias" element={<AgenciasReguladoras />} />
-              <Route path="/admin/agencias/:id" element={<AgenciaRegDetail />} />
-              <Route path="/admin/ldap" element={<LdapConfig />} />
-              <Route path="/admin/smtp" element={<SmtpConfig />} />
-              <Route path="/admin/sei" element={<SeiConfig />} />
-              <Route path="/admin/parametros" element={<SystemParameters />} />
-              <Route path="/admin/auditoria" element={<AuditLog />} />
-              <Route path="/admin/governanca" element={<GovernancaAudit />} />
-              <Route path="/admin/atlas-import" element={<AtlasImport />} />
-              <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
-              <Route path="/admin/repositorios" element={<RepositoriosArtefatos />} />
-              <Route path="/admin/bases-dados" element={<BasesDados />} />
+              <Route
+                path="/agencia"
+                element={
+                  <ProtectedRoute requiredRole="gestor_ar">
+                    <AgenciaDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Administração — Hub e módulos (somente superadmin) */}
+              <Route element={<ProtectedRoute requiredRole="superadmin" />}>
+                <Route path="/admin" element={<AdminHub />} />
+                <Route path="/admin/usuarios" element={<AdminPanel />} />
+                <Route path="/admin/concessionarias" element={<Concessionarias />} />
+                <Route path="/admin/concessionarias/:id" element={<ConcessionariaDetail />} />
+                <Route path="/admin/agencias" element={<AgenciasReguladoras />} />
+                <Route path="/admin/agencias/:id" element={<AgenciaRegDetail />} />
+                <Route path="/admin/ldap" element={<LdapConfig />} />
+                <Route path="/admin/smtp" element={<SmtpConfig />} />
+                <Route path="/admin/sei" element={<SeiConfig />} />
+                <Route path="/admin/parametros" element={<SystemParameters />} />
+                <Route path="/admin/auditoria" element={<AuditLog />} />
+                <Route path="/admin/governanca" element={<GovernancaAudit />} />
+                <Route path="/admin/atlas-import" element={<AtlasImport />} />
+                <Route path="/admin/cortex-modelos" element={<CortexModelos />} />
+                <Route path="/admin/repositorios" element={<RepositoriosArtefatos />} />
+                <Route path="/admin/bases-dados" element={<BasesDados />} />
+              </Route>
+
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
