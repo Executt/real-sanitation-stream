@@ -40,7 +40,7 @@ sob governança multi-tenant hierárquica.
 │   ├── integrations/supabase/  # Autogerado — não editar
 │   ├── lib/                    # utils, bacias, cortex, cortexThresholds, atlasDictionary,
 │   │                           # useTable, useHierarchyFilter
-│   ├── pages/                  # Uma página por rota (ver docs/ROUTES.md)
+│   ├── pages/                  # Uma página por rota (ver docs/06_rotas.md)
 │   ├── types/governance.ts
 │   ├── App.tsx
 │   └── main.tsx
@@ -113,7 +113,7 @@ checklist completo. Job `cortex-infer-daily` roda às 03:00 UTC.
 
 ## Padrões adotados
 
-- Design tokens HSL exclusivos; nenhuma cor literal em componente (`docs/VISUAL_STANDARDS.md`).
+- Design tokens HSL exclusivos; nenhuma cor literal em componente (`docs/01_padronizacao_visual.md`).
 - `ErrorBoundary` por painel de domínio — falha isolada não derruba a tela.
 - Paginação, ordenação e busca **server-side** em toda tabela (`useTable`), inclusive autocompletes.
 - Auditoria dupla: `audit_log` por trigger (alterações) e `access_audit_log` via `log_access` (consultas).
@@ -141,17 +141,17 @@ checklist completo. Job `cortex-infer-daily` roda às 03:00 UTC.
 
 | Documento | Conteúdo |
 |-----------|----------|
-| `docs/VISUAL_STANDARDS.md` | Cores, tipografia, espaçamento, ícones |
-| `docs/ARCHITECTURE.md` | Stack, diretórios, camadas, módulos |
-| `docs/DATABASE.md` | Visão consolidada: domínios, funções, GRANTs |
-| `docs/DATABASE_SCHEMA.md` | Tabelas, colunas, relacionamentos |
-| `docs/ER_DIAGRAM.md` | Diagramas Mermaid |
-| `docs/ROUTES.md` | Rotas, RBAC e parâmetros |
-| `docs/INTEGRATIONS.md` | Edge functions, PostgREST, realtime, segredos |
-| `docs/COMPLIANCE.md` | Frameworks GRC e como aplicá-los |
-| `docs/SECURITY_POLICIES.md` | RLS, autenticação, autorização |
-| `docs/SECURITY.md` | Práticas, hardening, ameaças |
-| `docs/FUNCTION_POINTS.md` | Contagem APF |
-| `docs/FUNCTION_INVENTORY.md` | Lista de funcionalidades |
-| `docs/BUSINESS_RULES.md` | Regras e validações |
-| `docs/LDAP.md` | Configuração e mapeamento de atributos |
+| `docs/01_padronizacao_visual.md` | Cores, tipografia, espaçamento, ícones |
+| `docs/02_arquitetura.md` | Stack, diretórios, camadas, módulos |
+| `docs/03_banco_de_dados.md` | Visão consolidada: domínios, funções, GRANTs |
+| `docs/04_schema_do_banco.md` | Tabelas, colunas, relacionamentos |
+| `docs/05_diagrama_er.md` | Diagramas Mermaid |
+| `docs/06_rotas.md` | Rotas, RBAC e parâmetros |
+| `docs/07_apis_e_integracoes.md` | Edge functions, PostgREST, realtime, segredos |
+| `docs/08_frameworks_conformidade.md` | Frameworks GRC e como aplicá-los |
+| `docs/09_politicas_seguranca.md` | RLS, autenticação, autorização |
+| `docs/13_seguranca_hardening.md` | Práticas, hardening, ameaças |
+| `docs/10_pontos_de_funcao.md` | Contagem APF |
+| `docs/11_inventario_funcoes.md` | Lista de funcionalidades |
+| `docs/12_regras_de_negocio.md` | Regras e validações |
+| `docs/14_configuracao_ldap.md` | Configuração e mapeamento de atributos |

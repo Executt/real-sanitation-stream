@@ -42,7 +42,7 @@ Falhas retornam "non-2xx"; o detalhe deve ser lido em `error.context.text()` (pa
 |-----------|---------|--------|-----------|
 | Atlas Esgotos / Atlas Águas (ANA) | entrada | `cortex-ingest-atlas`, `AtlasImport` | Planilhas XLSX validadas por `atlasDictionary.ts` |
 | SNIRH | entrada | aba Integrações nos detalhes | Status de disponibilidade por prestador |
-| LDAP / Active Directory | entrada | `ldap_config` | Ver `docs/LDAP.md` |
+| LDAP / Active Directory | entrada | `ldap_config` | Ver `docs/14_configuracao_ldap.md` |
 | SMTP | saída | `smtp_config` | E-mail transacional e convites |
 | SEI | saída | `sei_config` | Abertura de processo administrativo |
 | Lovable AI Gateway | saída | `LOVABLE_API_KEY` | Modelo `google/gemini-3-flash-preview` no Córtex |
