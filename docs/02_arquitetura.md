@@ -139,19 +139,6 @@ checklist completo. Job `cortex-infer-daily` roda às 03:00 UTC.
 
 ## Índice da documentação
 
-| Documento | Conteúdo |
-|-----------|----------|
-| `docs/01_padronizacao_visual.md` | Cores, tipografia, espaçamento, ícones |
-| `docs/02_arquitetura.md` | Stack, diretórios, camadas, módulos |
-| `docs/03_banco_de_dados.md` | Visão consolidada: domínios, funções, GRANTs |
-| `docs/04_schema_do_banco.md` | Tabelas, colunas, relacionamentos |
-| `docs/05_diagrama_er.md` | Diagramas Mermaid |
-| `docs/06_rotas.md` | Rotas, RBAC e parâmetros |
-| `docs/07_apis_e_integracoes.md` | Edge functions, PostgREST, realtime, segredos |
-| `docs/08_frameworks_conformidade.md` | Frameworks GRC e como aplicá-los |
-| `docs/09_politicas_seguranca.md` | RLS, autenticação, autorização |
-| `docs/13_seguranca_hardening.md` | Práticas, hardening, ameaças |
-| `docs/10_pontos_de_funcao.md` | Contagem APF |
-| `docs/11_inventario_funcoes.md` | Lista de funcionalidades |
-| `docs/12_regras_de_negocio.md` | Regras e validações |
-| `docs/14_configuracao_ldap.md` | Configuração e mapeamento de atributos |
+O índice completo e navegável vive em `docs/00_indice.md` (documentos 00 a 26 mais os guias de
+implantação AWS/OpenShift e o checklist de segurança e performance).
+
