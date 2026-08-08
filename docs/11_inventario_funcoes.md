@@ -1,6 +1,6 @@
 # Inventário de Funções — HydrosNet
 
-Lista funcional do sistema. Base para a contagem de pontos de função em `docs/FUNCTION_POINTS.md`.
+Lista funcional do sistema. Base para a contagem de pontos de função em `docs/10_pontos_de_funcao.md`.
 
 ## 1. Autenticação e sessão
 

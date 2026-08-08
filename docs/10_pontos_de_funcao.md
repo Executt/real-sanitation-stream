@@ -1,7 +1,7 @@
 # Pontos de Função — HydrosNet (APF / IFPUG)
 
-Contagem estimada segundo o IFPUG CPM 4.3.1, com base em `docs/FUNCTION_INVENTORY.md`,
-`docs/DATABASE_SCHEMA.md` e `docs/ROUTES.md`. Tipo: **contagem de aplicação instalada**.
+Contagem estimada segundo o IFPUG CPM 4.3.1, com base em `docs/11_inventario_funcoes.md`,
+`docs/04_schema_do_banco.md` e `docs/06_rotas.md`. Tipo: **contagem de aplicação instalada**.
 
 ## Fronteira da aplicação
 

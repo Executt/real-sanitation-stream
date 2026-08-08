@@ -78,7 +78,7 @@ Convenções: PK `id uuid default gen_random_uuid()`; `created_at`/`updated_at t
 
 View **`ish_urban_index`** — cruza cobertura/perdas (`distribution_metrics`) com capacidade e demanda
 (`production_systems`, `water_sources`) por município/ano e devolve a classe de segurança hídrica urbana
-(Mínima, Baixa, Média, Alta, Máxima). Fórmula em `docs/BUSINESS_RULES.md`.
+(Mínima, Baixa, Média, Alta, Máxima). Fórmula em `docs/12_regras_de_negocio.md`.
 
 ## Atlas / indicadores externos
 

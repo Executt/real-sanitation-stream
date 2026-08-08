@@ -1,7 +1,7 @@
 # Banco de Dados — Visão Consolidada
 
 Motor: PostgreSQL 15 (Lovable Cloud). Acesso via PostgREST (Data API) e Edge Functions (Deno).
-Detalhe coluna a coluna em `docs/DATABASE_SCHEMA.md`; diagrama em `docs/ER_DIAGRAM.md`.
+Detalhe coluna a coluna em `docs/04_schema_do_banco.md`; diagrama em `docs/05_diagrama_er.md`.
 
 ## Domínios funcionais
 

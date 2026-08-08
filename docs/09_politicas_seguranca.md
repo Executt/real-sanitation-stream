@@ -5,7 +5,7 @@ Autorização real acontece **no banco**. O frontend apenas antecipa a decisão 
 ## Camadas
 
 1. **Autenticação** — Supabase Auth (e-mail/senha, Google, LDAP via `ldap-sync`). Sessão em `localStorage`, refresh automático.
-2. **Guard de rota** — `ProtectedRoute` (`requiredRole`, bypass para `superadmin`). Ver `docs/ROUTES.md`.
+2. **Guard de rota** — `ProtectedRoute` (`requiredRole`, bypass para `superadmin`). Ver `docs/06_rotas.md`.
 3. **GRANT** — `anon` sem privilégio em `public`; `authenticated` com CRUD; `service_role` com tudo.
 4. **RLS** — política por tabela usando `has_role()` e `can_access_org()`.
 5. **Triggers de auditoria** — `log_audit_event()` em tabelas sensíveis; `log_access()` nos módulos de consulta.
@@ -66,4 +66,4 @@ A UI exibe o motivo do bloqueio; a validação é do banco e não pode ser burla
 3. `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`
 4. Policies com `TO authenticated` e `USING`/`WITH CHECK` simétricos
 5. Trigger de auditoria se a tabela for sensível
-6. Atualizar `docs/DATABASE_SCHEMA.md` e `docs/ER_DIAGRAM.md`
+6. Atualizar `docs/04_schema_do_banco.md` e `docs/05_diagrama_er.md`

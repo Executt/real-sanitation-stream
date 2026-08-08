@@ -31,12 +31,12 @@ Outorga em corpo hídrico estadual permanece competência do órgão gestor esta
 
 | Controle | Implementação |
 |----------|---------------|
-| A.5 Políticas | `docs/SECURITY_POLICIES.md` e `docs/SECURITY.md` |
-| A.8 Gestão de ativos | Inventário em `docs/FUNCTION_INVENTORY.md` e `docs/DATABASE_SCHEMA.md` |
+| A.5 Políticas | `docs/09_politicas_seguranca.md` e `docs/13_seguranca_hardening.md` |
+| A.8 Gestão de ativos | Inventário em `docs/11_inventario_funcoes.md` e `docs/04_schema_do_banco.md` |
 | A.9 Controle de acesso | RBAC + RLS + guard de rota |
 | A.12 Operações | Logs de probe, auditoria imutável, jobs agendados |
 | A.14 Desenvolvimento seguro | Checklist de migração (GRANT + RLS), revisão de dependências |
-| A.16 Incidentes | Procedimento em `docs/SECURITY.md` |
+| A.16 Incidentes | Procedimento em `docs/13_seguranca_hardening.md` |
 
 ## OWASP ASVS / Top 10 — mapeamento
 
@@ -52,7 +52,7 @@ Outorga em corpo hídrico estadual permanece competência do órgão gestor esta
 ## e-PING / e-MAG (governo federal)
 
 - Interoperabilidade: APIs REST com JSON, integração SEI e SNIRH.
-- Acessibilidade: contraste WCAG AA, `aria-label`, foco visível — ver `docs/VISUAL_STANDARDS.md`.
+- Acessibilidade: contraste WCAG AA, `aria-label`, foco visível — ver `docs/01_padronizacao_visual.md`.
 - Autenticação federada: prevista via gov.br, hoje atendida por LDAP corporativo e Google.
 
 ## Governança de IA
@@ -64,11 +64,11 @@ Estratégia Brasileira de IA e do PL de IA. Controle técnico: trigger `enforce_
 
 ## Como aplicar em novas entregas
 
-1. Nova tabela → checklist de `docs/SECURITY_POLICIES.md` (GRANT, RLS, `WITH CHECK`, trigger de auditoria).
+1. Nova tabela → checklist de `docs/09_politicas_seguranca.md` (GRANT, RLS, `WITH CHECK`, trigger de auditoria).
 2. Novo módulo de consulta → instrumentar com `useAccessLog` (rastreabilidade LGPD).
-3. Novo indicador → documentar fórmula e unidade em `docs/BUSINESS_RULES.md`.
+3. Novo indicador → documentar fórmula e unidade em `docs/12_regras_de_negocio.md`.
 4. Novo modelo de IA → laudo causal e checklist antes de `status = prod`.
-5. Nova integração → registrar em `docs/INTEGRATIONS.md` e usar `secret_ref`, nunca credencial em tabela.
+5. Nova integração → registrar em `docs/07_apis_e_integracoes.md` e usar `secret_ref`, nunca credencial em tabela.
 
 ## Lacunas conhecidas
 

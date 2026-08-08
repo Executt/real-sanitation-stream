@@ -1,6 +1,6 @@
 # Segurança — Práticas, Hardening e Ameaças
 
-Complemento operacional de `docs/SECURITY_POLICIES.md` (que descreve as regras) — aqui ficam práticas, endurecimento aplicado e modelo de ameaças.
+Complemento operacional de `docs/09_politicas_seguranca.md` (que descreve as regras) — aqui ficam práticas, endurecimento aplicado e modelo de ameaças.
 
 ## Hardening aplicado
 
@@ -41,7 +41,7 @@ Complemento operacional de `docs/SECURITY_POLICIES.md` (que descreve as regras) 
 ## Práticas de desenvolvimento
 
 1. Nenhum segredo em código versionado; `.env` gerenciado pela plataforma.
-2. Toda migração revisada quanto a GRANT + RLS antes de aplicar (checklist em `SECURITY_POLICIES.md`).
+2. Toda migração revisada quanto a GRANT + RLS antes de aplicar (checklist em `09_politicas_seguranca.md`).
 3. Validação de entrada nas Edge Functions antes de qualquer chamada externa.
 4. Erros de provedor propagados com status e corpo — sem `500` genérico que esconda a causa.
 5. Dependências revisadas periodicamente (scan de dependências).
