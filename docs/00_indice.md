@@ -14,6 +14,7 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 | SRE / plataforma | `17_zeroops_alertas_storage_por_orgao.md` → `21_guia_sustentacao_operacao.md` → `aws_deployment_guide.md` / `openshift_deployment_guide.md` |
 | Designer / frontend | `01_padronizacao_visual.md` → `24_especificacao_frontend_gov_fiori.md` → `26_especificacao_hub_gov_design_governance_v1_2.md` |
 | Gestão / negócio | `12_regras_de_negocio.md` → `11_inventario_funcoes.md` → `10_pontos_de_funcao.md` |
+| Qualquer perfil | `Glossario.md` para termos e unidades; `adr/` para o porquê das decisões; `27_matriz_rastreabilidade.md` para ligar regra a controle |
 
 ## Documentos
 
@@ -46,9 +47,14 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 | 24 | `24_especificacao_frontend_gov_fiori.md` | Frontend padrão gov.br + princípios SAP Fiori |
 | 25 | `25_governanca_sala_situacao_provisionamento_dinamico.md` | Sala de Situação e provisionamento dinâmico de tenants |
 | 26 | `26_especificacao_hub_gov_design_governance_v1_2.md` | Hub Gov — design governance v1.2 |
+| 27 | `27_matriz_rastreabilidade.md` | Matriz RN-xx × banco × RLS × UI, com status por regra |
+| 28 | `28_relatorio_verificacao_documentacao.md` | Verificação de consistência, links, diagramas e qualidade técnica |
+| — | `Glossario.md` | Siglas, termos técnicos, unidades e convenções de escrita |
+| — | `adr/README.md` | Índice dos Registros de Decisão de Arquitetura (ADR-0001 a ADR-0005) |
 | — | `aws_deployment_guide.md` | Implantação em AWS (ROSA/EKS, RDS, S3, WAF) |
 | — | `openshift_deployment_guide.md` | Implantação em OpenShift/OKD on-premises |
 | — | `security_and_performance_checklist.md` | Checklist de release: segurança e performance |
+
 
 ## Convenções
 
@@ -71,3 +77,7 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 3. Criou edge function ou integração? Atualize `07` e, se houver segredo novo, `13`.
 4. Mudou regra de cálculo (DBO, ISH-U, perdas)? Atualize `12` com a fórmula.
 5. Entregou funcionalidade nova? Recontagem incremental em `10` e item novo em `11`.
+6. Criou regra de negócio (RN-xx)? Nova linha em `27_matriz_rastreabilidade.md` na mesma entrega.
+7. Tomou decisão arquitetural relevante? Novo ADR em `adr/` (não edite ADR aceito — supersede).
+8. Introduziu sigla ou unidade nova? Registre em `Glossario.md` antes de usá-la em outro documento.
+9. Alterou schema, rota, RBAC ou regra de cálculo? Reexecute a verificação de `28`.
