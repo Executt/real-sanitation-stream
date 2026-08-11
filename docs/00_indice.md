@@ -77,3 +77,7 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 3. Criou edge function ou integração? Atualize `07` e, se houver segredo novo, `13`.
 4. Mudou regra de cálculo (DBO, ISH-U, perdas)? Atualize `12` com a fórmula.
 5. Entregou funcionalidade nova? Recontagem incremental em `10` e item novo em `11`.
+6. Criou regra de negócio (RN-xx)? Nova linha em `27_matriz_rastreabilidade.md` na mesma entrega.
+7. Tomou decisão arquitetural relevante? Novo ADR em `adr/` (não edite ADR aceito — supersede).
+8. Introduziu sigla ou unidade nova? Registre em `Glossario.md` antes de usá-la em outro documento.
+9. Alterou schema, rota, RBAC ou regra de cálculo? Reexecute a verificação de `28`.
