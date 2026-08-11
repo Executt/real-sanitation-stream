@@ -14,6 +14,7 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 | SRE / plataforma | `17_zeroops_alertas_storage_por_orgao.md` → `21_guia_sustentacao_operacao.md` → `aws_deployment_guide.md` / `openshift_deployment_guide.md` |
 | Designer / frontend | `01_padronizacao_visual.md` → `24_especificacao_frontend_gov_fiori.md` → `26_especificacao_hub_gov_design_governance_v1_2.md` |
 | Gestão / negócio | `12_regras_de_negocio.md` → `11_inventario_funcoes.md` → `10_pontos_de_funcao.md` |
+| Qualquer perfil | `Glossario.md` para termos e unidades; `adr/` para o porquê das decisões; `27_matriz_rastreabilidade.md` para ligar regra a controle |
 
 ## Documentos
 
