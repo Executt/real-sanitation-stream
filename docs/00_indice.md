@@ -46,9 +46,14 @@ banco, segurança ou operação deve refletir no documento correspondente na mes
 | 24 | `24_especificacao_frontend_gov_fiori.md` | Frontend padrão gov.br + princípios SAP Fiori |
 | 25 | `25_governanca_sala_situacao_provisionamento_dinamico.md` | Sala de Situação e provisionamento dinâmico de tenants |
 | 26 | `26_especificacao_hub_gov_design_governance_v1_2.md` | Hub Gov — design governance v1.2 |
+| 27 | `27_matriz_rastreabilidade.md` | Matriz RN-xx × banco × RLS × UI, com status por regra |
+| 28 | `28_relatorio_verificacao_documentacao.md` | Verificação de consistência, links, diagramas e qualidade técnica |
+| — | `Glossario.md` | Siglas, termos técnicos, unidades e convenções de escrita |
+| — | `adr/README.md` | Índice dos Registros de Decisão de Arquitetura (ADR-0001 a ADR-0005) |
 | — | `aws_deployment_guide.md` | Implantação em AWS (ROSA/EKS, RDS, S3, WAF) |
 | — | `openshift_deployment_guide.md` | Implantação em OpenShift/OKD on-premises |
 | — | `security_and_performance_checklist.md` | Checklist de release: segurança e performance |
+
 
 ## Convenções
 
