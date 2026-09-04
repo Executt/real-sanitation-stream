@@ -230,63 +230,39 @@ export function TopNavbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 md:hidden z-50">
+        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 md:hidden z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2">Operador B2B</p>
-            {operadorItems.map((item) => (
-              <Link
-                key={item.url}
-                to={item.url}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                  location.pathname === item.url
-                    ? "bg-[hsl(var(--nav-active))] text-white"
-                    : "text-[hsl(var(--nav-muted))] hover:text-white"
-                )}
-              >
-                <item.icon className="size-4" />
-                {item.title}
-              </Link>
-            ))}
-            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">Centro de Comando ANA</p>
-            {anaItems.map((item) => (
-              <Link
-                key={item.url}
-                to={item.url}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                  location.pathname === item.url
-                    ? "bg-[hsl(var(--nav-active))] text-white"
-                    : "text-[hsl(var(--nav-muted))] hover:text-white"
-                )}
-              >
-                <item.icon className="size-4" />
-                {item.title}
-              </Link>
-            ))}
-            {isSuperAdmin && (
-              <>
-                <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">Administração</p>
-                {adminItems.map((item) => (
-                  <Link
-                    key={item.url}
-                    to={item.url}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                      location.pathname === item.url
-                        ? "bg-[hsl(var(--nav-active))] text-white"
-                        : "text-[hsl(var(--nav-muted))] hover:text-white"
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                    {item.title}
-                  </Link>
-                ))}
-              </>
-            )}
+            {[
+              { label: "Operador B2B", items: operadorItems, show: true },
+              { label: "Centro de Comando ANA", items: anaItems, show: true },
+              { label: "Atlas Águas", items: atlasItems, show: true },
+              { label: "Agência Reguladora", items: agenciaItems, show: isGestorAR || isSuperAdmin },
+              { label: "Administração", items: adminItems, show: isSuperAdmin },
+            ]
+              .filter((group) => group.show)
+              .map((group) => (
+                <div key={group.label}>
+                  <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4 first:mt-0">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.url}
+                      to={item.url}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
+                        location.pathname === item.url
+                          ? "bg-[hsl(var(--nav-active))] text-white"
+                          : "text-[hsl(var(--nav-muted))] hover:text-white"
+                      )}
+                    >
+                      <item.icon className="size-4" />
+                      {item.title}
+                    </Link>
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       )}
