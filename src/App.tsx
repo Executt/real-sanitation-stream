@@ -63,7 +63,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
-              <Route path="/" element={<OperadorDashboard />} />
+              <Route path="/" element={<Home />} />
               <Route path="/operador" element={<OperadorDashboard />} />
               <Route path="/operador/etes" element={<Etes />} />
               <Route path="/operador/cadastro" element={<CadastroManual />} />
