@@ -61,6 +61,7 @@ const anaItems = [
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
   { title: "Córtex IA", url: "/command-center/cortex", icon: Brain },
+  { title: "Execuções do Córtex", url: "/command-center/cortex/execucoes", icon: Activity },
 ];
 
 const atlasItems = [
@@ -69,7 +70,6 @@ const atlasItems = [
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
   { title: "Investimentos", url: "/investimentos", icon: Coins },
-  { title: "Importar planilhas Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 const agenciaItems = [
@@ -88,6 +88,9 @@ const adminItems = [
   { title: "Auditoria & Segurança", url: "/admin/auditoria", icon: ShieldCheck },
   { title: "Auditoria de Governança", url: "/admin/governanca", icon: Eye },
   { title: "Importação Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
+  { title: "Modelos Córtex IA", url: "/admin/cortex-modelos", icon: Brain },
+  { title: "Repositórios de Artefatos", url: "/admin/repositorios", icon: FileCog },
+  { title: "Bases de Dados Externas", url: "/admin/bases-dados", icon: Network },
 ];
 
 interface NavDropdownProps {
