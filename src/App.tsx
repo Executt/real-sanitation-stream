@@ -12,6 +12,7 @@ import Investimentos from "./pages/Investimentos";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import OperadorDashboard from "./pages/OperadorDashboard";
 import CommandCenter from "./pages/CommandCenter";
 import CadastroManual from "./pages/CadastroManual";
