@@ -61,6 +61,7 @@ const anaItems = [
   { title: "Alertas DBO", url: "/command-center/alertas", icon: AlertTriangle },
   { title: "Conformidade", url: "/command-center/conformidade", icon: Shield },
   { title: "Córtex IA", url: "/command-center/cortex", icon: Brain },
+  { title: "Execuções do Córtex", url: "/command-center/cortex/execucoes", icon: Activity },
 ];
 
 const atlasItems = [
@@ -69,7 +70,6 @@ const atlasItems = [
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
   { title: "Investimentos", url: "/investimentos", icon: Coins },
-  { title: "Importar planilhas Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
 ];
 
 const agenciaItems = [
@@ -88,6 +88,9 @@ const adminItems = [
   { title: "Auditoria & Segurança", url: "/admin/auditoria", icon: ShieldCheck },
   { title: "Auditoria de Governança", url: "/admin/governanca", icon: Eye },
   { title: "Importação Atlas", url: "/admin/atlas-import", icon: FileSpreadsheet },
+  { title: "Modelos Córtex IA", url: "/admin/cortex-modelos", icon: Brain },
+  { title: "Repositórios de Artefatos", url: "/admin/repositorios", icon: FileCog },
+  { title: "Bases de Dados Externas", url: "/admin/bases-dados", icon: Network },
 ];
 
 interface NavDropdownProps {
@@ -227,63 +230,39 @@ export function TopNavbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 md:hidden z-50">
+        <div className="absolute top-14 left-0 right-0 bg-[hsl(var(--nav-bg))] border-b border-white/10 p-4 md:hidden z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2">Operador B2B</p>
-            {operadorItems.map((item) => (
-              <Link
-                key={item.url}
-                to={item.url}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                  location.pathname === item.url
-                    ? "bg-[hsl(var(--nav-active))] text-white"
-                    : "text-[hsl(var(--nav-muted))] hover:text-white"
-                )}
-              >
-                <item.icon className="size-4" />
-                {item.title}
-              </Link>
-            ))}
-            <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">Centro de Comando ANA</p>
-            {anaItems.map((item) => (
-              <Link
-                key={item.url}
-                to={item.url}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                  location.pathname === item.url
-                    ? "bg-[hsl(var(--nav-active))] text-white"
-                    : "text-[hsl(var(--nav-muted))] hover:text-white"
-                )}
-              >
-                <item.icon className="size-4" />
-                {item.title}
-              </Link>
-            ))}
-            {isSuperAdmin && (
-              <>
-                <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4">Administração</p>
-                {adminItems.map((item) => (
-                  <Link
-                    key={item.url}
-                    to={item.url}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
-                      location.pathname === item.url
-                        ? "bg-[hsl(var(--nav-active))] text-white"
-                        : "text-[hsl(var(--nav-muted))] hover:text-white"
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                    {item.title}
-                  </Link>
-                ))}
-              </>
-            )}
+            {[
+              { label: "Operador B2B", items: operadorItems, show: true },
+              { label: "Centro de Comando ANA", items: anaItems, show: true },
+              { label: "Atlas Águas", items: atlasItems, show: true },
+              { label: "Agência Reguladora", items: agenciaItems, show: isGestorAR || isSuperAdmin },
+              { label: "Administração", items: adminItems, show: isSuperAdmin },
+            ]
+              .filter((group) => group.show)
+              .map((group) => (
+                <div key={group.label}>
+                  <p className="text-xs font-semibold uppercase text-[hsl(var(--nav-muted))] mb-2 mt-4 first:mt-0">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.url}
+                      to={item.url}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-md text-sm",
+                        location.pathname === item.url
+                          ? "bg-[hsl(var(--nav-active))] text-white"
+                          : "text-[hsl(var(--nav-muted))] hover:text-white"
+                      )}
+                    >
+                      <item.icon className="size-4" />
+                      {item.title}
+                    </Link>
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       )}
