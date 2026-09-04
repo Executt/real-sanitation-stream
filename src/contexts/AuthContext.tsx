@@ -48,17 +48,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           setTimeout(async () => {
-            const [profileRes, rolesRes] = await Promise.all([
-              supabase
-                .from("profiles")
-                .select("full_name, organization, position, avatar_url, concessionaria_id, agencia_reguladora_id, org_id")
-                .eq("user_id", session.user.id)
-                .single(),
-              supabase.from("user_roles").select("role").eq("user_id", session.user.id),
-            ]);
-            setProfile(profileRes.data);
-            setRoles(rolesRes.data?.map((r) => r.role) ?? []);
-            setLoading(false);
+            try {
+              const [profileRes, rolesRes] = await Promise.all([
+                supabase
+                  .from("profiles")
+                  .select("full_name, organization, position, avatar_url, concessionaria_id, agencia_reguladora_id, org_id")
+                  .eq("user_id", session.user.id)
+                  .maybeSingle(),
+                supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+              ]);
+              setProfile(profileRes.data ?? null);
+              setRoles(rolesRes.data?.map((r) => r.role) ?? []);
+            } catch (err) {
+              console.error("Falha ao carregar perfil/papéis:", err);
+              setProfile(null);
+              setRoles([]);
+            } finally {
+              setLoading(false);
+            }
           }, 0);
         } else {
           setProfile(null);
