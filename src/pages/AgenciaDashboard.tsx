@@ -255,7 +255,7 @@ export default function AgenciaDashboard() {
                   {c.ativa
                     ? <Badge className="bg-success/10 text-success border-success/30 text-[10px]">Ativa</Badge>
                     : <Badge variant="outline" className="text-[10px]">Inativa</Badge>}
-                  <Link to={`/concessionarias/${c.id}`} className="text-xs text-primary hover:underline">
+                  <Link to={`/admin/concessionarias/${c.id}`} className="text-xs text-primary hover:underline">
                     Detalhes →
                   </Link>
                   <Link
