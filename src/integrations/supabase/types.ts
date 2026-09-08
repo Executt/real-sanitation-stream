@@ -968,6 +968,38 @@ export type Database = {
         }
         Relationships: []
       }
+      municipios: {
+        Row: {
+          codigo_ibge: string
+          created_at: string
+          nome: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          codigo_ibge: string
+          created_at?: string
+          nome: string
+          uf: string
+          updated_at?: string
+        }
+        Update: {
+          codigo_ibge?: string
+          created_at?: string
+          nome?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "municipios_uf_fkey"
+            columns: ["uf"]
+            isOneToOne: false
+            referencedRelation: "ufs"
+            referencedColumns: ["sigla"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           ativa: boolean
@@ -1336,6 +1368,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ufs: {
+        Row: {
+          codigo_ibge: number | null
+          created_at: string
+          nome: string
+          regiao: string | null
+          sigla: string
+          updated_at: string
+        }
+        Insert: {
+          codigo_ibge?: number | null
+          created_at?: string
+          nome: string
+          regiao?: string | null
+          sigla: string
+          updated_at?: string
+        }
+        Update: {
+          codigo_ibge?: number | null
+          created_at?: string
+          nome?: string
+          regiao?: string | null
+          sigla?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1360,15 +1419,18 @@ export type Database = {
       water_sources: {
         Row: {
           created_at: string
+          external_key: string | null
+          fonte: string | null
           gad_metric: number | null
           ibge_code: string | null
           id: string
+          import_batch_id: string | null
           latitude: number | null
           longitude: number | null
           municipio: string | null
           nome: string
           observacoes: string | null
-          org_id: string
+          org_id: string | null
           type: Database["public"]["Enums"]["water_source_type"]
           uf: string | null
           updated_at: string
@@ -1378,15 +1440,18 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          external_key?: string | null
+          fonte?: string | null
           gad_metric?: number | null
           ibge_code?: string | null
           id?: string
+          import_batch_id?: string | null
           latitude?: number | null
           longitude?: number | null
           municipio?: string | null
           nome: string
           observacoes?: string | null
-          org_id: string
+          org_id?: string | null
           type: Database["public"]["Enums"]["water_source_type"]
           uf?: string | null
           updated_at?: string
@@ -1396,15 +1461,18 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          external_key?: string | null
+          fonte?: string | null
           gad_metric?: number | null
           ibge_code?: string | null
           id?: string
+          import_batch_id?: string | null
           latitude?: number | null
           longitude?: number | null
           municipio?: string | null
           nome?: string
           observacoes?: string | null
-          org_id?: string
+          org_id?: string | null
           type?: Database["public"]["Enums"]["water_source_type"]
           uf?: string | null
           updated_at?: string
