@@ -50,8 +50,9 @@ export default function Mananciais() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     nome: "", type: "SURFACE" as WaterSourceType, vulnerability_level: "MEDIUM" as VulnerabilityLevel,
-    gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "",
+    gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "", ibge_code: "",
   });
+
 
   const load = async () => {
     setLoading(true);
@@ -140,10 +141,12 @@ export default function Mananciais() {
                 <div><Label>Outorga (L/s)</Label><Input type="number" value={form.vazao_outorgada_lps} onChange={(e) => setForm({ ...form, vazao_outorgada_lps: e.target.value })} /></div>
                 <div><Label>Disponível (L/s)</Label><Input type="number" value={form.vazao_disponivel_lps} onChange={(e) => setForm({ ...form, vazao_disponivel_lps: e.target.value })} /></div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div><Label>UF</Label><Input maxLength={2} value={form.uf} onChange={(e) => setForm({ ...form, uf: e.target.value.toUpperCase() })} /></div>
-                <div className="col-span-2"><Label>Município</Label><Input value={form.municipio} onChange={(e) => setForm({ ...form, municipio: e.target.value })} /></div>
-              </div>
+              <GeoPicker
+                uf={form.uf}
+                municipio={form.municipio}
+                onChange={({ uf, municipio, ibge_code }) => setForm({ ...form, uf, municipio, ibge_code: ibge_code ?? "" })}
+              />
+
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
