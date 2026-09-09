@@ -46,6 +46,7 @@ const vulnColor: Record<VulnerabilityLevel, string> = {
 
 export default function Mananciais() {
   const { currentOrg, orgs } = useOrg();
+  const { isSuperAdmin, roles } = useAuth();
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,6 +121,10 @@ export default function Mananciais() {
             Fontes de captação, vulnerabilidade e grau de atendimento à demanda (GAD).
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <Button variant="outline" asChild>
+          <Link to="/agua/mananciais/importar"><Upload className="size-4 mr-1.5" /> Importar</Link>
+        </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button><Plus className="size-4 mr-1.5" /> Novo manancial</Button>
