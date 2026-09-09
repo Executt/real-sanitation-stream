@@ -76,12 +76,13 @@ export default function Mananciais() {
   const orgName = (id: string) => orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name || "—";
 
   const save = async () => {
-    if (!currentOrg) {
+    const podeReferencia = isSuperAdmin || roles.includes("gestor_ana");
+    if (!currentOrg && !podeReferencia) {
       toast({ title: "Sem organização vinculada", description: "Seu usuário precisa estar vinculado a uma organização para cadastrar mananciais.", variant: "destructive" });
       return;
     }
     const { error } = await supabase.from("water_sources").insert({
-      org_id: currentOrg.id,
+      org_id: currentOrg?.id ?? null,
       nome: form.nome,
       type: form.type,
       vulnerability_level: form.vulnerability_level,
@@ -90,6 +91,8 @@ export default function Mananciais() {
       vazao_disponivel_lps: form.vazao_disponivel_lps ? Number(form.vazao_disponivel_lps) : null,
       uf: form.uf || null,
       municipio: form.municipio || null,
+      ibge_code: form.ibge_code || null,
+      fonte: "Cadastro manual",
     });
     if (error) {
       toast({ title: "Não foi possível salvar", description: error.message, variant: "destructive" });
@@ -97,9 +100,10 @@ export default function Mananciais() {
     }
     toast({ title: "Manancial cadastrado" });
     setOpen(false);
-    setForm({ nome: "", type: "SURFACE", vulnerability_level: "MEDIUM", gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "" });
+    setForm({ nome: "", type: "SURFACE", vulnerability_level: "MEDIUM", gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "", ibge_code: "" });
     void load();
   };
+
 
   return (
     <div>
