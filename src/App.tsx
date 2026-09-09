@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { OrgProvider } from "@/contexts/OrgContext";
 import Mananciais from "./pages/Mananciais";
+import MananciaisImport from "./pages/MananciaisImport";
 import SistemasProducao from "./pages/SistemasProducao";
 import Distribuicao from "./pages/Distribuicao";
 import IshDashboard from "./pages/IshDashboard";
@@ -79,6 +80,7 @@ const App = () => (
 
               {/* Módulos Atlas Águas */}
               <Route path="/agua/mananciais" element={<Mananciais />} />
+              <Route path="/agua/mananciais/importar" element={<MananciaisImport />} />
               <Route path="/agua/sistemas" element={<SistemasProducao />} />
               <Route path="/distribuicao" element={<Distribuicao />} />
               <Route path="/ish-u" element={<IshDashboard />} />

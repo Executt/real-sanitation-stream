@@ -43,6 +43,7 @@ import {
   Droplets,
   Factory,
   Waves,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,7 @@ const anaItems = [
 
 const atlasItems = [
   { title: "Mananciais", url: "/agua/mananciais", icon: Droplets },
+  { title: "Importar Mananciais", url: "/agua/mananciais/importar", icon: Upload },
   { title: "Sistemas Produtores", url: "/agua/sistemas", icon: Factory },
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
