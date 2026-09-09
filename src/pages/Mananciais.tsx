@@ -167,6 +167,7 @@ export default function Mananciais() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <HierarchyFilters filter={filter} />
