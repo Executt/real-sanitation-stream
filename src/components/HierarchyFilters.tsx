@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrg } from "@/contexts/OrgContext";
+import { useMunicipios, useUfs } from "@/lib/useGeo";
 import { ORG_TYPE_LABEL } from "@/types/governance";
 import type { HierarchyFilter } from "@/lib/useHierarchyFilter";
 import { FilterX, Network } from "lucide-react";
@@ -26,15 +27,22 @@ export function HierarchyFilters({ filter, searchPlaceholder = "Buscar por munic
   const { flat, loading } = useOrg();
   const { value, set, reset, orgIds } = filter;
 
+  const { ufs: ufsIbge } = useUfs();
+  const { municipios: munIbge } = useMunicipios(value.uf === "all" ? null : value.uf);
+
   const ufOptions = useMemo(() => {
     const fromOrgs = new Set(flat.map((o) => o.uf).filter(Boolean) as string[]);
-    return Array.from(new Set([...fromOrgs, ...UFS])).sort();
-  }, [flat]);
+    const fromIbge = ufsIbge.map((u) => u.sigla);
+    return Array.from(new Set([...fromIbge, ...fromOrgs, ...UFS])).sort();
+  }, [flat, ufsIbge]);
 
   const municipios = useMemo(() => {
     const scoped = flat.filter((o) => (value.uf === "all" || o.uf === value.uf) && o.municipio);
-    return Array.from(new Set(scoped.map((o) => o.municipio as string))).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [flat, value.uf]);
+    const fromOrgs = scoped.map((o) => o.municipio as string);
+    const fromIbge = munIbge.map((m) => m.nome);
+    return Array.from(new Set([...fromIbge, ...fromOrgs])).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [flat, value.uf, munIbge]);
+
 
   const orgOptions = useMemo(
     () =>

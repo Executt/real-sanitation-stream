@@ -15,7 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Droplets, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { GeoPicker } from "@/components/GeoPicker";
+import { useAuth } from "@/contexts/AuthContext";
+import { Droplets, Plus, Upload } from "lucide-react";
 import {
   VULNERABILITY_LABEL, WATER_SOURCE_LABEL,
   type VulnerabilityLevel, type WaterSourceType,
@@ -23,7 +26,7 @@ import {
 
 interface Row {
   id: string;
-  org_id: string;
+  org_id: string | null;
   nome: string;
   type: WaterSourceType;
   vulnerability_level: VulnerabilityLevel;
@@ -43,6 +46,7 @@ const vulnColor: Record<VulnerabilityLevel, string> = {
 
 export default function Mananciais() {
   const { currentOrg, orgs } = useOrg();
+  const { isSuperAdmin, roles } = useAuth();
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,8 +54,9 @@ export default function Mananciais() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     nome: "", type: "SURFACE" as WaterSourceType, vulnerability_level: "MEDIUM" as VulnerabilityLevel,
-    gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "",
+    gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "", ibge_code: "",
   });
+
 
   const load = async () => {
     setLoading(true);
@@ -72,15 +77,17 @@ export default function Mananciais() {
   useAccessLog({ modulo: "Mananciais", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
-  const orgName = (id: string) => orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name || "—";
+  const orgName = (id: string | null) =>
+    (id && (orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name)) || "Referência";
 
   const save = async () => {
-    if (!currentOrg) {
+    const podeReferencia = isSuperAdmin || roles.includes("gestor_ana");
+    if (!currentOrg && !podeReferencia) {
       toast({ title: "Sem organização vinculada", description: "Seu usuário precisa estar vinculado a uma organização para cadastrar mananciais.", variant: "destructive" });
       return;
     }
     const { error } = await supabase.from("water_sources").insert({
-      org_id: currentOrg.id,
+      org_id: currentOrg?.id ?? null,
       nome: form.nome,
       type: form.type,
       vulnerability_level: form.vulnerability_level,
@@ -89,6 +96,8 @@ export default function Mananciais() {
       vazao_disponivel_lps: form.vazao_disponivel_lps ? Number(form.vazao_disponivel_lps) : null,
       uf: form.uf || null,
       municipio: form.municipio || null,
+      ibge_code: form.ibge_code || null,
+      fonte: "Cadastro manual",
     });
     if (error) {
       toast({ title: "Não foi possível salvar", description: error.message, variant: "destructive" });
@@ -96,9 +105,10 @@ export default function Mananciais() {
     }
     toast({ title: "Manancial cadastrado" });
     setOpen(false);
-    setForm({ nome: "", type: "SURFACE", vulnerability_level: "MEDIUM", gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "" });
+    setForm({ nome: "", type: "SURFACE", vulnerability_level: "MEDIUM", gad_metric: "", vazao_outorgada_lps: "", vazao_disponivel_lps: "", uf: "", municipio: "", ibge_code: "" });
     void load();
   };
+
 
   return (
     <div>
@@ -111,6 +121,10 @@ export default function Mananciais() {
             Fontes de captação, vulnerabilidade e grau de atendimento à demanda (GAD).
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <Button variant="outline" asChild>
+          <Link to="/agua/mananciais/importar"><Upload className="size-4 mr-1.5" /> Importar</Link>
+        </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button><Plus className="size-4 mr-1.5" /> Novo manancial</Button>
@@ -140,10 +154,12 @@ export default function Mananciais() {
                 <div><Label>Outorga (L/s)</Label><Input type="number" value={form.vazao_outorgada_lps} onChange={(e) => setForm({ ...form, vazao_outorgada_lps: e.target.value })} /></div>
                 <div><Label>Disponível (L/s)</Label><Input type="number" value={form.vazao_disponivel_lps} onChange={(e) => setForm({ ...form, vazao_disponivel_lps: e.target.value })} /></div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div><Label>UF</Label><Input maxLength={2} value={form.uf} onChange={(e) => setForm({ ...form, uf: e.target.value.toUpperCase() })} /></div>
-                <div className="col-span-2"><Label>Município</Label><Input value={form.municipio} onChange={(e) => setForm({ ...form, municipio: e.target.value })} /></div>
-              </div>
+              <GeoPicker
+                uf={form.uf}
+                municipio={form.municipio}
+                onChange={({ uf, municipio, ibge_code }) => setForm({ ...form, uf, municipio, ibge_code: ibge_code ?? "" })}
+              />
+
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -151,6 +167,7 @@ export default function Mananciais() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <HierarchyFilters filter={filter} />

@@ -914,6 +914,75 @@ export type Database = {
           },
         ]
       }
+      ish_indicadores: {
+        Row: {
+          ano_referencia: number
+          classificacao_manancial: string | null
+          classificacao_sistema_produtor: string | null
+          cobertura: number | null
+          cobertura_preenchido: number | null
+          created_at: string
+          eficiencia_distribuicao: string | null
+          eficiencia_producao: string | null
+          fonte: string | null
+          ibge_code: string
+          id: string
+          import_batch_id: string | null
+          ish_u: string | null
+          municipio: string
+          perdas: string | null
+          perdas_preenchido: string | null
+          populacao_urbana: number | null
+          regiao: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ano_referencia?: number
+          classificacao_manancial?: string | null
+          classificacao_sistema_produtor?: string | null
+          cobertura?: number | null
+          cobertura_preenchido?: number | null
+          created_at?: string
+          eficiencia_distribuicao?: string | null
+          eficiencia_producao?: string | null
+          fonte?: string | null
+          ibge_code: string
+          id?: string
+          import_batch_id?: string | null
+          ish_u?: string | null
+          municipio: string
+          perdas?: string | null
+          perdas_preenchido?: string | null
+          populacao_urbana?: number | null
+          regiao?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ano_referencia?: number
+          classificacao_manancial?: string | null
+          classificacao_sistema_produtor?: string | null
+          cobertura?: number | null
+          cobertura_preenchido?: number | null
+          created_at?: string
+          eficiencia_distribuicao?: string | null
+          eficiencia_producao?: string | null
+          fonte?: string | null
+          ibge_code?: string
+          id?: string
+          import_batch_id?: string | null
+          ish_u?: string | null
+          municipio?: string
+          perdas?: string | null
+          perdas_preenchido?: string | null
+          populacao_urbana?: number | null
+          regiao?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ldap_config: {
         Row: {
           attr_email: string
