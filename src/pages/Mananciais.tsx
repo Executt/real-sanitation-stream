@@ -15,7 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Droplets, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { GeoPicker } from "@/components/GeoPicker";
+import { useAuth } from "@/contexts/AuthContext";
+import { Droplets, Plus, Upload } from "lucide-react";
 import {
   VULNERABILITY_LABEL, WATER_SOURCE_LABEL,
   type VulnerabilityLevel, type WaterSourceType,
@@ -23,7 +26,7 @@ import {
 
 interface Row {
   id: string;
-  org_id: string;
+  org_id: string | null;
   nome: string;
   type: WaterSourceType;
   vulnerability_level: VulnerabilityLevel;
@@ -73,7 +76,8 @@ export default function Mananciais() {
   useAccessLog({ modulo: "Mananciais", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
-  const orgName = (id: string) => orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name || "—";
+  const orgName = (id: string | null) =>
+    (id && (orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name)) || "Referência";
 
   const save = async () => {
     const podeReferencia = isSuperAdmin || roles.includes("gestor_ana");
