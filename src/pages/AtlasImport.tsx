@@ -120,10 +120,16 @@ export default function AtlasImport() {
     let gravadas = 0;
     let falha: string | null = null;
     for (let i = 0; i < preview.length; i += chunk) {
-      const slice = preview.slice(i, i + chunk).map((r) => ({ ...r, org_id: null, import_batch_id: batch.id }));
-      const { error } = await supabase
-        .from("investments_planning")
-        .upsert(slice, { onConflict: "external_key", ignoreDuplicates: false });
+      const slice = preview.slice(i, i + chunk);
+      const error = dataset.target === "ish_indicadores"
+        ? (await supabase.from("ish_indicadores").upsert(
+            (slice as IshRow[]).map((r) => ({ ...r, import_batch_id: batch.id })),
+            { onConflict: dataset.conflict, ignoreDuplicates: false },
+          )).error
+        : (await supabase.from("investments_planning").upsert(
+            (slice as AtlasRow[]).map((r) => ({ ...r, org_id: null, import_batch_id: batch.id })),
+            { onConflict: dataset.conflict, ignoreDuplicates: false },
+          )).error;
       if (error) { falha = error.message; break; }
       gravadas += slice.length;
       setProgress(Math.round((gravadas / preview.length) * 100));
