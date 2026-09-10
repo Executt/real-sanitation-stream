@@ -37,7 +37,7 @@ export default function AtlasImport() {
   const [sheet, setSheet] = useState<string>("");
   const [missing, setMissing] = useState<string[]>([]);
   const [found, setFound] = useState<string[]>([]);
-  const [preview, setPreview] = useState<AtlasRow[]>([]);
+  const [preview, setPreview] = useState<DatasetRow[]>([]);
   const [erros, setErros] = useState<string[]>([]);
   const [parsing, setParsing] = useState(false);
   const [saving, setSaving] = useState(false);
