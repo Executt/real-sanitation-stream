@@ -9,7 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/StatCard";
-import { ATLAS_DATASETS, detectDataset, findColumn, type AtlasDataset, type AtlasRow } from "@/lib/atlasDictionary";
+import {
+  ATLAS_DATASETS, detectDataset, findColumn, isIshRow,
+  type AtlasDataset, type AtlasRow, type DatasetRow, type IshRow,
+} from "@/lib/atlasDictionary";
 import { INVESTMENT_CATEGORY_LABEL, EPPO_LABEL } from "@/types/governance";
 import { AlertTriangle, CheckCircle2, Database, FileSpreadsheet, Upload } from "lucide-react";
 
@@ -34,7 +37,7 @@ export default function AtlasImport() {
   const [sheet, setSheet] = useState<string>("");
   const [missing, setMissing] = useState<string[]>([]);
   const [found, setFound] = useState<string[]>([]);
-  const [preview, setPreview] = useState<AtlasRow[]>([]);
+  const [preview, setPreview] = useState<DatasetRow[]>([]);
   const [erros, setErros] = useState<string[]>([]);
   const [parsing, setParsing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -117,10 +120,16 @@ export default function AtlasImport() {
     let gravadas = 0;
     let falha: string | null = null;
     for (let i = 0; i < preview.length; i += chunk) {
-      const slice = preview.slice(i, i + chunk).map((r) => ({ ...r, org_id: null, import_batch_id: batch.id }));
-      const { error } = await supabase
-        .from("investments_planning")
-        .upsert(slice, { onConflict: "external_key", ignoreDuplicates: false });
+      const slice = preview.slice(i, i + chunk);
+      const error = dataset.target === "ish_indicadores"
+        ? (await supabase.from("ish_indicadores").upsert(
+            (slice as IshRow[]).map((r) => ({ ...r, import_batch_id: batch.id })),
+            { onConflict: dataset.conflict, ignoreDuplicates: false },
+          )).error
+        : (await supabase.from("investments_planning").upsert(
+            (slice as AtlasRow[]).map((r) => ({ ...r, org_id: null, import_batch_id: batch.id })),
+            { onConflict: dataset.conflict, ignoreDuplicates: false },
+          )).error;
       if (error) { falha = error.message; break; }
       gravadas += slice.length;
       setProgress(Math.round((gravadas / preview.length) * 100));
@@ -140,10 +149,11 @@ export default function AtlasImport() {
     setSaving(false);
     void loadBatches();
     if (falha) toast({ title: "Importação interrompida", description: falha, variant: "destructive" });
-    else toast({ title: "Importação concluída", description: `${gravadas} registros gravados em investments_planning.` });
+    else toast({ title: "Importação concluída", description: `${gravadas} registros gravados em ${dataset.target}.` });
   };
 
-  const total = preview.reduce((a, r) => a + r.estimated_value, 0);
+  const ishMode = dataset?.target === "ish_indicadores";
+  const total = preview.reduce((a, r) => a + (isIshRow(r) ? 0 : r.estimated_value), 0);
 
   return (
     <div>
@@ -196,8 +206,17 @@ export default function AtlasImport() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <StatCard label="Registros válidos" value={String(preview.length)} icon={CheckCircle2} />
             <StatCard label="Linhas ignoradas" value={String(erros.length)} variant={erros.length ? "warning" : undefined} icon={AlertTriangle} />
-            <StatCard label="Investimento total" value={brl(total)} icon={Database} />
-            <StatCard label="Categorias" value={String(new Set(preview.map((r) => r.category)).size)} icon={Database} />
+            {ishMode ? (
+              <>
+                <StatCard label="UFs" value={String(new Set(preview.map((r) => (isIshRow(r) ? r.uf : null)).filter(Boolean)).size)} icon={Database} />
+                <StatCard label="Classes ISH-U" value={String(new Set(preview.map((r) => (isIshRow(r) ? r.ish_u : null)).filter(Boolean)).size)} icon={Database} />
+              </>
+            ) : (
+              <>
+                <StatCard label="Investimento total" value={brl(total)} icon={Database} />
+                <StatCard label="Categorias" value={String(new Set(preview.map((r) => (isIshRow(r) ? null : r.category)).filter(Boolean)).size)} icon={Database} />
+              </>
+            )}
           </div>
 
           <div className="bg-card border rounded-sm p-5 mb-6">
@@ -216,21 +235,43 @@ export default function AtlasImport() {
                   <TableRow>
                     <TableHead>Município</TableHead>
                     <TableHead>IBGE</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>EPPO</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Título</TableHead>
+                    {ishMode ? (
+                      <>
+                        <TableHead>Manancial</TableHead>
+                        <TableHead>Sistema produtor</TableHead>
+                        <TableHead className="text-right">Cobertura</TableHead>
+                        <TableHead>ISH-U</TableHead>
+                      </>
+                    ) : (
+                      <>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>EPPO</TableHead>
+                        <TableHead className="text-right">Valor</TableHead>
+                        <TableHead>Título</TableHead>
+                      </>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {preview.slice(0, 20).map((r) => (
-                    <TableRow key={r.external_key}>
+                  {preview.slice(0, 20).map((r, idx) => (
+                    <TableRow key={isIshRow(r) ? `${r.ibge_code}-${idx}` : r.external_key}>
                       <TableCell className="whitespace-nowrap">{r.municipio}/{r.uf}</TableCell>
                       <TableCell className="font-mono text-xs">{r.ibge_code}</TableCell>
-                      <TableCell><Badge variant="outline">{INVESTMENT_CATEGORY_LABEL[r.category]}</Badge></TableCell>
-                      <TableCell className="text-xs">{EPPO_LABEL[r.eppo]}</TableCell>
-                      <TableCell className="text-right font-mono text-xs">{brl(r.estimated_value)}</TableCell>
-                      <TableCell className="max-w-[380px] truncate text-xs">{r.titulo}</TableCell>
+                      {isIshRow(r) ? (
+                        <>
+                          <TableCell className="text-xs">{r.classificacao_manancial ?? "—"}</TableCell>
+                          <TableCell className="text-xs">{r.classificacao_sistema_produtor ?? "—"}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{r.cobertura ?? "—"}</TableCell>
+                          <TableCell><Badge variant="outline">{r.ish_u ?? "—"}</Badge></TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell><Badge variant="outline">{INVESTMENT_CATEGORY_LABEL[r.category]}</Badge></TableCell>
+                          <TableCell className="text-xs">{EPPO_LABEL[r.eppo]}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{brl(r.estimated_value)}</TableCell>
+                          <TableCell className="max-w-[380px] truncate text-xs">{r.titulo}</TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

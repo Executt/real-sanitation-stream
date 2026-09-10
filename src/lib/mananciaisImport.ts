@@ -153,14 +153,31 @@ export const MODELO_JSON = [
   },
 ];
 
-/** Presets de importação por API. */
-export const API_PRESETS = [
+export interface PortalPreset {
+  id: string;
+  label: string;
+  portal: string;
+  itemId: string;
+  fonte: string;
+  descricao: string;
+}
+
+/** Atalhos de portais geoespaciais conhecidos — a importação aceita qualquer portal ArcGIS. */
+export const API_PRESETS: PortalPreset[] = [
   {
     id: "inea-rj",
-    label: "INEA/RJ — Geoportal (ArcGIS)",
+    label: "INEA / RJ — Geoportal",
     portal: "https://geoportal.inea.rj.gov.br/portal",
     itemId: "8cff310438e9479cbb4a89631710f4ed",
     fonte: "INEA/RJ - Geoportal",
-    descricao: "Descobre as camadas publicadas no aplicativo do INEA e importa a camada escolhida.",
+    descricao: "Camadas de recursos hídricos publicadas pelo INEA (Rio de Janeiro).",
   },
-] as const;
+  {
+    id: "ana-br",
+    label: "ANA — Metadados Geoespaciais",
+    portal: "https://metadados.snirh.gov.br/geonetwork",
+    itemId: "",
+    fonte: "ANA - SNIRH",
+    descricao: "Serviços publicados pela Agência Nacional de Águas e Saneamento Básico.",
+  },
+];
