@@ -235,21 +235,43 @@ export default function AtlasImport() {
                   <TableRow>
                     <TableHead>Município</TableHead>
                     <TableHead>IBGE</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>EPPO</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Título</TableHead>
+                    {ishMode ? (
+                      <>
+                        <TableHead>Manancial</TableHead>
+                        <TableHead>Sistema produtor</TableHead>
+                        <TableHead className="text-right">Cobertura</TableHead>
+                        <TableHead>ISH-U</TableHead>
+                      </>
+                    ) : (
+                      <>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>EPPO</TableHead>
+                        <TableHead className="text-right">Valor</TableHead>
+                        <TableHead>Título</TableHead>
+                      </>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {preview.slice(0, 20).map((r) => (
-                    <TableRow key={r.external_key}>
+                  {preview.slice(0, 20).map((r, idx) => (
+                    <TableRow key={isIshRow(r) ? `${r.ibge_code}-${idx}` : r.external_key}>
                       <TableCell className="whitespace-nowrap">{r.municipio}/{r.uf}</TableCell>
                       <TableCell className="font-mono text-xs">{r.ibge_code}</TableCell>
-                      <TableCell><Badge variant="outline">{INVESTMENT_CATEGORY_LABEL[r.category]}</Badge></TableCell>
-                      <TableCell className="text-xs">{EPPO_LABEL[r.eppo]}</TableCell>
-                      <TableCell className="text-right font-mono text-xs">{brl(r.estimated_value)}</TableCell>
-                      <TableCell className="max-w-[380px] truncate text-xs">{r.titulo}</TableCell>
+                      {isIshRow(r) ? (
+                        <>
+                          <TableCell className="text-xs">{r.classificacao_manancial ?? "—"}</TableCell>
+                          <TableCell className="text-xs">{r.classificacao_sistema_produtor ?? "—"}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{r.cobertura ?? "—"}</TableCell>
+                          <TableCell><Badge variant="outline">{r.ish_u ?? "—"}</Badge></TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell><Badge variant="outline">{INVESTMENT_CATEGORY_LABEL[r.category]}</Badge></TableCell>
+                          <TableCell className="text-xs">{EPPO_LABEL[r.eppo]}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{brl(r.estimated_value)}</TableCell>
+                          <TableCell className="max-w-[380px] truncate text-xs">{r.titulo}</TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
