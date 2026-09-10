@@ -99,6 +99,23 @@ const PROD_COLS = {
   irea: "Investimento IREA (R$ Milhões)",
 };
 
+const ISH_COLS = {
+  ibge: "Código IBGE",
+  municipio: "Município",
+  uf: "UF",
+  regiao: "Região",
+  populacao: "População Urbana 2020 (hab)",
+  manancial: "Classificação Manancial",
+  sistema: "Classificação Sistema Produtor",
+  eficienciaProducao: "Eficiência da Produção de Água",
+  perdas: "Perdas",
+  perdasPreenchido: "Perdas Preenchido",
+  cobertura: "Cobertura",
+  coberturaPreenchido: "Cobertura Preenchido",
+  eficienciaDistribuicao: "Eficiência da Distribuição de Água",
+  ish: "Índice de Segurança Hídrica do Abastecimento Urbano (ISH-U)",
+};
+
 const DIST_COLS = {
   codigo: "Código",
   municipio: "Município",
