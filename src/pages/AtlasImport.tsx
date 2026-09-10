@@ -206,8 +206,17 @@ export default function AtlasImport() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <StatCard label="Registros válidos" value={String(preview.length)} icon={CheckCircle2} />
             <StatCard label="Linhas ignoradas" value={String(erros.length)} variant={erros.length ? "warning" : undefined} icon={AlertTriangle} />
-            <StatCard label="Investimento total" value={brl(total)} icon={Database} />
-            <StatCard label="Categorias" value={String(new Set(preview.map((r) => r.category)).size)} icon={Database} />
+            {ishMode ? (
+              <>
+                <StatCard label="UFs" value={String(new Set(preview.map((r) => (isIshRow(r) ? r.uf : null)).filter(Boolean)).size)} icon={Database} />
+                <StatCard label="Classes ISH-U" value={String(new Set(preview.map((r) => (isIshRow(r) ? r.ish_u : null)).filter(Boolean)).size)} icon={Database} />
+              </>
+            ) : (
+              <>
+                <StatCard label="Investimento total" value={brl(total)} icon={Database} />
+                <StatCard label="Categorias" value={String(new Set(preview.map((r) => (isIshRow(r) ? null : r.category)).filter(Boolean)).size)} icon={Database} />
+              </>
+            )}
           </div>
 
           <div className="bg-card border rounded-sm p-5 mb-6">
