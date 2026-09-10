@@ -109,6 +109,8 @@ const DIST_COLS = {
 export const ATLAS_DATASETS: AtlasDataset[] = [
   {
     id: "investimentos_producao",
+    target: "investments_planning",
+    conflict: "external_key",
     label: "Investimentos em Produção de Água",
     sheet: "02.Custos_SistProdutorMunicipio",
     headerRow: 2,
@@ -166,6 +168,8 @@ export const ATLAS_DATASETS: AtlasDataset[] = [
   },
   {
     id: "investimentos_distribuicao",
+    target: "investments_planning",
+    conflict: "external_key",
     label: "Investimentos em Distribuição e Reposição",
     sheet: "03.Custos_Distribu_Municipio",
     headerRow: 3,
@@ -219,6 +223,57 @@ export const ATLAS_DATASETS: AtlasDataset[] = [
             requer_estudo: null,
             fonte: arquivo,
           });
+        });
+      });
+      return { rows: out, erros };
+    },
+  },
+  {
+    id: "indicadores_ish",
+    label: "Indicadores de Segurança Hídrica (ISH-U)",
+    target: "ish_indicadores",
+    conflict: "ibge_code,ano_referencia",
+    sheet: "Indicadores_ISH_metadados",
+    headerRow: 2,
+    arquivoSugerido: "AtlasAguas_Indicadores_SegurancaHidrica.xlsx",
+    required: [ISH_COLS.ibge, ISH_COLS.municipio, ISH_COLS.uf, ISH_COLS.ish],
+    normalize: (rows, arquivo) => {
+      const erros: string[] = [];
+      const out: IshRow[] = [];
+      const headers = Object.keys(rows[0] ?? {});
+      const c = (k: keyof typeof ISH_COLS) => findColumn(headers, ISH_COLS[k]);
+      const cIbge = c("ibge"), cMun = c("municipio"), cUf = c("uf"), cReg = c("regiao"), cPop = c("populacao"),
+        cMan = c("manancial"), cSis = c("sistema"), cEfProd = c("eficienciaProducao"), cPer = c("perdas"),
+        cPerP = c("perdasPreenchido"), cCob = c("cobertura"), cCobP = c("coberturaPreenchido"),
+        cEfDist = c("eficienciaDistribuicao"), cIsh = c("ish");
+      const txt = (col: string | null, r: Record<string, unknown>) =>
+        col && !isEmpty(r[col]) ? norm(r[col]) : null;
+
+      const vistos = new Set<string>();
+      rows.forEach((r, i) => {
+        const ibge = norm(cIbge ? r[cIbge] : "").replace(/\D/g, "");
+        if (!ibge) return;
+        if (vistos.has(ibge)) { erros.push(`Linha ${i + 4}: município repetido (IBGE ${ibge}) — ignorado.`); return; }
+        vistos.add(ibge);
+        const municipio = txt(cMun, r);
+        if (!municipio) { erros.push(`Linha ${i + 4}: município sem nome — ignorado.`); return; }
+        out.push({
+          ibge_code: ibge,
+          municipio,
+          uf: txt(cUf, r),
+          regiao: txt(cReg, r),
+          populacao_urbana: cPop ? (toNumber(r[cPop]) ?? null) : null,
+          classificacao_manancial: txt(cMan, r),
+          classificacao_sistema_produtor: txt(cSis, r),
+          eficiencia_producao: txt(cEfProd, r),
+          perdas: txt(cPer, r),
+          perdas_preenchido: txt(cPerP, r),
+          cobertura: cCob ? toNumber(r[cCob]) : null,
+          cobertura_preenchido: cCobP ? toNumber(r[cCobP]) : null,
+          eficiencia_distribuicao: txt(cEfDist, r),
+          ish_u: txt(cIsh, r),
+          ano_referencia: 2021,
+          fonte: arquivo,
         });
       });
       return { rows: out, erros };
