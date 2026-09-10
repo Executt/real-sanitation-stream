@@ -9,7 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/StatCard";
-import { ATLAS_DATASETS, detectDataset, findColumn, type AtlasDataset, type AtlasRow } from "@/lib/atlasDictionary";
+import {
+  ATLAS_DATASETS, detectDataset, findColumn, isIshRow,
+  type AtlasDataset, type AtlasRow, type DatasetRow, type IshRow,
+} from "@/lib/atlasDictionary";
 import { INVESTMENT_CATEGORY_LABEL, EPPO_LABEL } from "@/types/governance";
 import { AlertTriangle, CheckCircle2, Database, FileSpreadsheet, Upload } from "lucide-react";
 
