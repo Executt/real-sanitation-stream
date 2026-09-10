@@ -214,7 +214,7 @@ export default function MananciaisImport() {
         <TabsList>
           <TabsTrigger value="arquivo">Arquivo (JSON / XLSX)</TabsTrigger>
           <TabsTrigger value="api">API</TabsTrigger>
-          <TabsTrigger value="inea">INEA / RJ</TabsTrigger>
+          <TabsTrigger value="portal">Portal geoespacial (órgãos)</TabsTrigger>
           <TabsTrigger value="padrao">Padrão de dados</TabsTrigger>
         </TabsList>
 
@@ -248,17 +248,48 @@ export default function MananciaisImport() {
           </div>
         </TabsContent>
 
-        <TabsContent value="inea">
+        <TabsContent value="portal">
           <div className="bg-card border rounded-sm p-5 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium">{API_PRESETS[0].label}</p>
-                <p className="text-xs text-muted-foreground">{API_PRESETS[0].descricao}</p>
+            <p className="text-xs text-muted-foreground">
+              Importe camadas publicadas por qualquer órgão em portal geoespacial (ArcGIS). Escolha um atalho conhecido
+              ou informe o endereço do portal do órgão.
+            </p>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>Atalhos de órgãos</Label>
+                <Select
+                  onValueChange={(v) => {
+                    const p = API_PRESETS.find((x) => x.id === v);
+                    if (!p) return;
+                    setPortalUrl(p.portal); setPortalItem(p.itemId); setPortalNome(p.fonte);
+                    setServices([]); setLayers([]); setService("");
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecionar órgão" /></SelectTrigger>
+                  <SelectContent>
+                    {API_PRESETS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-              <Button onClick={() => void descobrirInea()} disabled={busy === "discover"}>
-                {busy === "discover" ? "Consultando portal..." : "Buscar camadas do INEA"}
-              </Button>
+              <div className="space-y-1.5">
+                <Label>Endereço do portal</Label>
+                <Input value={portalUrl} onChange={(e) => { setPortalUrl(e.target.value); setPortalNome(e.target.value.replace(/^https?:\/\//, "").split("/")[0] || "Portal geoespacial"); }}
+                  placeholder="https://geoportal.orgao.gov.br/portal" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Identificador do item (opcional)</Label>
+                <Input value={portalItem} onChange={(e) => setPortalItem(e.target.value)} placeholder="ex.: 8cff3104..." />
+              </div>
             </div>
+
+            <div className="flex items-center gap-3">
+              <Button onClick={() => void descobrirPortal()} disabled={busy === "discover"}>
+                {busy === "discover" ? "Consultando portal..." : "Buscar camadas do portal"}
+              </Button>
+              <Badge variant="outline" className="font-mono text-xs">{portalNome}</Badge>
+            </div>
+
 
             {!!services.length && (
               <div className="space-y-2">
