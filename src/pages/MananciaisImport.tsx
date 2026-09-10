@@ -98,16 +98,18 @@ export default function MananciaisImport() {
     return res;
   };
 
-  const descobrirInea = async () => {
-    const preset = API_PRESETS[0];
+  const descobrirPortal = async () => {
+    if (!portalUrl.trim()) { toast({ title: "Informe o endereço do portal", variant: "destructive" }); return; }
     setBusy("discover"); setServices([]); setLayers([]); setService("");
     try {
-      const res = await callProxy({ discoverPortalItem: { portal: preset.portal, itemId: preset.itemId } });
+      const res = await callProxy({
+        discoverPortalItem: { portal: portalUrl.trim().replace(/\/$/, ""), itemId: portalItem.trim() },
+      });
       const found = (res.services as string[]) ?? [];
       setServices(found);
-      if (!found.length) toast({ title: "Nenhuma camada localizada no portal do INEA", variant: "destructive" });
+      if (!found.length) toast({ title: "Nenhuma camada localizada neste portal", variant: "destructive" });
     } catch (e) {
-      toast({ title: "Não foi possível consultar o portal do INEA", description: (e as Error).message, variant: "destructive" });
+      toast({ title: "Não foi possível consultar o portal", description: (e as Error).message, variant: "destructive" });
     }
     setBusy(null);
   };
