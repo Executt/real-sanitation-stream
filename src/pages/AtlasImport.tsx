@@ -149,10 +149,11 @@ export default function AtlasImport() {
     setSaving(false);
     void loadBatches();
     if (falha) toast({ title: "Importação interrompida", description: falha, variant: "destructive" });
-    else toast({ title: "Importação concluída", description: `${gravadas} registros gravados em investments_planning.` });
+    else toast({ title: "Importação concluída", description: `${gravadas} registros gravados em ${dataset.target}.` });
   };
 
-  const total = preview.reduce((a, r) => a + r.estimated_value, 0);
+  const ishMode = dataset?.target === "ish_indicadores";
+  const total = preview.reduce((a, r) => a + (isIshRow(r) ? 0 : r.estimated_value), 0);
 
   return (
     <div>
