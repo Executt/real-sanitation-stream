@@ -131,7 +131,7 @@ export default function MananciaisImport() {
     try {
       const url = `${service.replace(/\/$/, "")}/${layerId}/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=2000`;
       const res = await callProxy({ url });
-      aplicar(extrairRegistros(res.data), `INEA/RJ - ${nomeCamada}`);
+      aplicar(extrairRegistros(res.data), `${portalNome} - ${nomeCamada}`);
     } catch (e) {
       toast({ title: "Falha ao importar a camada", description: (e as Error).message, variant: "destructive" });
     }
