@@ -39,6 +39,11 @@ export default function MananciaisImport() {
   const [service, setService] = useState("");
   const [layers, setLayers] = useState<{ id: number; name: string }[]>([]);
 
+  // Portal geoespacial (qualquer órgão)
+  const [portalUrl, setPortalUrl] = useState("");
+  const [portalItem, setPortalItem] = useState("");
+  const [portalNome, setPortalNome] = useState("Portal geoespacial");
+
   useAccessLog({ modulo: "Importação de Mananciais", acao: "VIEW" });
 
   const loadGeo = async () => {
