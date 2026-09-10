@@ -19,7 +19,28 @@ export interface AtlasRow {
   fonte: string;
 }
 
-export interface AtlasDataset {
+export interface IshRow {
+  ibge_code: string;
+  municipio: string;
+  uf: string | null;
+  regiao: string | null;
+  populacao_urbana: number | null;
+  classificacao_manancial: string | null;
+  classificacao_sistema_produtor: string | null;
+  eficiencia_producao: string | null;
+  perdas: string | null;
+  perdas_preenchido: string | null;
+  cobertura: number | null;
+  cobertura_preenchido: number | null;
+  eficiencia_distribuicao: string | null;
+  ish_u: string | null;
+  ano_referencia: number;
+  fonte: string;
+}
+
+export type DatasetRow = AtlasRow | IshRow;
+
+interface DatasetBase {
   id: string;
   label: string;
   /** Aba esperada (correspondência por prefixo, tolerante a variações). */
@@ -29,8 +50,21 @@ export interface AtlasDataset {
   /** Colunas obrigatórias — validação do dicionário antes de gravar. */
   required: string[];
   arquivoSugerido: string;
-  normalize: (rows: Record<string, unknown>[], arquivo: string) => { rows: AtlasRow[]; erros: string[] };
 }
+
+export type AtlasDataset =
+  | (DatasetBase & {
+      target: "investments_planning";
+      conflict: "external_key";
+      normalize: (rows: Record<string, unknown>[], arquivo: string) => { rows: AtlasRow[]; erros: string[] };
+    })
+  | (DatasetBase & {
+      target: "ish_indicadores";
+      conflict: "ibge_code,ano_referencia";
+      normalize: (rows: Record<string, unknown>[], arquivo: string) => { rows: IshRow[]; erros: string[] };
+    });
+
+export const isIshRow = (r: DatasetRow): r is IshRow => "ish_u" in r;
 
 const norm = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 const isEmpty = (v: unknown) => ["", "-", "nan", "null", "undefined"].includes(norm(v).toLowerCase());
