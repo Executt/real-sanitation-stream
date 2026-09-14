@@ -27,10 +27,22 @@ interface Row {
 
 const CLASSES: IshClass[] = ["MINIMA", "BAIXA", "MEDIA", "ALTA", "MAXIMA"];
 
+interface OficialRow {
+  ibge_code: string;
+  municipio: string;
+  uf: string | null;
+  cobertura: number | null;
+  perdas: string | null;
+  ish_u: string | null;
+  ano_referencia: number;
+  fonte: string | null;
+}
+
 export default function IshDashboard() {
   const { orgs } = useOrg();
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
+  const [oficiais, setOficiais] = useState<OficialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const filter = useHierarchyFilter();
 
@@ -38,9 +50,18 @@ export default function IshDashboard() {
     setLoading(true);
     let q = supabase.from("ish_urban_index").select("*");
     q = filter.applyTo(q);
-    const { data, error } = await q;
+
+    let qo = supabase
+      .from("ish_indicadores")
+      .select("ibge_code, municipio, uf, cobertura, perdas, ish_u, ano_referencia, fonte")
+      .order("ano_referencia", { ascending: false })
+      .limit(2000);
+    qo = filter.applyTo(qo, { orgColumn: null });
+
+    const [{ data, error }, { data: dataO }] = await Promise.all([q, qo]);
     if (error) toast({ title: "Erro ao calcular o ISH-U", description: error.message, variant: "destructive" });
     setRows((data ?? []) as Row[]);
+    setOficiais((dataO ?? []) as OficialRow[]);
     setLoading(false);
   };
 
@@ -53,6 +74,14 @@ export default function IshDashboard() {
   useAccessLog({ modulo: "ISH-U", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
+  const tableOf = useTable(oficiais, { pageSize: 10 });
+
+  /** Indicador oficial mais recente por código IBGE. */
+  const ofMap = useMemo(() => {
+    const m = new Map<string, OficialRow>();
+    oficiais.forEach((o) => { if (o.ibge_code && !m.has(o.ibge_code)) m.set(o.ibge_code, o); });
+    return m;
+  }, [oficiais]);
   const orgName = (id: string | null) =>
     (id && (orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name)) || "—";
 
@@ -118,21 +147,26 @@ export default function IshDashboard() {
               <TableHead className="text-right">Distribuição</TableHead>
               <TableHead className="text-right">ISH-U</TableHead>
               <TableHead>Classe</TableHead>
+              <TableHead className="text-right">Cobertura (Atlas)</TableHead>
+              <TableHead className="text-right">Perdas (Atlas)</TableHead>
+              <TableHead className="text-right">ISH-U (Atlas)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-5 w-full" /></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={9}><Skeleton className="h-5 w-full" /></TableCell></TableRow>
               ))
             ) : table.rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
                   Sem dados suficientes — cadastre sistemas produtores e indicadores de distribuição.
                 </TableCell>
               </TableRow>
             ) : (
-              table.rows.map((r, i) => (
+              table.rows.map((r, i) => {
+                const of = r.ibge_code ? ofMap.get(r.ibge_code) : undefined;
+                return (
                 <TableRow key={`${r.org_id}-${r.ibge_code ?? r.municipio ?? i}`}>
                   <TableCell className="font-medium">{[r.municipio, r.uf].filter(Boolean).join(" / ") || "—"}</TableCell>
                   <TableCell className="text-xs font-mono">{orgName(r.org_id)}</TableCell>
@@ -142,14 +176,67 @@ export default function IshDashboard() {
                   <TableCell>
                     {r.ish_class && <Badge className={ISH_CLASS_TOKEN[r.ish_class]}>{ISH_CLASS_LABEL[r.ish_class]}</Badge>}
                   </TableCell>
+                  <TableCell className="text-right font-mono">{of?.cobertura != null ? `${Number(of.cobertura).toFixed(1)}%` : "—"}</TableCell>
+                  <TableCell className="text-right font-mono">{of?.perdas ?? "—"}</TableCell>
+                  <TableCell className="text-right font-mono">{of?.ish_u ?? "—"}</TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>
         <TablePagination
           page={table.page} pageCount={table.pageCount} pageSize={table.pageSize}
           total={table.total} onPageChange={table.setPage} onPageSizeChange={table.setPageSize}
+        />
+      </div>
+
+      <div className="bg-card border rounded-sm mt-6">
+        <div className="p-4 border-b">
+          <h2 className="text-sm font-semibold">Indicadores oficiais importados (Atlas Águas)</h2>
+          <p className="text-xs text-muted-foreground font-mono mt-1">
+            Planilha de Segurança Hídrica — importada em Atlas Águas → Importação.
+          </p>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Município</TableHead>
+              <TableHead className="text-right">Ano</TableHead>
+              <TableHead className="text-right">Cobertura</TableHead>
+              <TableHead className="text-right">Perdas</TableHead>
+              <TableHead className="text-right">ISH-U</TableHead>
+              <TableHead>Fonte</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-5 w-full" /></TableCell></TableRow>
+              ))
+            ) : tableOf.rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                  Nenhum indicador oficial importado para este filtro.
+                </TableCell>
+              </TableRow>
+            ) : (
+              tableOf.rows.map((o) => (
+                <TableRow key={`${o.ibge_code}-${o.ano_referencia}`}>
+                  <TableCell className="font-medium">{[o.municipio, o.uf].filter(Boolean).join(" / ")}</TableCell>
+                  <TableCell className="text-right font-mono">{o.ano_referencia}</TableCell>
+                  <TableCell className="text-right font-mono">{o.cobertura != null ? `${Number(o.cobertura).toFixed(1)}%` : "—"}</TableCell>
+                  <TableCell className="text-right font-mono">{o.perdas ?? "—"}</TableCell>
+                  <TableCell className="text-right font-mono font-semibold">{o.ish_u ?? "—"}</TableCell>
+                  <TableCell className="text-xs font-mono text-muted-foreground">{o.fonte ?? "—"}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <TablePagination
+          page={tableOf.page} pageCount={tableOf.pageCount} pageSize={tableOf.pageSize}
+          total={tableOf.total} onPageChange={tableOf.setPage} onPageSizeChange={tableOf.setPageSize}
         />
       </div>
     </div>
