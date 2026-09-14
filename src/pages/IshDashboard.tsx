@@ -27,10 +27,22 @@ interface Row {
 
 const CLASSES: IshClass[] = ["MINIMA", "BAIXA", "MEDIA", "ALTA", "MAXIMA"];
 
+interface OficialRow {
+  ibge_code: string;
+  municipio: string;
+  uf: string | null;
+  cobertura: number | null;
+  perdas: string | null;
+  ish_u: string | null;
+  ano_referencia: number;
+  fonte: string | null;
+}
+
 export default function IshDashboard() {
   const { orgs } = useOrg();
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
+  const [oficiais, setOficiais] = useState<OficialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const filter = useHierarchyFilter();
 
@@ -38,9 +50,18 @@ export default function IshDashboard() {
     setLoading(true);
     let q = supabase.from("ish_urban_index").select("*");
     q = filter.applyTo(q);
-    const { data, error } = await q;
+
+    let qo = supabase
+      .from("ish_indicadores")
+      .select("ibge_code, municipio, uf, cobertura, perdas, ish_u, ano_referencia, fonte")
+      .order("ano_referencia", { ascending: false })
+      .limit(2000);
+    qo = filter.applyTo(qo, { orgColumn: null });
+
+    const [{ data, error }, { data: dataO }] = await Promise.all([q, qo]);
     if (error) toast({ title: "Erro ao calcular o ISH-U", description: error.message, variant: "destructive" });
     setRows((data ?? []) as Row[]);
+    setOficiais((dataO ?? []) as OficialRow[]);
     setLoading(false);
   };
 
