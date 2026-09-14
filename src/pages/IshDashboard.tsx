@@ -74,6 +74,14 @@ export default function IshDashboard() {
   useAccessLog({ modulo: "ISH-U", orgId: filter.value.orgId === "all" ? null : filter.value.orgId, registros: rows.length, filtros: filter.auditFilters, key: filter.key, enabled: !loading });
 
   const table = useTable(rows, { pageSize: 20 });
+  const tableOf = useTable(oficiais, { pageSize: 10 });
+
+  /** Indicador oficial mais recente por código IBGE. */
+  const ofMap = useMemo(() => {
+    const m = new Map<string, OficialRow>();
+    oficiais.forEach((o) => { if (o.ibge_code && !m.has(o.ibge_code)) m.set(o.ibge_code, o); });
+    return m;
+  }, [oficiais]);
   const orgName = (id: string | null) =>
     (id && (orgs.find((o) => o.id === id)?.sigla || orgs.find((o) => o.id === id)?.name)) || "—";
 
