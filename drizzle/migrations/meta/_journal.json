@@ -8,6 +8,13 @@
       "when": 1789431262335,
       "tag": "0000_water_sources_external_key_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789431285103,
+      "tag": "0001_water_sources_external_key_unique_full",
+      "breakpoints": true
     }
   ]
 }
