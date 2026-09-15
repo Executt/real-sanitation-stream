@@ -71,6 +71,7 @@ const atlasItems = [
   { title: "Sistemas Produtores", url: "/agua/sistemas", icon: Factory },
   { title: "Distribuição e Perdas", url: "/distribuicao", icon: Waves },
   { title: "Segurança Hídrica (ISH-U)", url: "/ish-u", icon: ShieldCheck },
+  { title: "Priorização ISH-U × Déficit", url: "/ish-u/priorizacao", icon: Target },
   { title: "Investimentos", url: "/investimentos", icon: Coins },
 ];
 

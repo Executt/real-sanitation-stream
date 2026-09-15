@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789431262335,
+      "tag": "0000_water_sources_external_key_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789431285103,
+      "tag": "0001_water_sources_external_key_unique_full",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789431330561,
+      "tag": "0002_view_prioridade_investimento",
+      "breakpoints": true
+    }
+  ]
+}
