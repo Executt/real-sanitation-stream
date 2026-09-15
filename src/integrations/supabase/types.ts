@@ -1574,6 +1574,26 @@ export type Database = {
         }
         Relationships: []
       }
+      prioridade_investimento: {
+        Row: {
+          ano_ish: number | null
+          cobertura: number | null
+          deficit: number | null
+          distribuicao: number | null
+          esgotamento: number | null
+          ibge_code: string | null
+          intervencoes: number | null
+          ish_u: string | null
+          municipio: string | null
+          perdas: string | null
+          populacao_urbana: number | null
+          producao: number | null
+          reposicao: number | null
+          total_previsto: number | null
+          uf: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_org: { Args: { _org: string }; Returns: boolean }
