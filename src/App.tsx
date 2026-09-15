@@ -44,6 +44,7 @@ import RepositoriosArtefatos from "./pages/RepositoriosArtefatos";
 import BasesDados from "./pages/BasesDados";
 import AtlasImport from "./pages/AtlasImport";
 import GovernancaAudit from "./pages/GovernancaAudit";
+import PriorizacaoIsh from "./pages/PriorizacaoIsh";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="/agua/sistemas" element={<SistemasProducao />} />
               <Route path="/distribuicao" element={<Distribuicao />} />
               <Route path="/ish-u" element={<IshDashboard />} />
+              <Route path="/ish-u/priorizacao" element={<PriorizacaoIsh />} />
               <Route path="/investimentos" element={<Investimentos />} />
 
               {/* Portal da Agência Reguladora */}
